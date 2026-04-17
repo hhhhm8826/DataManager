@@ -70,29 +70,31 @@ export function DiagramView(): React.JSX.Element {
 
     const positions = buildLayout(messages)
 
-    const newNodes: Node[] = messages.map((msg, i) => ({
-      id: msg.name,
-      type: 'tableNode',
-      position: positions[i],
-      data: { message: msg, allEnums: enums, allMessages: messages, onMessageHover: setHoveredPair }
-    }))
-
-    // 엣지: 필드 타입이 다른 Message 이름과 일치할 때
+    // 엣지 빌드 + 참조되는 필드 수집
     const messageNames = new Set(messages.map((m) => m.name))
     const newEdges: Edge[] = []
     const edgeSet = new Set<string>()
+    // msgName -> 실제로 target handle로 연결되는 필드명 Set
+    const referencedFieldsMap = new Map<string, Set<string>>()
 
     messages.forEach((msg) => {
       msg.fields.forEach((field) => {
         if (messageNames.has(field.type) && field.type !== msg.name) {
-          const edgeId = `${msg.name}->${field.type}`
+          const edgeId = `${msg.name}.${field.name}->${field.type}`
           if (!edgeSet.has(edgeId)) {
             edgeSet.add(edgeId)
+            const targetMsg = messages.find((m) => m.name === field.type)
+            const targetPk = targetMsg?.pkFields[0] ?? targetMsg?.fields[0]?.name
+            if (targetPk) {
+              if (!referencedFieldsMap.has(field.type)) referencedFieldsMap.set(field.type, new Set())
+              referencedFieldsMap.get(field.type)!.add(targetPk)
+            }
             newEdges.push({
               id: edgeId,
               source: msg.name,
+              sourceHandle: `src-${field.name}`,
               target: field.type,
-              label: field.name,
+              targetHandle: targetPk ? `tgt-${targetPk}` : undefined,
               style: { stroke: '#a0c4ff', strokeWidth: 1.5 },
               labelStyle: { fontSize: 10, fill: '#9ca3af' }
             })
@@ -100,6 +102,19 @@ export function DiagramView(): React.JSX.Element {
         }
       })
     })
+
+    const newNodes: Node[] = messages.map((msg, i) => ({
+      id: msg.name,
+      type: 'tableNode',
+      position: positions[i],
+      data: {
+        message: msg,
+        allEnums: enums,
+        allMessages: messages,
+        onMessageHover: setHoveredPair,
+        referencedFields: referencedFieldsMap.get(msg.name) ?? new Set<string>()
+      }
+    }))
 
     setNodes(newNodes)
     setEdges(newEdges)

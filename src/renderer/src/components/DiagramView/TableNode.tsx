@@ -9,6 +9,7 @@ interface TableNodeData {
   allMessages: ProtoMessage[]
   isHighlighted?: boolean
   onMessageHover?: (pair: { source: string; target: string } | null) => void
+  referencedFields?: Set<string>
   [key: string]: unknown
 }
 
@@ -18,8 +19,13 @@ const PRIMITIVE_TYPES = new Set([
   'bool', 'string', 'bytes'
 ])
 
+// 헤더 높이 + 필드 영역 시작 오프셋 (px) — 레이아웃 상수와 동기화
+const HANDLE_HEADER_H = 36
+const HANDLE_FIELD_TOP = 4
+const HANDLE_FIELD_H = 30
+
 export function TableNode({ data }: NodeProps): React.JSX.Element {
-  const { message, allEnums, allMessages, isHighlighted, onMessageHover } = data as TableNodeData
+  const { message, allEnums, allMessages, isHighlighted, onMessageHover, referencedFields } = data as TableNodeData
   const messageNames = new Set(allMessages?.map((m) => m.name) ?? [])
   const [enumModal, setEnumModal] = useState<{ field: string; protoEnum: ProtoEnum } | null>(null)
   const [hoveredFieldType, setHoveredFieldType] = useState<string | null>(null)
@@ -31,9 +37,39 @@ export function TableNode({ data }: NodeProps): React.JSX.Element {
     }
   }
 
+  const fieldTop = (idx: number): number =>
+    HANDLE_HEADER_H + HANDLE_FIELD_TOP + idx * HANDLE_FIELD_H + HANDLE_FIELD_H / 2
+
   return (
     <>
-      <Handle type="target" position={Position.Left} style={{ background: '#a0c4ff' }} />
+      {/* 필드별 target handle (왼쪽, 참조되는 필드만) */}
+      {message.fields.map((field, idx) => {
+        if (!referencedFields?.has(field.name)) return null
+        return (
+          <Handle
+            key={`tgt-${field.name}`}
+            type="target"
+            position={Position.Left}
+            id={`tgt-${field.name}`}
+            style={{ top: fieldTop(idx), background: '#6fcf97', width: 8, height: 8, border: 'none' }}
+          />
+        )
+      })}
+
+      {/* 필드별 source handle (오른쪽, Message 참조 필드만) */}
+      {message.fields.map((field, idx) => {
+        const isMsg = messageNames.has(field.type) && field.type !== message.name
+        if (!isMsg) return null
+        return (
+          <Handle
+            key={`src-${field.name}`}
+            type="source"
+            position={Position.Right}
+            id={`src-${field.name}`}
+            style={{ top: fieldTop(idx), background: '#a0c4ff', width: 8, height: 8, border: 'none' }}
+          />
+        )
+      })}
 
       <div
         style={{
@@ -120,7 +156,7 @@ export function TableNode({ data }: NodeProps): React.JSX.Element {
         </div>
       </div>
 
-      <Handle type="source" position={Position.Right} style={{ background: '#a0c4ff' }} />
+
 
       {enumModal && (
         <EnumModal
