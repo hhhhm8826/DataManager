@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package DATA_TABLE;
+
+// 몬스터 테이블
+message MonsterTable {
+  // @PK
+  int32 monsterId = 1;
+  string name = 2;
+  int32 hp = 3;
+  int32 atk = 4;
+  int32 def = 5;
+  float moveSpeed = 6;
+  int32 rewardItemId = 7;
+}
+
+// 몬스터 드롭 아이템 테이블
+message MonsterDropTable {
+  // @PK
+  int32 monsterId = 1;
+  // @PK
+  int32 itemId = 2;
+  float dropRate = 3;
+  int32 minCount = 4;
+  int32 maxCount = 5;
+}
