@@ -1,0 +1,20 @@
+{
+	"protoDir": "D:\\DataManager\\examples\\PROTO",
+	"excelDir": "D:\\DataManager\\examples\\EXCEL",
+	"jsonDir": "D:\\DataManager\\examples\\JSON",
+	"outputDirs": [
+		{
+			"language": "cpp",
+			"dir": "D:\\DataManager\\examples\\CODE\\C++"
+		},
+		{
+			"language": "csharp",
+			"dir": "D:\\DataManager\\examples\\CODE\\C#"
+		},
+		{
+			"language": "golang",
+			"dir": "D:\\DataManager\\examples\\CODE\\Go"
+		}
+	],
+	"protocPath": "D:\\DataManager\\examples\\PROTOC\\protoc.exe"
+}

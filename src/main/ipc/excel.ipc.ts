@@ -6,11 +6,138 @@ import { excelService } from '../services/ExcelService'
 import { jsonService } from '../services/JsonService'
 import { settingsService } from '../services/SettingsService'
 import { protoParserService } from '../services/ProtoParserService'
-import type { IpcResult, ExcelReadResult, ExcelFileInfo } from '../../shared/types'
+import type { IpcResult, ExcelReadResult, ExcelFileInfo, ExcelRowData } from '../../shared/types'
+
+// ── 인라인 임베드 헬퍼 ────────────────────────────────────────────────────────
+
+/**
+ * ExcelReadResult 배열을 proto Message 정의를 바탕으로 재처리합니다.
+ * Message 타입 필드는 참조 테이블의 행 객체(또는 배열)로 교체됩니다 (인라인 임베드).
+ *
+ * - 합성 PK 테이블 참조: 첫 번째 PK가 일치하는 모든 행을 배열로 임베드 (32-1 fix)
+ * - 다단계 참조: 위상 정렬 후 순서대로 처리하여 이미 임베드된 행을 재사용 (32-2 fix)
+ */
+function resolveInlineReferences(
+  results: ExcelReadResult[],
+  allMessageDefs: ReturnType<typeof protoParserService.parseMessages>
+): ExcelReadResult[] {
+  const msgNameSet = new Set(allMessageDefs.map((m) => m.name))
+  const presentNames = new Set(results.map((r) => r.messageName))
+
+  // ── 원본 PK 인덱스 (임베드 전 원시 PK값 기준, 임베드 후에도 조회에 사용) ──
+  // key: msgName → { firstPk: string, entries: Array<{ rawKey: unknown, rowIdx: number }> }
+  const rawPkIndex = new Map<string, { firstPk: string; entries: { rawKey: unknown; rowIdx: number }[] }>()
+  for (const result of results) {
+    const msgDef = allMessageDefs.find((m) => m.name === result.messageName)
+    if (!msgDef) continue
+    const firstPk = msgDef.pkFields[0]
+    if (!firstPk) continue
+    const entries = result.rows.map((row, idx) => ({ rawKey: row[firstPk], rowIdx: idx }))
+    rawPkIndex.set(result.messageName, { firstPk, entries })
+  }
+
+  // ── 임베드 진행 중인 행 배열 (처리 후 갱신) ──
+  const resolvedRows = new Map<string, ExcelRowData[]>()
+  for (const result of results) {
+    resolvedRows.set(result.messageName, result.rows.map((r) => ({ ...r })))
+  }
+
+  const pkMatch = (rawKey: unknown, val: unknown): boolean => {
+    if (rawKey === val) return true
+    const n = Number(val)
+    if (!isNaN(n) && rawKey === n) return true
+    if (rawKey === String(val)) return true
+    return false
+  }
+
+  // ── 위상 정렬 (참조 대상을 먼저 처리) ──────────────────────
+  const deps = new Map<string, Set<string>>()
+  for (const name of presentNames) {
+    const msgDef = allMessageDefs.find((m) => m.name === name)
+    const refTypes = msgDef
+      ? msgDef.fields
+          .filter((f) => msgNameSet.has(f.type) && f.type !== name && presentNames.has(f.type))
+          .map((f) => f.type)
+      : []
+    deps.set(name, new Set(refTypes))
+  }
+
+  const processed = new Set<string>()
+  const order: string[] = []
+  let changed = true
+  while (changed) {
+    changed = false
+    for (const name of presentNames) {
+      if (processed.has(name)) continue
+      const d = deps.get(name) ?? new Set<string>()
+      if ([...d].every((dep) => processed.has(dep) || !presentNames.has(dep))) {
+        order.push(name)
+        processed.add(name)
+        changed = true
+      }
+    }
+  }
+  for (const name of presentNames) {
+    if (!processed.has(name)) order.push(name)
+  }
+
+  // ── 위상 순서대로 임베드 처리 ──────────────────────────────
+  for (const msgName of order) {
+    const msgDef = allMessageDefs.find((m) => m.name === msgName)
+    if (!msgDef) continue
+
+    const refFields = msgDef.fields.filter(
+      (f) => msgNameSet.has(f.type) && f.type !== msgName && presentNames.has(f.type)
+    )
+    if (refFields.length === 0) continue
+
+    const currentRows = resolvedRows.get(msgName) ?? []
+    const newRows = currentRows.map((row) => {
+      const newRow: ExcelRowData = { ...row }
+      for (const field of refFields) {
+        const rawVal = row[field.name]
+        if (rawVal === null || rawVal === undefined) continue
+
+        const refMsgDef = allMessageDefs.find((m) => m.name === field.type)
+        if (!refMsgDef) continue
+
+        // 원본 PK 인덱스로 행 인덱스를 찾아 → 임베드 완료된 행을 가져옴
+        const pkIdx = rawPkIndex.get(field.type)
+        if (!pkIdx) continue
+        const refResolved = resolvedRows.get(field.type) ?? []
+
+        if (refMsgDef.pkFields.length > 1) {
+          // 합성 PK: 첫 번째 PK가 일치하는 모든 행을 배열로
+          const matchIndices = pkIdx.entries
+            .filter((e) => pkMatch(e.rawKey, rawVal))
+            .map((e) => e.rowIdx)
+          const matches = matchIndices.map((i) => refResolved[i]).filter(Boolean)
+          if (matches.length > 0) newRow[field.name] = matches as unknown as ExcelRowData[string]
+        } else {
+          // 단일 PK: 일치하는 첫 번째 행 하나
+          const entry = pkIdx.entries.find((e) => pkMatch(e.rawKey, rawVal))
+          if (entry !== undefined) {
+            const match = refResolved[entry.rowIdx]
+            if (match) newRow[field.name] = match as unknown as ExcelRowData[string]
+          }
+        }
+      }
+      return newRow
+    })
+
+    resolvedRows.set(msgName, newRows)
+  }
+
+  return results.map((result) => ({
+    ...result,
+    rows: resolvedRows.get(result.messageName) ?? result.rows
+  }))
+}
 
 export function registerExcelIpc(): void {
   // proto 기반 Excel 파일 생성 (selectedProtoFiles 가 있으면 해당 파일만, 없으면 전체)
-  ipcMain.handle(IPC.EXCEL_GENERATE, async (_event, selectedProtoFiles?: string[]): Promise<IpcResult<string[]>> => {
+  // backup=true 이면 기존 파일을 {Name}_bak.xlsx 로 백업한 뒤 생성
+  ipcMain.handle(IPC.EXCEL_GENERATE, async (_event, selectedProtoFiles?: string[], backup?: boolean): Promise<IpcResult<{ created: string[]; backedUp: string[] }>> => {
     try {
       const settings = settingsService.get()
       if (!settings.protoDir) return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
@@ -26,8 +153,37 @@ export function registerExcelIpc(): void {
 
       if (messages.length === 0) return { success: false, error: '선택된 proto 파일에 테이블이 없습니다.' }
 
-      const createdFiles = await excelService.generateExcel(settings.excelDir, messages)
-      return { success: true, data: createdFiles }
+      // 백업: 생성될 각 xlsx 파일이 이미 존재하면 backup/{Name}_{Date}.xlsx 로 이동
+      const backedUp: string[] = []
+      if (backup) {
+        const backupDir = path.join(settings.excelDir, 'backup')
+        if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true })
+
+        const now = new Date()
+        const dateStr = [
+          now.getFullYear(),
+          String(now.getMonth() + 1).padStart(2, '0'),
+          String(now.getDate()).padStart(2, '0'),
+          String(now.getHours()).padStart(2, '0'),
+          String(now.getMinutes()).padStart(2, '0'),
+          String(now.getSeconds()).padStart(2, '0')
+        ].join('')
+
+        const sourceFiles = [...new Set(messages.map((m) => m.sourceFile))]
+        for (const sourceFile of sourceFiles) {
+          const baseName = sourceFile.replace(/\.proto$/, '')
+          const excelPath = path.join(settings.excelDir, baseName + '.xlsx')
+          if (fs.existsSync(excelPath)) {
+            const bakFileName = `${baseName}_${dateStr}.xlsx`
+            const bakPath = path.join(backupDir, bakFileName)
+            fs.copyFileSync(excelPath, bakPath)
+            backedUp.push(`backup/${bakFileName}`)
+          }
+        }
+      }
+
+      const created = await excelService.generateExcel(settings.excelDir, messages, parsed.enums)
+      return { success: true, data: { created, backedUp } }
     } catch (e) {
       return { success: false, error: String(e) }
     }
@@ -62,25 +218,27 @@ export function registerExcelIpc(): void {
   })
 
   // Excel 파일 읽기 → JSON 저장
-  // xlsx 파일명에서 proto 파일명을 도출해 해당 proto의 Message만 허용합니다.
-  // 예: GameItemTable.xlsx → GameItemTable.proto → GameItemTable, GameItemTypeTable 시트만 읽음
-  ipcMain.handle(IPC.EXCEL_READ, async (_event, excelFilePath: string): Promise<IpcResult<ExcelReadResult[]>> => {
+  // specificSheets 가 있으면 해당 시트만, 없으면 proto 파일명 기반으로 허용 시트를 도출합니다.
+  ipcMain.handle(IPC.EXCEL_READ, async (_event, excelFilePath: string, specificSheets?: string[]): Promise<IpcResult<ExcelReadResult[]>> => {
     try {
       const settings = settingsService.get()
-      if (!settings.protoDir) return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
       if (!settings.jsonDir) return { success: false, error: 'JSON 디렉토리가 설정되지 않았습니다.' }
 
-      const parsed = protoParserService.parseDirectory(settings.protoDir)
+      let allowedMessages: string[]
 
-      // xlsx 파일명 → proto 파일명 도출
-      const baseName = path.basename(excelFilePath, '.xlsx') // e.g. "GameItemTable"
-      const protoFileName = baseName + '.proto'               // e.g. "GameItemTable.proto"
-      const allowedMessages = parsed.messages
-        .filter((m) => m.sourceFile === protoFileName)
-        .map((m) => m.name)
-
-      if (allowedMessages.length === 0) {
-        return { success: false, error: `${protoFileName} 에 정의된 테이블을 찾을 수 없습니다.` }
+      if (specificSheets && specificSheets.length > 0) {
+        allowedMessages = specificSheets
+      } else {
+        if (!settings.protoDir) return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
+        const parsed = protoParserService.parseDirectory(settings.protoDir)
+        const baseName = path.basename(excelFilePath, '.xlsx')
+        const protoFileName = baseName + '.proto'
+        allowedMessages = parsed.messages
+          .filter((m) => m.sourceFile === protoFileName)
+          .map((m) => m.name)
+        if (allowedMessages.length === 0) {
+          return { success: false, error: `${protoFileName} 에 정의된 테이블을 찾을 수 없습니다.` }
+        }
       }
 
       const results = await excelService.readExcel(excelFilePath, allowedMessages)
@@ -91,4 +249,51 @@ export function registerExcelIpc(): void {
       return { success: false, error: String(e) }
     }
   })
+
+  // 여러 Excel 파일을 한 번에 읽고 Message 참조를 인라인 임베드하여 JSON 저장
+  // requests: Array<{ excelPath: string; sheets: string[] }>
+  ipcMain.handle(
+    IPC.EXCEL_EXPORT_JSON,
+    async (
+      _event,
+      requests: { excelPath: string; sheets: string[] }[]
+    ): Promise<IpcResult<{ exported: number; embedded: string[] }>> => {
+      try {
+        const settings = settingsService.get()
+        if (!settings.jsonDir) return { success: false, error: 'JSON 디렉토리가 설정되지 않았습니다.' }
+        if (!settings.protoDir) return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
+
+        const parsed = protoParserService.parseDirectory(settings.protoDir)
+        const allMessageDefs = parsed.messages
+
+        // 1. 모든 Excel 파일 읽기
+        const allResults: ExcelReadResult[] = []
+        for (const req of requests) {
+          const rows = await excelService.readExcel(req.excelPath, req.sheets)
+          allResults.push(...rows)
+        }
+
+        // 2. 인라인 임베드 처리
+        const embedded: string[] = []
+        const msgNameSet = new Set(allMessageDefs.map((m) => m.name))
+        for (const result of allResults) {
+          const msgDef = allMessageDefs.find((m) => m.name === result.messageName)
+          if (!msgDef) continue
+          const refFields = msgDef.fields.filter(
+            (f) => msgNameSet.has(f.type) && f.type !== result.messageName
+          )
+          if (refFields.length > 0) embedded.push(result.messageName)
+        }
+
+        const resolved = resolveInlineReferences(allResults, allMessageDefs)
+
+        // 3. JSON 파일 저장
+        jsonService.exportExcelToJson(settings.jsonDir, resolved)
+
+        return { success: true, data: { exported: resolved.length, embedded } }
+      } catch (e) {
+        return { success: false, error: String(e) }
+      }
+    }
+  )
 }

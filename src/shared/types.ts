@@ -40,6 +40,7 @@ export interface AppSettings {
   excelDir: string
   jsonDir: string
   outputDirs: OutputDirConfig[]
+  protocPath: string
 }
 
 export interface OutputDirConfig {

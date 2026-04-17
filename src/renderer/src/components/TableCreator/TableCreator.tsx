@@ -35,6 +35,7 @@ export function TableCreator(): React.JSX.Element {
   const { parsed, loadProto } = useAppStore()
   const [mode, setMode] = useState<Mode>('list')
   const [editTarget, setEditTarget] = useState<ProtoMessage | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   // 폼 상태
   const [tableName, setTableName] = useState('')
@@ -47,18 +48,32 @@ export function TableCreator(): React.JSX.Element {
   const existingProtoFiles = parsed
     ? [...new Set(parsed.messages.map((m) => m.sourceFile))]
     : []
-  const resolvedProtoFile = newProtoFileName.trim() || protoFileName
 
-  // proto 파일별 메시지 그룹
-  const protoGroups = parsed
-    ? Array.from(
-        parsed.messages.reduce((map, msg) => {
-          if (!map.has(msg.sourceFile)) map.set(msg.sourceFile, [])
-          map.get(msg.sourceFile)!.push(msg)
-          return map
-        }, new Map<string, ProtoMessage[]>())
+  // 이름만 입력하면 {Name}Table.proto 형식으로 자동 변환
+  const buildTableFileName = (raw: string): string => {
+    let name = raw.trim().replace(/\.proto$/i, '')
+    if (!name) return ''
+    if (!name.endsWith('Table')) name += 'Table'
+    return name + '.proto'
+  }
+
+  const resolvedProtoFile = buildTableFileName(newProtoFileName) || protoFileName
+
+  // 검색 필터링 후 proto 파일별 메시지 그룹
+  const q = searchQuery.trim().toLowerCase()
+  const filteredMessages = parsed
+    ? parsed.messages.filter(
+        (m) => !q || m.name.toLowerCase().includes(q) || m.sourceFile.toLowerCase().includes(q)
       )
     : []
+
+  const protoGroups = Array.from(
+    filteredMessages.reduce((map, msg) => {
+      if (!map.has(msg.sourceFile)) map.set(msg.sourceFile, [])
+      map.get(msg.sourceFile)!.push(msg)
+      return map
+    }, new Map<string, ProtoMessage[]>())
+  )
 
   const resetForm = useCallback((): void => {
     setTableName('')
@@ -83,6 +98,14 @@ export function TableCreator(): React.JSX.Element {
   const removeField = (i: number): void => setFields((prev) => prev.filter((_, idx) => idx !== i))
   const updateField = (i: number, patch: Partial<FieldDraft>): void =>
     setFields((prev) => prev.map((f, idx) => (idx === i ? { ...f, ...patch } : f)))
+  const moveField = (i: number, dir: -1 | 1): void =>
+    setFields((prev) => {
+      const next = [...prev]
+      const j = i + dir
+      if (j < 0 || j >= next.length) return prev
+      ;[next[i], next[j]] = [next[j], next[i]]
+      return next
+    })
 
   const handleDelete = async (msg: ProtoMessage): Promise<void> => {
     if (!window.confirm(`'${msg.name}' 테이블을 삭제하시겠습니까?`)) return
@@ -98,13 +121,12 @@ export function TableCreator(): React.JSX.Element {
   const handleSubmit = async (): Promise<void> => {
     if (!tableName.trim()) { toast.error('테이블 이름을 입력하세요.'); return }
     if (!resolvedProtoFile) { toast.error('저장할 proto 파일을 선택하거나 입력하세요.'); return }
-    if (!resolvedProtoFile.endsWith('Table.proto')) { toast.error('파일 이름은 {Name}Table.proto 형식이어야 합니다.'); return }
     if (fields.some((f) => !f.name.trim())) { toast.error('모든 필드 이름을 입력하세요.'); return }
 
     setSaving(true)
     const message: ProtoMessage = {
       name: tableName.trim(),
-      fields: fields.map((f): ProtoField => ({ ...f, comment: '' })),
+      fields: fields.map((f, idx): ProtoField => ({ ...f, fieldNumber: idx + 1, comment: '' })),
       pkFields: fields.filter((f) => f.isPk).map((f) => f.name),
       sourceFile: resolvedProtoFile,
     }
@@ -128,17 +150,50 @@ export function TableCreator(): React.JSX.Element {
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div className="page-header">
         <span className="page-title">테이블</span>
-        {mode === 'list'
-          ? <button className="btn btn-success" style={{ marginLeft: 'auto' }} onClick={openAdd}>+ 테이블 추가</button>
-          : <button className="btn btn-ghost" style={{ marginLeft: 'auto' }} onClick={() => { resetForm(); setMode('list') }}>← 목록으로</button>
-        }
+        {mode === 'list' ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="테이블 / 파일 검색..."
+                style={{
+                  background: '#16213e',
+                  border: '1px solid #0f3460',
+                  borderRadius: 6,
+                  color: '#e0e0e0',
+                  padding: '5px 28px 5px 10px',
+                  fontSize: 13,
+                  width: 200,
+                  outline: 'none'
+                }}
+              />
+              {searchQuery ? (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  style={{
+                    position: 'absolute', right: 6,
+                    background: 'none', border: 'none', color: '#9ca3af',
+                    cursor: 'pointer', fontSize: 14, padding: 0, lineHeight: 1
+                  }}
+                >✕</button>
+              ) : (
+                <span style={{ position: 'absolute', right: 8, color: '#4b5563', fontSize: 13, pointerEvents: 'none' }}>🔍</span>
+              )}
+            </div>
+            <button className="btn btn-success" onClick={openAdd}>+ 테이블 추가</button>
+          </div>
+        ) : (
+          <button className="btn btn-ghost" style={{ marginLeft: 'auto' }} onClick={() => { resetForm(); setMode('list') }}>← 목록으로</button>
+        )}
       </div>
       <div className="page-body">
 
         {/* ── 목록 뷰 ── */}
         {mode === 'list' && (
           protoGroups.length === 0
-            ? <div className="card"><p className="empty-state">등록된 테이블이 없습니다. proto 디렉토리를 설정하거나 테이블을 추가하세요.</p></div>
+            ? <div className="card"><p className="empty-state">{q ? `'${searchQuery}' 에 해당하는 테이블이 없습니다.` : '등록된 테이블이 없습니다. proto 디렉토리를 설정하거나 테이블을 추가하세요.'}</p></div>
             : protoGroups.map(([protoFile, msgs]) => (
               <div className="card" key={protoFile}>
                 <div className="card-title" style={{ color: '#a0c4ff', fontSize: 13 }}>{protoFile}</div>
@@ -190,7 +245,7 @@ export function TableCreator(): React.JSX.Element {
                 </select>
               )}
               {mode === 'add'
-                ? <input className="form-input" placeholder="신규 파일명 입력 (예: GameItemTable.proto)" value={newProtoFileName} onChange={(e) => { setNewProtoFileName(e.target.value); setProtoFileName('') }} />
+                ? <input className="form-input" placeholder="예: GameItem → GameItemTable.proto" value={newProtoFileName} onChange={(e) => { setNewProtoFileName(e.target.value); setProtoFileName('') }} />
                 : <input className="form-input" value={protoFileName} readOnly style={{ opacity: 0.6 }} />
               }
               {resolvedProtoFile && mode === 'add' && (
@@ -208,6 +263,11 @@ export function TableCreator(): React.JSX.Element {
             <div className="columns-list">
               {fields.map((field, i) => (
                 <div key={i} className="column-row">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
+                    <button className="btn btn-ghost" style={{ padding: '0 6px', lineHeight: '16px', fontSize: 11 }} onClick={() => moveField(i, -1)} disabled={i === 0} title="위로">▲</button>
+                    <button className="btn btn-ghost" style={{ padding: '0 6px', lineHeight: '16px', fontSize: 11 }} onClick={() => moveField(i, 1)} disabled={i === fields.length - 1} title="아래로">▼</button>
+                  </div>
+                  <span style={{ width: 22, textAlign: 'center', color: '#6b7280', fontSize: 12, flexShrink: 0 }}>{i + 1}</span>
                   <input className="form-input" placeholder="필드 이름" value={field.name} onChange={(e) => updateField(i, { name: e.target.value })} />
                   <select className="form-select" value={field.type} onChange={(e) => updateField(i, { type: e.target.value })}>
                     <optgroup label="기본 타입">
@@ -224,7 +284,6 @@ export function TableCreator(): React.JSX.Element {
                       </optgroup>
                     )}
                   </select>
-                  <input className="form-input" type="number" placeholder="#" style={{ width: 64, flexShrink: 0 }} value={field.fieldNumber} min={1} onChange={(e) => updateField(i, { fieldNumber: parseInt(e.target.value) || i + 1 })} />
                   <label className="checkbox-group" title="기본키(PK)">
                     <input type="checkbox" checked={field.isPk} onChange={(e) => updateField(i, { isPk: e.target.checked })} />
                     PK

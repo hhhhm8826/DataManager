@@ -1,23 +1,25 @@
 syntax = "proto3";
 
-package DATA_TABLE;
+package DATA_MANAGER_TABLE;
+option go_package = "./DATA_MANAGER_TABLE";
+import "CommonEnumType.proto";
+
+import "ItemEnumType.proto";
 
 // 게임 아이템 테이블 (GameItemTable.proto 예시)
 // 하나의 proto 파일에 여러 Message를 정의 → Excel에서 여러 시트로 생성됩니다.
 
-// 아이템 기본 테이블
+// 아이템 기본 테이블
 
 // 아이템 타입별 세부 정보 테이블
 
 
-
-
 message GameItemTypeTable {
   // @PK
-  ItemTypeEnum itemType = 1;
+  ItemType itemType = 1;
   string typeName = 2;
-  string iconPath = 3;
-  bool tradeable = 4;
+  bool isTradable = 3;
+  string iconPath = 4;
 }
 
 message GameItem {
@@ -25,8 +27,8 @@ message GameItem {
   int32 itemId = 1;
   string name = 2;
   GameItemTypeTable itemType = 3;
-  ItemRarityEnum rarity = 4;
+  GradeType rarity = 4;
   int32 maxStack = 5;
   int32 price = 6;
-  string description = 7;
+  string descriptions = 7;
 }

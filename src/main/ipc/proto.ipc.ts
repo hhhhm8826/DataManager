@@ -27,7 +27,8 @@ export function registerProtoIpc(): void {
         return { success: false, error: '저장할 파일 이름은 {Name}Table.proto 형식이어야 합니다.' }
       }
       const filePath = path.join(settings.protoDir, message.sourceFile)
-      protoParserService.addMessageToFile(filePath, message)
+      const parsed = protoParserService.parseDirectory(settings.protoDir)
+      protoParserService.addMessageToFile(filePath, message, parsed.enums)
       return { success: true }
     } catch (e) {
       return { success: false, error: String(e) }
@@ -42,7 +43,8 @@ export function registerProtoIpc(): void {
         const settings = settingsService.get()
         if (!settings.protoDir) return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
         const filePath = path.join(settings.protoDir, payload.sourceFile)
-        protoParserService.updateMessage(filePath, payload.oldName, payload.message)
+        const parsed = protoParserService.parseDirectory(settings.protoDir)
+        protoParserService.updateMessage(filePath, payload.oldName, payload.message, parsed.enums)
         return { success: true }
       } catch (e) {
         return { success: false, error: String(e) }

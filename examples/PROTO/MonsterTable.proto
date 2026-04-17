@@ -1,8 +1,14 @@
 syntax = "proto3";
 
-package DATA_TABLE;
+package DATA_MANAGER_TABLE;
+option go_package = "./DATA_MANAGER_TABLE";
 
-// 몬스터 테이블
+// 몬스터 테이블
+
+// 몬스터 드롭 아이템 테이블
+
+
+
 message MonsterTable {
   // @PK
   int32 monsterId = 1;
@@ -14,13 +20,18 @@ message MonsterTable {
   int32 rewardItemId = 7;
 }
 
-// 몬스터 드롭 아이템 테이블
-message MonsterDropTable {
+message MonsterDrop {
   // @PK
-  int32 monsterId = 1;
+  MonsterTable monsterId = 1;
   // @PK
   int32 itemId = 2;
   float dropRate = 3;
   int32 minCount = 4;
   int32 maxCount = 5;
+}
+
+message MonsterTest {
+  // @PK
+  int32 ID = 1;
+  MonsterDrop MonsterDrop = 2;
 }

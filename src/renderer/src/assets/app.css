@@ -132,6 +132,12 @@ html, body, #root {
 .card { background: #16213e; border: 1px solid #0f3460; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
 .card-title { font-size: 14px; font-weight: 600; color: #a0c4ff; margin-bottom: 16px; }
 
+/* Sub-tabs */
+.sub-tabs { display: flex; gap: 0; border-bottom: 2px solid #0f3460; margin-bottom: 20px; flex-shrink: 0; }
+.sub-tab { padding: 8px 20px; font-size: 13px; font-weight: 500; color: #6b7280; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; transition: color 0.15s, border-color 0.15s; white-space: nowrap; }
+.sub-tab:hover { color: #a0c4ff; }
+.sub-tab.active { color: #a0c4ff; border-bottom-color: #a0c4ff; font-weight: 600; }
+
 /* Table */
 .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .data-table th, .data-table td { padding: 8px 12px; border: 1px solid #0f3460; text-align: left; }
@@ -164,6 +170,8 @@ html, body, #root {
 .badge-pk { background: #4a3800; color: #f0c040; border: 1px solid #8a6a00; }
 .badge-type { background: #1e3a5f; color: #7ab3f0; }
 .badge-enum { background: #2a1e4a; color: #c0a0f0; }
+.badge-invalid { background: #4a1010; color: #ff6b6b; border: 1px solid #8a2020; cursor: help; }
+.badge-ref { background: #3a2800; color: #ffb347; border: 1px solid #7a5500; }
 
 /* Column rows */
 .columns-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }

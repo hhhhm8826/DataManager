@@ -1,14 +1,13 @@
 import { ipcMain } from 'electron'
 import { IPC } from '../../shared/ipc-channels'
-import { codeGeneratorService } from '../services/CodeGeneratorService'
-import { protoParserService } from '../services/ProtoParserService'
+import { protocService, SUPPORTED_LANGUAGES } from '../services/CodeGeneratorService'
 import { settingsService } from '../services/SettingsService'
 import type { IpcResult } from '../../shared/types'
 
 export function registerCodegenIpc(): void {
-  // 등록된 언어 목록 반환
+  // protoc 가 지원하는 언어 목록 반환
   ipcMain.handle(IPC.CODEGEN_LIST_LANGUAGES, (): IpcResult<string[]> => {
-    return { success: true, data: codeGeneratorService.getSupportedLanguages() }
+    return { success: true, data: SUPPORTED_LANGUAGES }
   })
 
   // 특정 언어 코드 생성
@@ -17,15 +16,13 @@ export function registerCodegenIpc(): void {
     async (_event, language: string): Promise<IpcResult> => {
       try {
         const settings = settingsService.get()
+        if (!settings.protocPath) return { success: false, error: 'protoc 경로가 설정되지 않았습니다.' }
         if (!settings.protoDir) return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
 
         const targetOutput = settings.outputDirs.find((o) => o.language === language)
         if (!targetOutput?.dir) return { success: false, error: `${language} 출력 경로가 설정되지 않았습니다.` }
 
-        const parsed = protoParserService.parseDirectory(settings.protoDir)
-        if (parsed.errors.length > 0) return { success: false, error: parsed.errors.join('\n') }
-
-        codeGeneratorService.generate(language, parsed.messages, parsed.enums, targetOutput.dir)
+        protocService.generate(settings.protocPath, settings.protoDir, language, targetOutput.dir)
         return { success: true }
       } catch (e) {
         return { success: false, error: String(e) }
@@ -37,17 +34,15 @@ export function registerCodegenIpc(): void {
   ipcMain.handle(IPC.CODEGEN_GENERATE_ALL, async (): Promise<IpcResult<string[]>> => {
     try {
       const settings = settingsService.get()
+      if (!settings.protocPath) return { success: false, error: 'protoc 경로가 설정되지 않았습니다.' }
       if (!settings.protoDir) return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
-
-      const parsed = protoParserService.parseDirectory(settings.protoDir)
-      if (parsed.errors.length > 0) return { success: false, error: parsed.errors.join('\n') }
 
       const configured = settings.outputDirs.filter((o) => o.dir)
       if (configured.length === 0) return { success: false, error: '출력 경로가 설정된 언어가 없습니다.' }
 
       const generated: string[] = []
       for (const o of configured) {
-        codeGeneratorService.generate(o.language, parsed.messages, parsed.enums, o.dir)
+        protocService.generate(settings.protocPath, settings.protoDir, o.language, o.dir)
         generated.push(o.language)
       }
       return { success: true, data: generated }

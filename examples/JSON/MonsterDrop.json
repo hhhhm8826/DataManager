@@ -1,0 +1,32 @@
+[
+  {
+    "monsterId": {
+      "monsterId": 1,
+      "name": "고블린",
+      "hp": 100,
+      "atk": 1,
+      "def": 1,
+      "moveSpeed": 1,
+      "rewardItemId": 100
+    },
+    "itemId": 35,
+    "dropRate": 0.1,
+    "minCount": 1,
+    "maxCount": 10
+  },
+  {
+    "monsterId": {
+      "monsterId": 1,
+      "name": "고블린",
+      "hp": 100,
+      "atk": 1,
+      "def": 1,
+      "moveSpeed": 1,
+      "rewardItemId": 100
+    },
+    "itemId": 36,
+    "dropRate": 0.1,
+    "minCount": 1,
+    "maxCount": 1
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "itemId": 1,
+    "name": "뉴비의 장검",
+    "itemType": {
+      "itemType": "ItemType_EQUIPMENT",
+      "typeName": "Newbie",
+      "isTradable": false,
+      "iconPath": "D:\\icon\\icon.icon"
+    },
+    "rarity": "GradeType_NORMAL",
+    "maxStack": 34,
+    "price": 100,
+    "descriptions": "뉴비가 쓰는 검이다"
+  }
+]

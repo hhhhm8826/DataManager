@@ -11,7 +11,8 @@ export function SettingsPanel(): React.JSX.Element {
     protoDir: '',
     excelDir: '',
     jsonDir: '',
-    outputDirs: []
+    outputDirs: [],
+    protocPath: ''
   })
 
   useEffect(() => {
@@ -50,8 +51,8 @@ export function SettingsPanel(): React.JSX.Element {
             <label className="form-label">Proto 디렉토리</label>
             <div className="path-row">
               <input className="form-input path-input" placeholder="proto 파일이 있는 폴더" value={draft.protoDir} onChange={(e) => setDraft((p) => ({ ...p, protoDir: e.target.value }))} />
-              <button className="btn btn-ghost" onClick={() => pickDir('protoDir')}>📂</button>
-              <button className="btn btn-ghost" title="폴더 열기" onClick={() => openDir(draft.protoDir)}>🗂</button>
+              <button className="btn btn-ghost" onClick={() => pickDir('protoDir')} title="폴더 선택">📂</button>
+              <button className="btn btn-ghost" title="탐색기에서 열기" onClick={() => openDir(draft.protoDir)}>↗</button>
             </div>
           </div>
 
@@ -59,8 +60,8 @@ export function SettingsPanel(): React.JSX.Element {
             <label className="form-label">Excel 디렉토리</label>
             <div className="path-row">
               <input className="form-input path-input" placeholder="Excel 파일을 생성/읽을 폴더" value={draft.excelDir} onChange={(e) => setDraft((p) => ({ ...p, excelDir: e.target.value }))} />
-              <button className="btn btn-ghost" onClick={() => pickDir('excelDir')}>📂</button>
-              <button className="btn btn-ghost" title="폴더 열기" onClick={() => openDir(draft.excelDir)}>🗂</button>
+              <button className="btn btn-ghost" onClick={() => pickDir('excelDir')} title="폴더 선택">📂</button>
+              <button className="btn btn-ghost" title="탐색기에서 열기" onClick={() => openDir(draft.excelDir)}>↗</button>
             </div>
           </div>
 
@@ -68,8 +69,8 @@ export function SettingsPanel(): React.JSX.Element {
             <label className="form-label">JSON 디렉토리</label>
             <div className="path-row">
               <input className="form-input path-input" placeholder="JSON 파일을 저장할 폴더" value={draft.jsonDir} onChange={(e) => setDraft((p) => ({ ...p, jsonDir: e.target.value }))} />
-              <button className="btn btn-ghost" onClick={() => pickDir('jsonDir')}>📂</button>
-              <button className="btn btn-ghost" title="폴더 열기" onClick={() => openDir(draft.jsonDir)}>🗂</button>
+              <button className="btn btn-ghost" onClick={() => pickDir('jsonDir')} title="폴더 선택">📂</button>
+              <button className="btn btn-ghost" title="탐색기에서 열기" onClick={() => openDir(draft.jsonDir)}>↗</button>
             </div>
           </div>
         </div>

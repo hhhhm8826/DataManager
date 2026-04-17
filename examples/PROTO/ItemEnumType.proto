@@ -1,24 +1,17 @@
 syntax = "proto3";
 
-package DATA_TABLE;
-
-// 아이템 종류 Enum
-enum ItemTypeEnum {
-  ItemTypeEnum_NONE = 0;
-  EQUIPMENT = 1;
-  CONSUMABLE = 2;
-  MATERIAL = 3;
-  QUEST = 4;
-  ItemTypeEnum_MAX = 5;
-}
+package DATA_MANAGER_TABLE;
+option go_package = "./DATA_MANAGER_TABLE";
 
 // 아이템 희귀도 Enum
-enum ItemRarityEnum {
-  ItemRarityEnum_NONE = 0;
-  COMMON = 1;
-  UNCOMMON = 2;
-  RARE = 3;
-  EPIC = 4;
-  LEGENDARY = 5;
-  ItemRarityEnum_MAX = 6;
+
+
+// 아이템 종류 Enum
+enum ItemType {
+  ItemType_NONE = 0;
+  ItemType_EQUIPMENT = 1;
+  ItemType_CONSUMABLE = 2;
+  ItemType_MATERIAL = 3;
+  ItemType_QUEST = 4;
+  ItemType_MAX = 5;
 }

@@ -159,15 +159,32 @@ export class ProtoParserService {
 
   // ── Message 수정 (삭제 후 재추가) ─────────────────────────
 
-  updateMessage(filePath: string, oldName: string, message: ProtoMessage): void {
+  updateMessage(filePath: string, oldName: string, message: ProtoMessage, allEnums: ProtoEnum[] = []): void {
     this.deleteMessage(filePath, oldName)
-    this.addMessageToFile(filePath, message)
+    this.addMessageToFile(filePath, message, allEnums)
   }
 
   // ── proto 파일에 Message 추가 ──────────────────────────────
 
-  addMessageToFile(filePath: string, message: ProtoMessage): void {
+  addMessageToFile(filePath: string, message: ProtoMessage, allEnums: ProtoEnum[] = []): void {
     let content = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : this.createProtoHeader('DataTable.proto')
+
+    // 사용된 Enum 타입의 sourceFile 수집 → 아직 import되지 않은 것만 추가
+    const usedEnumFiles = new Set<string>()
+    for (const field of message.fields) {
+      const enumDef = allEnums.find((e) => e.name === field.type)
+      if (enumDef?.sourceFile) usedEnumFiles.add(enumDef.sourceFile)
+    }
+    for (const enumFile of usedEnumFiles) {
+      const importLine = `import "${enumFile}";`
+      if (!content.includes(importLine)) {
+        // package/option 라인 다음에 삽입
+        content = content.replace(
+          /(option go_package[^;]+;)/,
+          `$1\n${importLine}`
+        )
+      }
+    }
 
     const fieldLines = message.fields
       .map((f) => {
@@ -228,7 +245,7 @@ export class ProtoParserService {
   }
 
   private createProtoHeader(_filename: string): string {
-    return `syntax = "proto3";\n\npackage DATA_TABLE;\n`
+    return `syntax = "proto3";\n\npackage DATA_MANAGER_TABLE;\noption go_package = "./DATA_MANAGER_TABLE";\n`
   }
 }
 

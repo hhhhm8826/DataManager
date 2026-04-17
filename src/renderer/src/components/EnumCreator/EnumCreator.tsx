@@ -27,6 +27,14 @@ export function EnumCreator(): React.JSX.Element {
   const [values, setValues] = useState<ValueDraft[]>([makeValue(0)])
   const [saving, setSaving] = useState(false)
 
+  // 이름만 입력하면 {Name}EnumType.proto 형식으로 자동 변환
+  const buildEnumFileName = (raw: string): string => {
+    let name = raw.trim().replace(/\.proto$/i, '')
+    if (!name) return ''
+    if (!name.endsWith('EnumType')) name += 'EnumType'
+    return name + '.proto'
+  }
+
   const existingEnumFiles = parsed
     ? [...new Set(parsed.enums.map((e) => e.sourceFile).filter((f) => f.endsWith('EnumType.proto')))]
     : []
@@ -82,8 +90,33 @@ export function EnumCreator(): React.JSX.Element {
   const handleSubmit = async (): Promise<void> => {
     if (!enumName.trim()) { toast.error('Enum 이름을 입력하세요.'); return }
     if (!fileName.trim()) { toast.error('저장할 파일 이름을 입력하세요.'); return }
-    if (!fileName.endsWith('EnumType.proto')) { toast.error('파일 이름은 {Name}EnumType.proto 형식이어야 합니다.'); return }
+    // 새 파일 입력 시 {Name}EnumType.proto 형식으로 자동 변환 (기존 파일 선택은 그대로 사용)
+    const resolvedFileName = mode === 'edit' ? fileName.trim() : buildEnumFileName(fileName)
     if (values.some((v) => !v.name.trim())) { toast.error('모든 Enum 값 이름을 입력하세요.'); return }
+
+    // 값 이름 중복 검사
+    const nameSet = new Set<string>()
+    const dupNames: string[] = []
+    for (const v of values) {
+      const n = v.name.trim()
+      if (nameSet.has(n)) { if (!dupNames.includes(n)) dupNames.push(n) }
+      else nameSet.add(n)
+    }
+    if (dupNames.length > 0) { toast.error(`중복된 Enum 값 이름: ${dupNames.join(', ')}`); return }
+
+    // 값 번호 중복 검사 (0번은 _NONE 자동 추가 고려, 사용자 입력 범위만 검사)
+    const numMap = new Map<number, string>()
+    const dupNums: string[] = []
+    for (const v of values) {
+      const existing = numMap.get(v.number)
+      if (existing !== undefined) {
+        const label = `${v.number} (${existing}, ${v.name.trim() || '?'})`
+        if (!dupNums.includes(label)) dupNums.push(label)
+      } else {
+        numMap.set(v.number, v.name.trim() || '?')
+      }
+    }
+    if (dupNums.length > 0) { toast.error(`중복된 Enum 값 번호: ${dupNums.join(' / ')}`); return }
 
     const hasNone = values.some((v) => v.name === `${enumName}_NONE` && v.number === 0)
     const hasMax = values.some((v) => v.name === `${enumName}_MAX`)
@@ -96,11 +129,11 @@ export function EnumCreator(): React.JSX.Element {
     }
 
     setSaving(true)
-    const protoEnum: ProtoEnum = { name: enumName.trim(), values: finalValues, sourceFile: fileName.trim() }
+    const protoEnum: ProtoEnum = { name: enumName.trim(), values: finalValues, sourceFile: resolvedFileName }
 
     const result = mode === 'edit' && editTarget
       ? await ipcInvoke(IPC.PROTO_UPDATE_ENUM, { sourceFile: editTarget.sourceFile, oldName: editTarget.name, protoEnum })
-      : await ipcInvoke(IPC.PROTO_ADD_ENUM, { fileName: fileName.trim(), protoEnum })
+      : await ipcInvoke(IPC.PROTO_ADD_ENUM, { fileName: resolvedFileName, protoEnum })
     setSaving(false)
 
     if (result.success) {
@@ -177,9 +210,12 @@ export function EnumCreator(): React.JSX.Element {
                 </select>
               )}
               {mode === 'add'
-                ? <input className="form-input" placeholder="예: MonsterEnumType.proto (신규 파일)" value={fileName} onChange={(e) => setFileName(e.target.value)} />
+                ? <input className="form-input" placeholder="예: Monster → MonsterEnumType.proto" value={fileName} onChange={(e) => setFileName(e.target.value)} />
                 : <input className="form-input" value={fileName} readOnly style={{ opacity: 0.6 }} />
               }
+              {mode === 'add' && fileName.trim() && (
+                <span style={{ fontSize: 11, color: '#6fcf97' }}>→ {buildEnumFileName(fileName)} 에 저장됩니다</span>
+              )}
               <span style={{ fontSize: 11, color: '#4b5563' }}>
                 _NONE=0 과 _MAX 값은 없으면 자동으로 추가됩니다.
               </span>

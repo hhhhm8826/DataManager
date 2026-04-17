@@ -5,6 +5,7 @@ export const IPC = {
   SETTINGS_GET: 'settings:get',
   SETTINGS_SET: 'settings:set',
   SETTINGS_SELECT_DIR: 'settings:select-dir',
+  SETTINGS_SELECT_FILE: 'settings:select-file',
   SETTINGS_OPEN_DIR: 'settings:open-dir',
 
   // Proto
@@ -20,6 +21,7 @@ export const IPC = {
   EXCEL_GENERATE: 'excel:generate',
   EXCEL_LIST_EXISTING: 'excel:list-existing',
   EXCEL_READ: 'excel:read',
+  EXCEL_EXPORT_JSON: 'excel:export-json',
 
   // JSON
   JSON_READ: 'json:read',

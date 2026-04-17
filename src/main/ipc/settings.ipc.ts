@@ -50,4 +50,16 @@ export function registerSettingsIpc(): void {
       return { success: false, error: String(e) }
     }
   })
+
+  // 파일 선택 다이얼로그 (protoc 등 실행파일 선택용)
+  ipcMain.handle(IPC.SETTINGS_SELECT_FILE, async (_event, options?: Electron.OpenDialogOptions): Promise<IpcResult<string>> => {
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile'],
+      ...options
+    })
+    if (result.canceled || result.filePaths.length === 0) {
+      return { success: false, error: '취소됨' }
+    }
+    return { success: true, data: result.filePaths[0] }
+  })
 }

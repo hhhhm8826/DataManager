@@ -26,10 +26,10 @@ $ npm run dev
 # For windows
 $ npm run build:win
 
-# For macOS
+# For macOS (Currently not supported)
 $ npm run build:mac
 
-# For Linux
+# For Linux (Currently not supported)
 $ npm run build:linux
 ```
 
@@ -38,4 +38,4 @@ $ npm run build:linux
 Q. 왜 Protobuf를 기반으로 엑셀 테이블을 만들었나요?
 A. Json으로 사용할 스키마를 명세할 수 있음과 동시에 클라이언트/서버가 함께 사용할 수 있는 Code-Gen이 가능하기 때문입니다.
 
-* 이 프로젝트는 대부분의 작업이 Prompt를 사용한 Copliot으로 이뤄졌습니다.
+* 이 프로젝트는 대부분의 작업이 Copliot으로 이뤄졌습니다.

@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package DATA_MANAGER_TABLE;
+option go_package = "./DATA_MANAGER_TABLE";
+import "TestEnumType.proto";
+
+message GoTest {
+  // @PK
+  int32 ID = 1;
+  TestType TestColumn = 2;
+}

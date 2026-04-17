@@ -1,0 +1,11 @@
+[
+  {
+    "monsterId": 1,
+    "name": "고블린",
+    "hp": 100,
+    "atk": 1,
+    "def": 1,
+    "moveSpeed": 1,
+    "rewardItemId": 100
+  }
+]

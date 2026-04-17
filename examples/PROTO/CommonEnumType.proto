@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package DATA_MANAGER_TABLE;
+option go_package = "./DATA_MANAGER_TABLE";
+
+enum GradeType {
+  GradeType_NONE = 0;
+  GradeType_NORMAL = 1;
+  GradeType_SUPERIOR = 2;
+  GradeType_RARE = 3;
+  GradeType_EPIC = 4;
+  GradeType_LEGENDARY = 5;
+  GradeType_MAX = 6;
+}
