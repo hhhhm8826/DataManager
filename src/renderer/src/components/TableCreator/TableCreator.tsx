@@ -3,26 +3,41 @@ import { toast } from 'sonner'
 import { useAppStore } from '../../store/appStore'
 import { IPC } from '../../../../shared/ipc-channels'
 import { ipcInvoke } from '../../hooks/useIpc'
-import type { ProtoMessage, ProtoField } from '../../../../shared/types'
+import type { ProtoMessage, ProtoField, ProtoEnum } from '../../../../shared/types'
 
 const PRIMITIVE_TYPES = ['string', 'int32', 'int64', 'uint32', 'uint64', 'float', 'double', 'bool', 'bytes']
 
 interface FieldDraft {
   name: string
   type: string
+  typeCategory: string  // 'primitive' | sourceFile
   fieldNumber: number
   isPk: boolean
   isRepeated: boolean
 }
 
-function makeField(index: number): FieldDraft {
-  return { name: '', type: 'int32', fieldNumber: index + 1, isPk: false, isRepeated: false }
+function getTypeCategory(
+  type: string,
+  allEnums: ProtoEnum[],
+  allMessages: ProtoMessage[]
+): string {
+  if (PRIMITIVE_TYPES.includes(type)) return 'primitive'
+  const enumDef = allEnums.find((e) => e.name === type)
+  if (enumDef) return enumDef.sourceFile
+  const msgDef = allMessages.find((m) => m.name === type)
+  if (msgDef) return msgDef.sourceFile
+  return 'primitive'
 }
 
-function messageToDrafts(msg: ProtoMessage): FieldDraft[] {
+function makeField(index: number): FieldDraft {
+  return { name: '', type: 'int32', typeCategory: 'primitive', fieldNumber: index + 1, isPk: false, isRepeated: false }
+}
+
+function messageToDrafts(msg: ProtoMessage, allEnums: ProtoEnum[], allMessages: ProtoMessage[]): FieldDraft[] {
   return msg.fields.map((f) => ({
     name: f.name,
     type: f.type,
+    typeCategory: getTypeCategory(f.type, allEnums, allMessages),
     fieldNumber: f.fieldNumber,
     isPk: f.isPk,
     isRepeated: f.isRepeated,
@@ -44,7 +59,26 @@ export function TableCreator(): React.JSX.Element {
   const [fields, setFields] = useState<FieldDraft[]>([makeField(0)])
   const [saving, setSaving] = useState(false)
 
+  const allMessages = parsed?.messages ?? []
   const allEnums = parsed?.enums ?? []
+
+  // 타입 선택용 파일 목록: 테이블 파일과 Enum 파일 구분
+  const tableSourceFiles = [...new Set(allMessages.map((m) => m.sourceFile))].sort()
+  const enumSourceFiles = [...new Set(allEnums.map((e) => e.sourceFile))].sort()
+
+  // 카테고리(소스파일)에 따른 타입 목록 반환, 자기 자신 테이블 제외
+  const getTypesForCategory = (category: string): string[] => {
+    if (category === 'primitive') return PRIMITIVE_TYPES
+    const selfName = tableName.trim()
+    const msgs = allMessages
+      .filter((m) => m.sourceFile === category && m.name !== selfName)
+      .map((m) => m.name)
+    const enums = allEnums
+      .filter((e) => e.sourceFile === category)
+      .map((e) => e.name)
+    return [...msgs, ...enums]
+  }
+
   const existingProtoFiles = parsed
     ? [...new Set(parsed.messages.map((m) => m.sourceFile))]
     : []
@@ -90,7 +124,7 @@ export function TableCreator(): React.JSX.Element {
     setTableName(msg.name)
     setProtoFileName(msg.sourceFile)
     setNewProtoFileName('')
-    setFields(messageToDrafts(msg))
+    setFields(messageToDrafts(msg, allEnums, parsed?.messages ?? []))
     setMode('edit')
   }
 
@@ -269,21 +303,59 @@ export function TableCreator(): React.JSX.Element {
                   </div>
                   <span style={{ width: 22, textAlign: 'center', color: '#6b7280', fontSize: 12, flexShrink: 0 }}>{i + 1}</span>
                   <input className="form-input" placeholder="필드 이름" value={field.name} onChange={(e) => updateField(i, { name: e.target.value })} />
-                  <select className="form-select" value={field.type} onChange={(e) => updateField(i, { type: e.target.value })}>
-                    <optgroup label="기본 타입">
-                      {PRIMITIVE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-                    </optgroup>
-                    {allEnums.length > 0 && (
-                      <optgroup label="Enum">
-                        {allEnums.map((e) => <option key={e.name} value={e.name}>{e.name}</option>)}
-                      </optgroup>
+                  {/* 두 단계 타입 선택 */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 140, flexShrink: 0 }}>
+                    {/* 1단계: 카테고리(파일) 선택 */}
+                    <select
+                      className="form-select"
+                      style={{ fontSize: 11, padding: '2px 4px' }}
+                      value={field.typeCategory}
+                      onChange={(e) => {
+                        const cat = e.target.value
+                        const types = cat === 'primitive' ? PRIMITIVE_TYPES : getTypesForCategory(cat)
+                        const firstType = types[0] ?? 'int32'
+                        updateField(i, { typeCategory: cat, type: firstType })
+                      }}
+                    >
+                      <option value="primitive">기본 타입</option>
+                      {tableSourceFiles.length > 0 && (
+                        <optgroup label="── 테이블">
+                          {tableSourceFiles.map((f) => (
+                            <option key={f} value={f}>{f}</option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {enumSourceFiles.length > 0 && (
+                        <optgroup label="── Enum">
+                          {enumSourceFiles.map((f) => (
+                            <option key={f} value={f}>{f}</option>
+                          ))}
+                        </optgroup>
+                      )}
+                    </select>
+                    {/* 2단계: 해당 카테고리 내 타입 선택 */}
+                    {field.typeCategory === 'primitive' ? (
+                      <select
+                        className="form-select"
+                        style={{ fontSize: 11, padding: '2px 4px' }}
+                        value={field.type}
+                        onChange={(e) => updateField(i, { type: e.target.value })}
+                      >
+                        {PRIMITIVE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                    ) : (
+                      <select
+                        className="form-select"
+                        style={{ fontSize: 11, padding: '2px 4px' }}
+                        value={field.type}
+                        onChange={(e) => updateField(i, { type: e.target.value })}
+                      >
+                        {getTypesForCategory(field.typeCategory).map((t) => (
+                          <option key={t} value={t}>{t}</option>
+                        ))}
+                      </select>
                     )}
-                    {(parsed?.messages ?? []).length > 0 && (
-                      <optgroup label="Message (참조)">
-                        {(parsed?.messages ?? []).map((m) => <option key={m.name} value={m.name}>{m.name}</option>)}
-                      </optgroup>
-                    )}
-                  </select>
+                  </div>
                   <label className="checkbox-group" title="기본키(PK)">
                     <input type="checkbox" checked={field.isPk} onChange={(e) => updateField(i, { isPk: e.target.checked })} />
                     PK

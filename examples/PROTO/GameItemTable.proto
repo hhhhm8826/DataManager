@@ -14,7 +14,9 @@ import "ItemEnumType.proto";
 // 아이템 타입별 세부 정보 테이블
 
 
-message GameItemTypeTable {
+
+
+message GameItemTypeDef {
   // @PK
   ItemType itemType = 1;
   string typeName = 2;
@@ -26,7 +28,7 @@ message GameItem {
   // @PK
   int32 itemId = 1;
   string name = 2;
-  GameItemTypeTable itemType = 3;
+  GameItemTypeDef itemType = 3;
   GradeType rarity = 4;
   int32 maxStack = 5;
   int32 price = 6;

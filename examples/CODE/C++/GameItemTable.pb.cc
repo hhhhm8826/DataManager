@@ -27,7 +27,7 @@ namespace _pbi = ::google::protobuf::internal;
 namespace _fl = ::google::protobuf::internal::field_layout;
 namespace DATA_MANAGER_TABLE {
 
-inline constexpr GameItemTypeTable::Impl_::Impl_(
+inline constexpr GameItemTypeDef::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
@@ -41,24 +41,24 @@ inline constexpr GameItemTypeTable::Impl_::Impl_(
         istradable_{false} {}
 
 template <typename>
-constexpr GameItemTypeTable::GameItemTypeTable(::_pbi::ConstantInitialized)
+constexpr GameItemTypeDef::GameItemTypeDef(::_pbi::ConstantInitialized)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(GameItemTypeTable_class_data_.base()),
+    : ::google::protobuf::Message(GameItemTypeDef_class_data_.base()),
 #else   // PROTOBUF_CUSTOM_VTABLE
     : ::google::protobuf::Message(),
 #endif  // PROTOBUF_CUSTOM_VTABLE
       _impl_(internal_visibility(), ::_pbi::ConstantInitialized()) {
 }
-struct GameItemTypeTableDefaultTypeInternal {
-  constexpr GameItemTypeTableDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~GameItemTypeTableDefaultTypeInternal() {}
+struct GameItemTypeDefDefaultTypeInternal {
+  constexpr GameItemTypeDefDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~GameItemTypeDefDefaultTypeInternal() {}
   union {
-    GameItemTypeTable _instance;
+    GameItemTypeDef _instance;
   };
 };
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GameItemTypeTableDefaultTypeInternal _GameItemTypeTable_default_instance_;
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GameItemTypeDefDefaultTypeInternal _GameItemTypeDef_default_instance_;
 
 inline constexpr GameItem::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
@@ -104,12 +104,12 @@ const ::uint32_t
     TableStruct_GameItemTable_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
         protodesc_cold) = {
         0x081, // bitmap
-        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::GameItemTypeTable, _impl_._has_bits_),
+        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::GameItemTypeDef, _impl_._has_bits_),
         7, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::GameItemTypeTable, _impl_.itemtype_),
-        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::GameItemTypeTable, _impl_.typename__),
-        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::GameItemTypeTable, _impl_.istradable_),
-        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::GameItemTypeTable, _impl_.iconpath_),
+        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::GameItemTypeDef, _impl_.itemtype_),
+        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::GameItemTypeDef, _impl_.typename__),
+        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::GameItemTypeDef, _impl_.istradable_),
+        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::GameItemTypeDef, _impl_.iconpath_),
         2,
         0,
         3,
@@ -135,27 +135,26 @@ const ::uint32_t
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, sizeof(::DATA_MANAGER_TABLE::GameItemTypeTable)},
+        {0, sizeof(::DATA_MANAGER_TABLE::GameItemTypeDef)},
         {11, sizeof(::DATA_MANAGER_TABLE::GameItem)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
-    &::DATA_MANAGER_TABLE::_GameItemTypeTable_default_instance_._instance,
+    &::DATA_MANAGER_TABLE::_GameItemTypeDef_default_instance_._instance,
     &::DATA_MANAGER_TABLE::_GameItem_default_instance_._instance,
 };
 const char descriptor_table_protodef_GameItemTable_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\023GameItemTable.proto\022\022DATA_MANAGER_TABL"
     "E\032\024CommonEnumType.proto\032\022ItemEnumType.pr"
-    "oto\"{\n\021GameItemTypeTable\022.\n\010itemType\030\001 \001"
-    "(\0162\034.DATA_MANAGER_TABLE.ItemType\022\020\n\010type"
-    "Name\030\002 \001(\t\022\022\n\nisTradable\030\003 \001(\010\022\020\n\010iconPa"
-    "th\030\004 \001(\t\"\307\001\n\010GameItem\022\016\n\006itemId\030\001 \001(\005\022\014\n"
-    "\004name\030\002 \001(\t\0227\n\010itemType\030\003 \001(\0132%.DATA_MAN"
-    "AGER_TABLE.GameItemTypeTable\022-\n\006rarity\030\004"
-    " \001(\0162\035.DATA_MANAGER_TABLE.GradeType\022\020\n\010m"
-    "axStack\030\005 \001(\005\022\r\n\005price\030\006 \001(\005\022\024\n\014descript"
-    "ions\030\007 \001(\tB\026Z\024./DATA_MANAGER_TABLEb\006prot"
-    "o3"
+    "oto\"y\n\017GameItemTypeDef\022.\n\010itemType\030\001 \001(\016"
+    "2\034.DATA_MANAGER_TABLE.ItemType\022\020\n\010typeNa"
+    "me\030\002 \001(\t\022\022\n\nisTradable\030\003 \001(\010\022\020\n\010iconPath"
+    "\030\004 \001(\t\"\305\001\n\010GameItem\022\016\n\006itemId\030\001 \001(\005\022\014\n\004n"
+    "ame\030\002 \001(\t\0225\n\010itemType\030\003 \001(\0132#.DATA_MANAG"
+    "ER_TABLE.GameItemTypeDef\022-\n\006rarity\030\004 \001(\016"
+    "2\035.DATA_MANAGER_TABLE.GradeType\022\020\n\010maxSt"
+    "ack\030\005 \001(\005\022\r\n\005price\030\006 \001(\005\022\024\n\014descriptions"
+    "\030\007 \001(\tB\026Z\024./DATA_MANAGER_TABLEb\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_GameItemTable_2eproto_deps[2] = {
@@ -166,7 +165,7 @@ static ::absl::once_flag descriptor_table_GameItemTable_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GameItemTable_2eproto = {
     false,
     false,
-    442,
+    438,
     descriptor_table_protodef_GameItemTable_2eproto,
     "GameItemTable.proto",
     &descriptor_table_GameItemTable_2eproto_once,
@@ -182,41 +181,41 @@ PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_GameItemTable_
 namespace DATA_MANAGER_TABLE {
 // ===================================================================
 
-class GameItemTypeTable::_Internal {
+class GameItemTypeDef::_Internal {
  public:
   using HasBits =
-      decltype(::std::declval<GameItemTypeTable>()._impl_._has_bits_);
+      decltype(::std::declval<GameItemTypeDef>()._impl_._has_bits_);
   static constexpr ::int32_t kHasBitsOffset =
-      8 * PROTOBUF_FIELD_OFFSET(GameItemTypeTable, _impl_._has_bits_);
+      8 * PROTOBUF_FIELD_OFFSET(GameItemTypeDef, _impl_._has_bits_);
 };
 
-GameItemTypeTable::GameItemTypeTable(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+GameItemTypeDef::GameItemTypeDef(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(arena, GameItemTypeTable_class_data_.base()) {
+    : ::google::protobuf::Message(arena, GameItemTypeDef_class_data_.base()) {
 #else   // PROTOBUF_CUSTOM_VTABLE
     : ::google::protobuf::Message(arena) {
 #endif  // PROTOBUF_CUSTOM_VTABLE
   SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:DATA_MANAGER_TABLE.GameItemTypeTable)
+  // @@protoc_insertion_point(arena_constructor:DATA_MANAGER_TABLE.GameItemTypeDef)
 }
-PROTOBUF_NDEBUG_INLINE GameItemTypeTable::Impl_::Impl_(
+PROTOBUF_NDEBUG_INLINE GameItemTypeDef::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
-    [[maybe_unused]] const ::DATA_MANAGER_TABLE::GameItemTypeTable& from_msg)
+    [[maybe_unused]] const ::DATA_MANAGER_TABLE::GameItemTypeDef& from_msg)
       : _has_bits_{from._has_bits_},
         _cached_size_{0},
         typename__(arena, from.typename__),
         iconpath_(arena, from.iconpath_) {}
 
-GameItemTypeTable::GameItemTypeTable(
+GameItemTypeDef::GameItemTypeDef(
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
-    const GameItemTypeTable& from)
+    const GameItemTypeDef& from)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(arena, GameItemTypeTable_class_data_.base()) {
+    : ::google::protobuf::Message(arena, GameItemTypeDef_class_data_.base()) {
 #else   // PROTOBUF_CUSTOM_VTABLE
     : ::google::protobuf::Message(arena) {
 #endif  // PROTOBUF_CUSTOM_VTABLE
-  GameItemTypeTable* const _this = this;
+  GameItemTypeDef* const _this = this;
   (void)_this;
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
@@ -229,16 +228,16 @@ GameItemTypeTable::GameItemTypeTable(
                offsetof(Impl_, itemtype_) +
                sizeof(Impl_::istradable_));
 
-  // @@protoc_insertion_point(copy_constructor:DATA_MANAGER_TABLE.GameItemTypeTable)
+  // @@protoc_insertion_point(copy_constructor:DATA_MANAGER_TABLE.GameItemTypeDef)
 }
-PROTOBUF_NDEBUG_INLINE GameItemTypeTable::Impl_::Impl_(
+PROTOBUF_NDEBUG_INLINE GameItemTypeDef::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
       : _cached_size_{0},
         typename__(arena),
         iconpath_(arena) {}
 
-inline void GameItemTypeTable::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+inline void GameItemTypeDef::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
   ::memset(reinterpret_cast<char*>(&_impl_) +
                offsetof(Impl_, itemtype_),
@@ -247,12 +246,12 @@ inline void GameItemTypeTable::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena)
                offsetof(Impl_, itemtype_) +
                sizeof(Impl_::istradable_));
 }
-GameItemTypeTable::~GameItemTypeTable() {
-  // @@protoc_insertion_point(destructor:DATA_MANAGER_TABLE.GameItemTypeTable)
+GameItemTypeDef::~GameItemTypeDef() {
+  // @@protoc_insertion_point(destructor:DATA_MANAGER_TABLE.GameItemTypeDef)
   SharedDtor(*this);
 }
-inline void GameItemTypeTable::SharedDtor(MessageLite& self) {
-  GameItemTypeTable& this_ = static_cast<GameItemTypeTable&>(self);
+inline void GameItemTypeDef::SharedDtor(MessageLite& self) {
+  GameItemTypeDef& this_ = static_cast<GameItemTypeDef&>(self);
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     this_.CheckHasBitConsistency();
   }
@@ -263,52 +262,52 @@ inline void GameItemTypeTable::SharedDtor(MessageLite& self) {
   this_._impl_.~Impl_();
 }
 
-inline void* PROTOBUF_NONNULL GameItemTypeTable::PlacementNew_(
+inline void* PROTOBUF_NONNULL GameItemTypeDef::PlacementNew_(
     const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
-  return ::new (mem) GameItemTypeTable(arena);
+  return ::new (mem) GameItemTypeDef(arena);
 }
-constexpr auto GameItemTypeTable::InternalNewImpl_() {
-  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(GameItemTypeTable),
-                                            alignof(GameItemTypeTable));
+constexpr auto GameItemTypeDef::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(GameItemTypeDef),
+                                            alignof(GameItemTypeDef));
 }
-constexpr auto GameItemTypeTable::InternalGenerateClassData_() {
+constexpr auto GameItemTypeDef::InternalGenerateClassData_() {
   return ::google::protobuf::internal::ClassDataFull{
       ::google::protobuf::internal::ClassData{
-          &_GameItemTypeTable_default_instance_._instance,
+          &_GameItemTypeDef_default_instance_._instance,
           &_table_.header,
           nullptr,  // IsInitialized
-          &GameItemTypeTable::MergeImpl,
-          ::google::protobuf::Message::GetNewImpl<GameItemTypeTable>(),
+          &GameItemTypeDef::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<GameItemTypeDef>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-          &GameItemTypeTable::SharedDtor,
-          ::google::protobuf::Message::GetClearImpl<GameItemTypeTable>(), &GameItemTypeTable::ByteSizeLong,
-              &GameItemTypeTable::_InternalSerialize,
+          &GameItemTypeDef::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<GameItemTypeDef>(), &GameItemTypeDef::ByteSizeLong,
+              &GameItemTypeDef::_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
-          PROTOBUF_FIELD_OFFSET(GameItemTypeTable, _impl_._cached_size_),
+          PROTOBUF_FIELD_OFFSET(GameItemTypeDef, _impl_._cached_size_),
           false,
       },
-      &GameItemTypeTable::kDescriptorMethods,
+      &GameItemTypeDef::kDescriptorMethods,
       &descriptor_table_GameItemTable_2eproto,
       nullptr,  // tracker
   };
 }
 
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
-    ::google::protobuf::internal::ClassDataFull GameItemTypeTable_class_data_ =
-        GameItemTypeTable::InternalGenerateClassData_();
+    ::google::protobuf::internal::ClassDataFull GameItemTypeDef_class_data_ =
+        GameItemTypeDef::InternalGenerateClassData_();
 
 PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
-GameItemTypeTable::GetClassData() const {
-  ::google::protobuf::internal::PrefetchToLocalCache(&GameItemTypeTable_class_data_);
-  ::google::protobuf::internal::PrefetchToLocalCache(GameItemTypeTable_class_data_.tc_table);
-  return GameItemTypeTable_class_data_.base();
+GameItemTypeDef::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&GameItemTypeDef_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(GameItemTypeDef_class_data_.tc_table);
+  return GameItemTypeDef_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 4, 0, 61, 2>
-GameItemTypeTable::_table_ = {
+const ::_pbi::TcParseTable<2, 4, 0, 59, 2>
+GameItemTypeDef::_table_ = {
   {
-    PROTOBUF_FIELD_OFFSET(GameItemTypeTable, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(GameItemTypeDef, _impl_._has_bits_),
     0, // no _extensions_
     4, 24,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
@@ -317,51 +316,51 @@ GameItemTypeTable::_table_ = {
     4,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
-    GameItemTypeTable_class_data_.base(),
+    GameItemTypeDef_class_data_.base(),
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::GenericFallback,  // fallback
     #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::DATA_MANAGER_TABLE::GameItemTypeTable>(),  // to_prefetch
+    ::_pbi::TcParser::GetTable<::DATA_MANAGER_TABLE::GameItemTypeDef>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     // string iconPath = 4;
     {::_pbi::TcParser::FastUS1,
      {34, 1, 0,
-      PROTOBUF_FIELD_OFFSET(GameItemTypeTable, _impl_.iconpath_)}},
+      PROTOBUF_FIELD_OFFSET(GameItemTypeDef, _impl_.iconpath_)}},
     // .DATA_MANAGER_TABLE.ItemType itemType = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(GameItemTypeTable, _impl_.itemtype_), 2>(),
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(GameItemTypeDef, _impl_.itemtype_), 2>(),
      {8, 2, 0,
-      PROTOBUF_FIELD_OFFSET(GameItemTypeTable, _impl_.itemtype_)}},
+      PROTOBUF_FIELD_OFFSET(GameItemTypeDef, _impl_.itemtype_)}},
     // string typeName = 2;
     {::_pbi::TcParser::FastUS1,
      {18, 0, 0,
-      PROTOBUF_FIELD_OFFSET(GameItemTypeTable, _impl_.typename__)}},
+      PROTOBUF_FIELD_OFFSET(GameItemTypeDef, _impl_.typename__)}},
     // bool isTradable = 3;
-    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(GameItemTypeTable, _impl_.istradable_), 3>(),
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(GameItemTypeDef, _impl_.istradable_), 3>(),
      {24, 3, 0,
-      PROTOBUF_FIELD_OFFSET(GameItemTypeTable, _impl_.istradable_)}},
+      PROTOBUF_FIELD_OFFSET(GameItemTypeDef, _impl_.istradable_)}},
   }}, {{
     65535, 65535
   }}, {{
     // .DATA_MANAGER_TABLE.ItemType itemType = 1;
-    {PROTOBUF_FIELD_OFFSET(GameItemTypeTable, _impl_.itemtype_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kOpenEnum)},
+    {PROTOBUF_FIELD_OFFSET(GameItemTypeDef, _impl_.itemtype_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kOpenEnum)},
     // string typeName = 2;
-    {PROTOBUF_FIELD_OFFSET(GameItemTypeTable, _impl_.typename__), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    {PROTOBUF_FIELD_OFFSET(GameItemTypeDef, _impl_.typename__), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
     // bool isTradable = 3;
-    {PROTOBUF_FIELD_OFFSET(GameItemTypeTable, _impl_.istradable_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kBool)},
+    {PROTOBUF_FIELD_OFFSET(GameItemTypeDef, _impl_.istradable_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kBool)},
     // string iconPath = 4;
-    {PROTOBUF_FIELD_OFFSET(GameItemTypeTable, _impl_.iconpath_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    {PROTOBUF_FIELD_OFFSET(GameItemTypeDef, _impl_.iconpath_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
   // no aux_entries
   {{
-    "\44\0\10\0\10\0\0\0"
-    "DATA_MANAGER_TABLE.GameItemTypeTable"
+    "\42\0\10\0\10\0\0\0"
+    "DATA_MANAGER_TABLE.GameItemTypeDef"
     "typeName"
     "iconPath"
   }},
 };
-PROTOBUF_NOINLINE void GameItemTypeTable::Clear() {
-// @@protoc_insertion_point(message_clear_start:DATA_MANAGER_TABLE.GameItemTypeTable)
+PROTOBUF_NOINLINE void GameItemTypeDef::Clear() {
+// @@protoc_insertion_point(message_clear_start:DATA_MANAGER_TABLE.GameItemTypeDef)
   ::google::protobuf::internal::TSanWrite(&_impl_);
   ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
@@ -386,20 +385,20 @@ PROTOBUF_NOINLINE void GameItemTypeTable::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL GameItemTypeTable::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL GameItemTypeDef::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
-  const GameItemTypeTable& this_ = static_cast<const GameItemTypeTable&>(base);
+  const GameItemTypeDef& this_ = static_cast<const GameItemTypeDef&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
-::uint8_t* PROTOBUF_NONNULL GameItemTypeTable::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL GameItemTypeDef::_InternalSerialize(
     ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
-  const GameItemTypeTable& this_ = *this;
+  const GameItemTypeDef& this_ = *this;
 #endif  // PROTOBUF_CUSTOM_VTABLE
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     this_.CheckHasBitConsistency();
   }
-  // @@protoc_insertion_point(serialize_to_array_start:DATA_MANAGER_TABLE.GameItemTypeTable)
+  // @@protoc_insertion_point(serialize_to_array_start:DATA_MANAGER_TABLE.GameItemTypeDef)
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
@@ -418,7 +417,7 @@ PROTOBUF_NOINLINE void GameItemTypeTable::Clear() {
     if (!this_._internal_typename_().empty()) {
       const ::std::string& _s = this_._internal_typename_();
       ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "DATA_MANAGER_TABLE.GameItemTypeTable.typeName");
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "DATA_MANAGER_TABLE.GameItemTypeDef.typeName");
       target = stream->WriteStringMaybeAliased(2, _s, target);
     }
   }
@@ -437,7 +436,7 @@ PROTOBUF_NOINLINE void GameItemTypeTable::Clear() {
     if (!this_._internal_iconpath().empty()) {
       const ::std::string& _s = this_._internal_iconpath();
       ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "DATA_MANAGER_TABLE.GameItemTypeTable.iconPath");
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "DATA_MANAGER_TABLE.GameItemTypeDef.iconPath");
       target = stream->WriteStringMaybeAliased(4, _s, target);
     }
   }
@@ -447,18 +446,18 @@ PROTOBUF_NOINLINE void GameItemTypeTable::Clear() {
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
             this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:DATA_MANAGER_TABLE.GameItemTypeTable)
+  // @@protoc_insertion_point(serialize_to_array_end:DATA_MANAGER_TABLE.GameItemTypeDef)
   return target;
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t GameItemTypeTable::ByteSizeLong(const MessageLite& base) {
-  const GameItemTypeTable& this_ = static_cast<const GameItemTypeTable&>(base);
+::size_t GameItemTypeDef::ByteSizeLong(const MessageLite& base) {
+  const GameItemTypeDef& this_ = static_cast<const GameItemTypeDef&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
-::size_t GameItemTypeTable::ByteSizeLong() const {
-  const GameItemTypeTable& this_ = *this;
+::size_t GameItemTypeDef::ByteSizeLong() const {
+  const GameItemTypeDef& this_ = *this;
 #endif  // PROTOBUF_CUSTOM_VTABLE
-  // @@protoc_insertion_point(message_byte_size_start:DATA_MANAGER_TABLE.GameItemTypeTable)
+  // @@protoc_insertion_point(message_byte_size_start:DATA_MANAGER_TABLE.GameItemTypeDef)
   ::size_t total_size = 0;
 
   ::uint32_t cached_has_bits = 0;
@@ -500,15 +499,15 @@ PROTOBUF_NOINLINE void GameItemTypeTable::Clear() {
                                              &this_._impl_._cached_size_);
 }
 
-void GameItemTypeTable::MergeImpl(::google::protobuf::MessageLite& to_msg,
+void GameItemTypeDef::MergeImpl(::google::protobuf::MessageLite& to_msg,
                             const ::google::protobuf::MessageLite& from_msg) {
    auto* const _this =
-      static_cast<GameItemTypeTable*>(&to_msg);
-  auto& from = static_cast<const GameItemTypeTable&>(from_msg);
+      static_cast<GameItemTypeDef*>(&to_msg);
+  auto& from = static_cast<const GameItemTypeDef&>(from_msg);
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     from.CheckHasBitConsistency();
   }
-  // @@protoc_insertion_point(class_specific_merge_from_start:DATA_MANAGER_TABLE.GameItemTypeTable)
+  // @@protoc_insertion_point(class_specific_merge_from_start:DATA_MANAGER_TABLE.GameItemTypeDef)
   ABSL_DCHECK_NE(&from, _this);
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
@@ -549,15 +548,15 @@ void GameItemTypeTable::MergeImpl(::google::protobuf::MessageLite& to_msg,
       from._internal_metadata_);
 }
 
-void GameItemTypeTable::CopyFrom(const GameItemTypeTable& from) {
-  // @@protoc_insertion_point(class_specific_copy_from_start:DATA_MANAGER_TABLE.GameItemTypeTable)
+void GameItemTypeDef::CopyFrom(const GameItemTypeDef& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:DATA_MANAGER_TABLE.GameItemTypeDef)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
 
-void GameItemTypeTable::InternalSwap(GameItemTypeTable* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+void GameItemTypeDef::InternalSwap(GameItemTypeDef* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
   using ::std::swap;
   auto* arena = GetArena();
   ABSL_DCHECK_EQ(arena, other->GetArena());
@@ -566,14 +565,14 @@ void GameItemTypeTable::InternalSwap(GameItemTypeTable* PROTOBUF_RESTRICT PROTOB
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.typename__, &other->_impl_.typename__, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.iconpath_, &other->_impl_.iconpath_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(GameItemTypeTable, _impl_.istradable_)
-      + sizeof(GameItemTypeTable::_impl_.istradable_)
-      - PROTOBUF_FIELD_OFFSET(GameItemTypeTable, _impl_.itemtype_)>(
+      PROTOBUF_FIELD_OFFSET(GameItemTypeDef, _impl_.istradable_)
+      + sizeof(GameItemTypeDef::_impl_.istradable_)
+      - PROTOBUF_FIELD_OFFSET(GameItemTypeDef, _impl_.itemtype_)>(
           reinterpret_cast<char*>(&_impl_.itemtype_),
           reinterpret_cast<char*>(&other->_impl_.itemtype_));
 }
 
-::google::protobuf::Metadata GameItemTypeTable::GetMetadata() const {
+::google::protobuf::Metadata GameItemTypeDef::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // ===================================================================
@@ -734,7 +733,7 @@ GameItem::_table_ = {
     {::_pbi::TcParser::FastUS1,
      {18, 0, 0,
       PROTOBUF_FIELD_OFFSET(GameItem, _impl_.name_)}},
-    // .DATA_MANAGER_TABLE.GameItemTypeTable itemType = 3;
+    // .DATA_MANAGER_TABLE.GameItemTypeDef itemType = 3;
     {::_pbi::TcParser::FastMtS1,
      {26, 2, 0,
       PROTOBUF_FIELD_OFFSET(GameItem, _impl_.itemtype_)}},
@@ -761,7 +760,7 @@ GameItem::_table_ = {
     {PROTOBUF_FIELD_OFFSET(GameItem, _impl_.itemid_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // string name = 2;
     {PROTOBUF_FIELD_OFFSET(GameItem, _impl_.name_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // .DATA_MANAGER_TABLE.GameItemTypeTable itemType = 3;
+    // .DATA_MANAGER_TABLE.GameItemTypeDef itemType = 3;
     {PROTOBUF_FIELD_OFFSET(GameItem, _impl_.itemtype_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
     // .DATA_MANAGER_TABLE.GradeType rarity = 4;
     {PROTOBUF_FIELD_OFFSET(GameItem, _impl_.rarity_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kOpenEnum)},
@@ -773,7 +772,7 @@ GameItem::_table_ = {
     {PROTOBUF_FIELD_OFFSET(GameItem, _impl_.descriptions_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
   {{
-      {::_pbi::TcParser::GetTable<::DATA_MANAGER_TABLE::GameItemTypeTable>()},
+      {::_pbi::TcParser::GetTable<::DATA_MANAGER_TABLE::GameItemTypeDef>()},
   }},
   {{
     "\33\0\4\0\0\0\0\14"
@@ -849,7 +848,7 @@ PROTOBUF_NOINLINE void GameItem::Clear() {
     }
   }
 
-  // .DATA_MANAGER_TABLE.GameItemTypeTable itemType = 3;
+  // .DATA_MANAGER_TABLE.GameItemTypeDef itemType = 3;
   if (CheckHasBit(cached_has_bits, 0x00000004U)) {
     target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
         3, *this_._impl_.itemtype_, this_._impl_.itemtype_->GetCachedSize(), target,
@@ -933,7 +932,7 @@ PROTOBUF_NOINLINE void GameItem::Clear() {
                                         this_._internal_descriptions());
       }
     }
-    // .DATA_MANAGER_TABLE.GameItemTypeTable itemType = 3;
+    // .DATA_MANAGER_TABLE.GameItemTypeDef itemType = 3;
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
       total_size += 1 +
                     ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.itemtype_);

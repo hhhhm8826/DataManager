@@ -24,812 +24,28 @@ namespace DATAMANAGERTABLE {
     static MonsterTableReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "ChJNb25zdGVyVGFibGUucHJvdG8SEkRBVEFfTUFOQUdFUl9UQUJMRSJ+CgxN",
-            "b25zdGVyVGFibGUSEQoJbW9uc3RlcklkGAEgASgFEgwKBG5hbWUYAiABKAkS",
-            "CgoCaHAYAyABKAUSCwoDYXRrGAQgASgFEgsKA2RlZhgFIAEoBRIRCgltb3Zl",
-            "U3BlZWQYBiABKAISFAoMcmV3YXJkSXRlbUlkGAcgASgFIogBCgtNb25zdGVy",
-            "RHJvcBIzCgltb25zdGVySWQYASABKAsyIC5EQVRBX01BTkFHRVJfVEFCTEUu",
-            "TW9uc3RlclRhYmxlEg4KBml0ZW1JZBgCIAEoBRIQCghkcm9wUmF0ZRgDIAEo",
-            "AhIQCghtaW5Db3VudBgEIAEoBRIQCghtYXhDb3VudBgFIAEoBSJPCgtNb25z",
-            "dGVyVGVzdBIKCgJJRBgBIAEoBRI0CgtNb25zdGVyRHJvcBgCIAEoCzIfLkRB",
-            "VEFfTUFOQUdFUl9UQUJMRS5Nb25zdGVyRHJvcEIWWhQuL0RBVEFfTUFOQUdF",
-            "Ul9UQUJMRWIGcHJvdG8z"));
+            "ChJNb25zdGVyVGFibGUucHJvdG8SEkRBVEFfTUFOQUdFUl9UQUJMRSJPCgtN",
+            "b25zdGVyVGVzdBIKCgJJRBgBIAEoBRI0CgtNb25zdGVyRHJvcBgCIAEoCzIf",
+            "LkRBVEFfTUFOQUdFUl9UQUJMRS5Nb25zdGVyRHJvcCJ5CgdNb25zdGVyEhEK",
+            "CW1vbnN0ZXJJZBgBIAEoBRIMCgRuYW1lGAIgASgJEgoKAmhwGAMgASgFEgsK",
+            "A2F0axgEIAEoBRILCgNkZWYYBSABKAUSEQoJbW92ZVNwZWVkGAYgASgCEhQK",
+            "DHJld2FyZEl0ZW1JZBgHIAEoBSKHAQoLTW9uc3RlckRyb3ASMgoJbW9uc3Rl",
+            "cklkGAEgASgLMh8uREFUQV9NQU5BR0VSX1RBQkxFLk1vbnN0ZXJEcm9wEg4K",
+            "Bml0ZW1JZBgCIAEoBRIQCghkcm9wUmF0ZRgDIAEoAhIQCghtaW5Db3VudBgE",
+            "IAEoBRIQCghtYXhDb3VudBgFIAEoBUIWWhQuL0RBVEFfTUFOQUdFUl9UQUJM",
+            "RWIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::DATAMANAGERTABLE.MonsterTable), global::DATAMANAGERTABLE.MonsterTable.Parser, new[]{ "MonsterId", "Name", "Hp", "Atk", "Def", "MoveSpeed", "RewardItemId" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::DATAMANAGERTABLE.MonsterDrop), global::DATAMANAGERTABLE.MonsterDrop.Parser, new[]{ "MonsterId", "ItemId", "DropRate", "MinCount", "MaxCount" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::DATAMANAGERTABLE.MonsterTest), global::DATAMANAGERTABLE.MonsterTest.Parser, new[]{ "ID", "MonsterDrop" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::DATAMANAGERTABLE.MonsterTest), global::DATAMANAGERTABLE.MonsterTest.Parser, new[]{ "ID", "MonsterDrop" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::DATAMANAGERTABLE.Monster), global::DATAMANAGERTABLE.Monster.Parser, new[]{ "MonsterId", "Name", "Hp", "Atk", "Def", "MoveSpeed", "RewardItemId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::DATAMANAGERTABLE.MonsterDrop), global::DATAMANAGERTABLE.MonsterDrop.Parser, new[]{ "MonsterId", "ItemId", "DropRate", "MinCount", "MaxCount" }, null, null, null, null)
           }));
     }
     #endregion
 
   }
   #region Messages
-  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
-  public sealed partial class MonsterTable : pb::IMessage<MonsterTable>
-  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      , pb::IBufferMessage
-  #endif
-  {
-    private static readonly pb::MessageParser<MonsterTable> _parser = new pb::MessageParser<MonsterTable>(() => new MonsterTable());
-    private pb::UnknownFieldSet _unknownFields;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<MonsterTable> Parser { get { return _parser; } }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::DATAMANAGERTABLE.MonsterTableReflection.Descriptor.MessageTypes[0]; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public MonsterTable() {
-      OnConstruction();
-    }
-
-    partial void OnConstruction();
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public MonsterTable(MonsterTable other) : this() {
-      monsterId_ = other.monsterId_;
-      name_ = other.name_;
-      hp_ = other.hp_;
-      atk_ = other.atk_;
-      def_ = other.def_;
-      moveSpeed_ = other.moveSpeed_;
-      rewardItemId_ = other.rewardItemId_;
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public MonsterTable Clone() {
-      return new MonsterTable(this);
-    }
-
-    /// <summary>Field number for the "monsterId" field.</summary>
-    public const int MonsterIdFieldNumber = 1;
-    private int monsterId_;
-    /// <summary>
-    /// @PK
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int MonsterId {
-      get { return monsterId_; }
-      set {
-        monsterId_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "name" field.</summary>
-    public const int NameFieldNumber = 2;
-    private string name_ = "";
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public string Name {
-      get { return name_; }
-      set {
-        name_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
-    }
-
-    /// <summary>Field number for the "hp" field.</summary>
-    public const int HpFieldNumber = 3;
-    private int hp_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int Hp {
-      get { return hp_; }
-      set {
-        hp_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "atk" field.</summary>
-    public const int AtkFieldNumber = 4;
-    private int atk_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int Atk {
-      get { return atk_; }
-      set {
-        atk_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "def" field.</summary>
-    public const int DefFieldNumber = 5;
-    private int def_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int Def {
-      get { return def_; }
-      set {
-        def_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "moveSpeed" field.</summary>
-    public const int MoveSpeedFieldNumber = 6;
-    private float moveSpeed_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float MoveSpeed {
-      get { return moveSpeed_; }
-      set {
-        moveSpeed_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "rewardItemId" field.</summary>
-    public const int RewardItemIdFieldNumber = 7;
-    private int rewardItemId_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int RewardItemId {
-      get { return rewardItemId_; }
-      set {
-        rewardItemId_ = value;
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override bool Equals(object other) {
-      return Equals(other as MonsterTable);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(MonsterTable other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (MonsterId != other.MonsterId) return false;
-      if (Name != other.Name) return false;
-      if (Hp != other.Hp) return false;
-      if (Atk != other.Atk) return false;
-      if (Def != other.Def) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MoveSpeed, other.MoveSpeed)) return false;
-      if (RewardItemId != other.RewardItemId) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (MonsterId != 0) hash ^= MonsterId.GetHashCode();
-      if (Name.Length != 0) hash ^= Name.GetHashCode();
-      if (Hp != 0) hash ^= Hp.GetHashCode();
-      if (Atk != 0) hash ^= Atk.GetHashCode();
-      if (Def != 0) hash ^= Def.GetHashCode();
-      if (MoveSpeed != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MoveSpeed);
-      if (RewardItemId != 0) hash ^= RewardItemId.GetHashCode();
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void WriteTo(pb::CodedOutputStream output) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      output.WriteRawMessage(this);
-    #else
-      if (MonsterId != 0) {
-        output.WriteRawTag(8);
-        output.WriteInt32(MonsterId);
-      }
-      if (Name.Length != 0) {
-        output.WriteRawTag(18);
-        output.WriteString(Name);
-      }
-      if (Hp != 0) {
-        output.WriteRawTag(24);
-        output.WriteInt32(Hp);
-      }
-      if (Atk != 0) {
-        output.WriteRawTag(32);
-        output.WriteInt32(Atk);
-      }
-      if (Def != 0) {
-        output.WriteRawTag(40);
-        output.WriteInt32(Def);
-      }
-      if (MoveSpeed != 0F) {
-        output.WriteRawTag(53);
-        output.WriteFloat(MoveSpeed);
-      }
-      if (RewardItemId != 0) {
-        output.WriteRawTag(56);
-        output.WriteInt32(RewardItemId);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    #endif
-    }
-
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (MonsterId != 0) {
-        output.WriteRawTag(8);
-        output.WriteInt32(MonsterId);
-      }
-      if (Name.Length != 0) {
-        output.WriteRawTag(18);
-        output.WriteString(Name);
-      }
-      if (Hp != 0) {
-        output.WriteRawTag(24);
-        output.WriteInt32(Hp);
-      }
-      if (Atk != 0) {
-        output.WriteRawTag(32);
-        output.WriteInt32(Atk);
-      }
-      if (Def != 0) {
-        output.WriteRawTag(40);
-        output.WriteInt32(Def);
-      }
-      if (MoveSpeed != 0F) {
-        output.WriteRawTag(53);
-        output.WriteFloat(MoveSpeed);
-      }
-      if (RewardItemId != 0) {
-        output.WriteRawTag(56);
-        output.WriteInt32(RewardItemId);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(ref output);
-      }
-    }
-    #endif
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int CalculateSize() {
-      int size = 0;
-      if (MonsterId != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(MonsterId);
-      }
-      if (Name.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
-      }
-      if (Hp != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Hp);
-      }
-      if (Atk != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Atk);
-      }
-      if (Def != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Def);
-      }
-      if (MoveSpeed != 0F) {
-        size += 1 + 4;
-      }
-      if (RewardItemId != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(RewardItemId);
-      }
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(MonsterTable other) {
-      if (other == null) {
-        return;
-      }
-      if (other.MonsterId != 0) {
-        MonsterId = other.MonsterId;
-      }
-      if (other.Name.Length != 0) {
-        Name = other.Name;
-      }
-      if (other.Hp != 0) {
-        Hp = other.Hp;
-      }
-      if (other.Atk != 0) {
-        Atk = other.Atk;
-      }
-      if (other.Def != 0) {
-        Def = other.Def;
-      }
-      if (other.MoveSpeed != 0F) {
-        MoveSpeed = other.MoveSpeed;
-      }
-      if (other.RewardItemId != 0) {
-        RewardItemId = other.RewardItemId;
-      }
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(pb::CodedInputStream input) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      input.ReadRawMessage(this);
-    #else
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 8: {
-            MonsterId = input.ReadInt32();
-            break;
-          }
-          case 18: {
-            Name = input.ReadString();
-            break;
-          }
-          case 24: {
-            Hp = input.ReadInt32();
-            break;
-          }
-          case 32: {
-            Atk = input.ReadInt32();
-            break;
-          }
-          case 40: {
-            Def = input.ReadInt32();
-            break;
-          }
-          case 53: {
-            MoveSpeed = input.ReadFloat();
-            break;
-          }
-          case 56: {
-            RewardItemId = input.ReadInt32();
-            break;
-          }
-        }
-      }
-    #endif
-    }
-
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
-            break;
-          case 8: {
-            MonsterId = input.ReadInt32();
-            break;
-          }
-          case 18: {
-            Name = input.ReadString();
-            break;
-          }
-          case 24: {
-            Hp = input.ReadInt32();
-            break;
-          }
-          case 32: {
-            Atk = input.ReadInt32();
-            break;
-          }
-          case 40: {
-            Def = input.ReadInt32();
-            break;
-          }
-          case 53: {
-            MoveSpeed = input.ReadFloat();
-            break;
-          }
-          case 56: {
-            RewardItemId = input.ReadInt32();
-            break;
-          }
-        }
-      }
-    }
-    #endif
-
-  }
-
-  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
-  public sealed partial class MonsterDrop : pb::IMessage<MonsterDrop>
-  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      , pb::IBufferMessage
-  #endif
-  {
-    private static readonly pb::MessageParser<MonsterDrop> _parser = new pb::MessageParser<MonsterDrop>(() => new MonsterDrop());
-    private pb::UnknownFieldSet _unknownFields;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<MonsterDrop> Parser { get { return _parser; } }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::DATAMANAGERTABLE.MonsterTableReflection.Descriptor.MessageTypes[1]; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public MonsterDrop() {
-      OnConstruction();
-    }
-
-    partial void OnConstruction();
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public MonsterDrop(MonsterDrop other) : this() {
-      monsterId_ = other.monsterId_ != null ? other.monsterId_.Clone() : null;
-      itemId_ = other.itemId_;
-      dropRate_ = other.dropRate_;
-      minCount_ = other.minCount_;
-      maxCount_ = other.maxCount_;
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public MonsterDrop Clone() {
-      return new MonsterDrop(this);
-    }
-
-    /// <summary>Field number for the "monsterId" field.</summary>
-    public const int MonsterIdFieldNumber = 1;
-    private global::DATAMANAGERTABLE.MonsterTable monsterId_;
-    /// <summary>
-    /// @PK
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public global::DATAMANAGERTABLE.MonsterTable MonsterId {
-      get { return monsterId_; }
-      set {
-        monsterId_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "itemId" field.</summary>
-    public const int ItemIdFieldNumber = 2;
-    private int itemId_;
-    /// <summary>
-    /// @PK
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int ItemId {
-      get { return itemId_; }
-      set {
-        itemId_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "dropRate" field.</summary>
-    public const int DropRateFieldNumber = 3;
-    private float dropRate_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public float DropRate {
-      get { return dropRate_; }
-      set {
-        dropRate_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "minCount" field.</summary>
-    public const int MinCountFieldNumber = 4;
-    private int minCount_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int MinCount {
-      get { return minCount_; }
-      set {
-        minCount_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "maxCount" field.</summary>
-    public const int MaxCountFieldNumber = 5;
-    private int maxCount_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int MaxCount {
-      get { return maxCount_; }
-      set {
-        maxCount_ = value;
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override bool Equals(object other) {
-      return Equals(other as MonsterDrop);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(MonsterDrop other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (!object.Equals(MonsterId, other.MonsterId)) return false;
-      if (ItemId != other.ItemId) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(DropRate, other.DropRate)) return false;
-      if (MinCount != other.MinCount) return false;
-      if (MaxCount != other.MaxCount) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (monsterId_ != null) hash ^= MonsterId.GetHashCode();
-      if (ItemId != 0) hash ^= ItemId.GetHashCode();
-      if (DropRate != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(DropRate);
-      if (MinCount != 0) hash ^= MinCount.GetHashCode();
-      if (MaxCount != 0) hash ^= MaxCount.GetHashCode();
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void WriteTo(pb::CodedOutputStream output) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      output.WriteRawMessage(this);
-    #else
-      if (monsterId_ != null) {
-        output.WriteRawTag(10);
-        output.WriteMessage(MonsterId);
-      }
-      if (ItemId != 0) {
-        output.WriteRawTag(16);
-        output.WriteInt32(ItemId);
-      }
-      if (DropRate != 0F) {
-        output.WriteRawTag(29);
-        output.WriteFloat(DropRate);
-      }
-      if (MinCount != 0) {
-        output.WriteRawTag(32);
-        output.WriteInt32(MinCount);
-      }
-      if (MaxCount != 0) {
-        output.WriteRawTag(40);
-        output.WriteInt32(MaxCount);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    #endif
-    }
-
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (monsterId_ != null) {
-        output.WriteRawTag(10);
-        output.WriteMessage(MonsterId);
-      }
-      if (ItemId != 0) {
-        output.WriteRawTag(16);
-        output.WriteInt32(ItemId);
-      }
-      if (DropRate != 0F) {
-        output.WriteRawTag(29);
-        output.WriteFloat(DropRate);
-      }
-      if (MinCount != 0) {
-        output.WriteRawTag(32);
-        output.WriteInt32(MinCount);
-      }
-      if (MaxCount != 0) {
-        output.WriteRawTag(40);
-        output.WriteInt32(MaxCount);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(ref output);
-      }
-    }
-    #endif
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int CalculateSize() {
-      int size = 0;
-      if (monsterId_ != null) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(MonsterId);
-      }
-      if (ItemId != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(ItemId);
-      }
-      if (DropRate != 0F) {
-        size += 1 + 4;
-      }
-      if (MinCount != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(MinCount);
-      }
-      if (MaxCount != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(MaxCount);
-      }
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(MonsterDrop other) {
-      if (other == null) {
-        return;
-      }
-      if (other.monsterId_ != null) {
-        if (monsterId_ == null) {
-          MonsterId = new global::DATAMANAGERTABLE.MonsterTable();
-        }
-        MonsterId.MergeFrom(other.MonsterId);
-      }
-      if (other.ItemId != 0) {
-        ItemId = other.ItemId;
-      }
-      if (other.DropRate != 0F) {
-        DropRate = other.DropRate;
-      }
-      if (other.MinCount != 0) {
-        MinCount = other.MinCount;
-      }
-      if (other.MaxCount != 0) {
-        MaxCount = other.MaxCount;
-      }
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(pb::CodedInputStream input) {
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-      input.ReadRawMessage(this);
-    #else
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 10: {
-            if (monsterId_ == null) {
-              MonsterId = new global::DATAMANAGERTABLE.MonsterTable();
-            }
-            input.ReadMessage(MonsterId);
-            break;
-          }
-          case 16: {
-            ItemId = input.ReadInt32();
-            break;
-          }
-          case 29: {
-            DropRate = input.ReadFloat();
-            break;
-          }
-          case 32: {
-            MinCount = input.ReadInt32();
-            break;
-          }
-          case 40: {
-            MaxCount = input.ReadInt32();
-            break;
-          }
-        }
-      }
-    #endif
-    }
-
-    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-      if ((tag & 7) == 4) {
-        // Abort on any end group tag.
-        return;
-      }
-      switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
-            break;
-          case 10: {
-            if (monsterId_ == null) {
-              MonsterId = new global::DATAMANAGERTABLE.MonsterTable();
-            }
-            input.ReadMessage(MonsterId);
-            break;
-          }
-          case 16: {
-            ItemId = input.ReadInt32();
-            break;
-          }
-          case 29: {
-            DropRate = input.ReadFloat();
-            break;
-          }
-          case 32: {
-            MinCount = input.ReadInt32();
-            break;
-          }
-          case 40: {
-            MaxCount = input.ReadInt32();
-            break;
-          }
-        }
-      }
-    }
-    #endif
-
-  }
-
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
   public sealed partial class MonsterTest : pb::IMessage<MonsterTest>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
@@ -845,7 +61,7 @@ namespace DATAMANAGERTABLE {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::DATAMANAGERTABLE.MonsterTableReflection.Descriptor.MessageTypes[2]; }
+      get { return global::DATAMANAGERTABLE.MonsterTableReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1068,6 +284,790 @@ namespace DATAMANAGERTABLE {
               MonsterDrop = new global::DATAMANAGERTABLE.MonsterDrop();
             }
             input.ReadMessage(MonsterDrop);
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class Monster : pb::IMessage<Monster>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<Monster> _parser = new pb::MessageParser<Monster>(() => new Monster());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<Monster> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::DATAMANAGERTABLE.MonsterTableReflection.Descriptor.MessageTypes[1]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public Monster() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public Monster(Monster other) : this() {
+      monsterId_ = other.monsterId_;
+      name_ = other.name_;
+      hp_ = other.hp_;
+      atk_ = other.atk_;
+      def_ = other.def_;
+      moveSpeed_ = other.moveSpeed_;
+      rewardItemId_ = other.rewardItemId_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public Monster Clone() {
+      return new Monster(this);
+    }
+
+    /// <summary>Field number for the "monsterId" field.</summary>
+    public const int MonsterIdFieldNumber = 1;
+    private int monsterId_;
+    /// <summary>
+    /// @PK
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int MonsterId {
+      get { return monsterId_; }
+      set {
+        monsterId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "name" field.</summary>
+    public const int NameFieldNumber = 2;
+    private string name_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string Name {
+      get { return name_; }
+      set {
+        name_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "hp" field.</summary>
+    public const int HpFieldNumber = 3;
+    private int hp_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Hp {
+      get { return hp_; }
+      set {
+        hp_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "atk" field.</summary>
+    public const int AtkFieldNumber = 4;
+    private int atk_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Atk {
+      get { return atk_; }
+      set {
+        atk_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "def" field.</summary>
+    public const int DefFieldNumber = 5;
+    private int def_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Def {
+      get { return def_; }
+      set {
+        def_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "moveSpeed" field.</summary>
+    public const int MoveSpeedFieldNumber = 6;
+    private float moveSpeed_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float MoveSpeed {
+      get { return moveSpeed_; }
+      set {
+        moveSpeed_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "rewardItemId" field.</summary>
+    public const int RewardItemIdFieldNumber = 7;
+    private int rewardItemId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int RewardItemId {
+      get { return rewardItemId_; }
+      set {
+        rewardItemId_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as Monster);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(Monster other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (MonsterId != other.MonsterId) return false;
+      if (Name != other.Name) return false;
+      if (Hp != other.Hp) return false;
+      if (Atk != other.Atk) return false;
+      if (Def != other.Def) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(MoveSpeed, other.MoveSpeed)) return false;
+      if (RewardItemId != other.RewardItemId) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (MonsterId != 0) hash ^= MonsterId.GetHashCode();
+      if (Name.Length != 0) hash ^= Name.GetHashCode();
+      if (Hp != 0) hash ^= Hp.GetHashCode();
+      if (Atk != 0) hash ^= Atk.GetHashCode();
+      if (Def != 0) hash ^= Def.GetHashCode();
+      if (MoveSpeed != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(MoveSpeed);
+      if (RewardItemId != 0) hash ^= RewardItemId.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (MonsterId != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(MonsterId);
+      }
+      if (Name.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(Name);
+      }
+      if (Hp != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(Hp);
+      }
+      if (Atk != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(Atk);
+      }
+      if (Def != 0) {
+        output.WriteRawTag(40);
+        output.WriteInt32(Def);
+      }
+      if (MoveSpeed != 0F) {
+        output.WriteRawTag(53);
+        output.WriteFloat(MoveSpeed);
+      }
+      if (RewardItemId != 0) {
+        output.WriteRawTag(56);
+        output.WriteInt32(RewardItemId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (MonsterId != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(MonsterId);
+      }
+      if (Name.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(Name);
+      }
+      if (Hp != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(Hp);
+      }
+      if (Atk != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(Atk);
+      }
+      if (Def != 0) {
+        output.WriteRawTag(40);
+        output.WriteInt32(Def);
+      }
+      if (MoveSpeed != 0F) {
+        output.WriteRawTag(53);
+        output.WriteFloat(MoveSpeed);
+      }
+      if (RewardItemId != 0) {
+        output.WriteRawTag(56);
+        output.WriteInt32(RewardItemId);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (MonsterId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(MonsterId);
+      }
+      if (Name.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
+      }
+      if (Hp != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Hp);
+      }
+      if (Atk != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Atk);
+      }
+      if (Def != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Def);
+      }
+      if (MoveSpeed != 0F) {
+        size += 1 + 4;
+      }
+      if (RewardItemId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(RewardItemId);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(Monster other) {
+      if (other == null) {
+        return;
+      }
+      if (other.MonsterId != 0) {
+        MonsterId = other.MonsterId;
+      }
+      if (other.Name.Length != 0) {
+        Name = other.Name;
+      }
+      if (other.Hp != 0) {
+        Hp = other.Hp;
+      }
+      if (other.Atk != 0) {
+        Atk = other.Atk;
+      }
+      if (other.Def != 0) {
+        Def = other.Def;
+      }
+      if (other.MoveSpeed != 0F) {
+        MoveSpeed = other.MoveSpeed;
+      }
+      if (other.RewardItemId != 0) {
+        RewardItemId = other.RewardItemId;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 8: {
+            MonsterId = input.ReadInt32();
+            break;
+          }
+          case 18: {
+            Name = input.ReadString();
+            break;
+          }
+          case 24: {
+            Hp = input.ReadInt32();
+            break;
+          }
+          case 32: {
+            Atk = input.ReadInt32();
+            break;
+          }
+          case 40: {
+            Def = input.ReadInt32();
+            break;
+          }
+          case 53: {
+            MoveSpeed = input.ReadFloat();
+            break;
+          }
+          case 56: {
+            RewardItemId = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            MonsterId = input.ReadInt32();
+            break;
+          }
+          case 18: {
+            Name = input.ReadString();
+            break;
+          }
+          case 24: {
+            Hp = input.ReadInt32();
+            break;
+          }
+          case 32: {
+            Atk = input.ReadInt32();
+            break;
+          }
+          case 40: {
+            Def = input.ReadInt32();
+            break;
+          }
+          case 53: {
+            MoveSpeed = input.ReadFloat();
+            break;
+          }
+          case 56: {
+            RewardItemId = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    }
+    #endif
+
+  }
+
+  [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
+  public sealed partial class MonsterDrop : pb::IMessage<MonsterDrop>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<MonsterDrop> _parser = new pb::MessageParser<MonsterDrop>(() => new MonsterDrop());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<MonsterDrop> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::DATAMANAGERTABLE.MonsterTableReflection.Descriptor.MessageTypes[2]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MonsterDrop() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MonsterDrop(MonsterDrop other) : this() {
+      monsterId_ = other.monsterId_ != null ? other.monsterId_.Clone() : null;
+      itemId_ = other.itemId_;
+      dropRate_ = other.dropRate_;
+      minCount_ = other.minCount_;
+      maxCount_ = other.maxCount_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public MonsterDrop Clone() {
+      return new MonsterDrop(this);
+    }
+
+    /// <summary>Field number for the "monsterId" field.</summary>
+    public const int MonsterIdFieldNumber = 1;
+    private global::DATAMANAGERTABLE.MonsterDrop monsterId_;
+    /// <summary>
+    /// @PK
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::DATAMANAGERTABLE.MonsterDrop MonsterId {
+      get { return monsterId_; }
+      set {
+        monsterId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "itemId" field.</summary>
+    public const int ItemIdFieldNumber = 2;
+    private int itemId_;
+    /// <summary>
+    /// @PK
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int ItemId {
+      get { return itemId_; }
+      set {
+        itemId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "dropRate" field.</summary>
+    public const int DropRateFieldNumber = 3;
+    private float dropRate_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public float DropRate {
+      get { return dropRate_; }
+      set {
+        dropRate_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "minCount" field.</summary>
+    public const int MinCountFieldNumber = 4;
+    private int minCount_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int MinCount {
+      get { return minCount_; }
+      set {
+        minCount_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "maxCount" field.</summary>
+    public const int MaxCountFieldNumber = 5;
+    private int maxCount_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int MaxCount {
+      get { return maxCount_; }
+      set {
+        maxCount_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override bool Equals(object other) {
+      return Equals(other as MonsterDrop);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool Equals(MonsterDrop other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(MonsterId, other.MonsterId)) return false;
+      if (ItemId != other.ItemId) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(DropRate, other.DropRate)) return false;
+      if (MinCount != other.MinCount) return false;
+      if (MaxCount != other.MaxCount) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (monsterId_ != null) hash ^= MonsterId.GetHashCode();
+      if (ItemId != 0) hash ^= ItemId.GetHashCode();
+      if (DropRate != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(DropRate);
+      if (MinCount != 0) hash ^= MinCount.GetHashCode();
+      if (MaxCount != 0) hash ^= MaxCount.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void WriteTo(pb::CodedOutputStream output) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (monsterId_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(MonsterId);
+      }
+      if (ItemId != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(ItemId);
+      }
+      if (DropRate != 0F) {
+        output.WriteRawTag(29);
+        output.WriteFloat(DropRate);
+      }
+      if (MinCount != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(MinCount);
+      }
+      if (MaxCount != 0) {
+        output.WriteRawTag(40);
+        output.WriteInt32(MaxCount);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (monsterId_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(MonsterId);
+      }
+      if (ItemId != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(ItemId);
+      }
+      if (DropRate != 0F) {
+        output.WriteRawTag(29);
+        output.WriteFloat(DropRate);
+      }
+      if (MinCount != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(MinCount);
+      }
+      if (MaxCount != 0) {
+        output.WriteRawTag(40);
+        output.WriteInt32(MaxCount);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int CalculateSize() {
+      int size = 0;
+      if (monsterId_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(MonsterId);
+      }
+      if (ItemId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(ItemId);
+      }
+      if (DropRate != 0F) {
+        size += 1 + 4;
+      }
+      if (MinCount != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(MinCount);
+      }
+      if (MaxCount != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(MaxCount);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(MonsterDrop other) {
+      if (other == null) {
+        return;
+      }
+      if (other.monsterId_ != null) {
+        if (monsterId_ == null) {
+          MonsterId = new global::DATAMANAGERTABLE.MonsterDrop();
+        }
+        MonsterId.MergeFrom(other.MonsterId);
+      }
+      if (other.ItemId != 0) {
+        ItemId = other.ItemId;
+      }
+      if (other.DropRate != 0F) {
+        DropRate = other.DropRate;
+      }
+      if (other.MinCount != 0) {
+        MinCount = other.MinCount;
+      }
+      if (other.MaxCount != 0) {
+        MaxCount = other.MaxCount;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (monsterId_ == null) {
+              MonsterId = new global::DATAMANAGERTABLE.MonsterDrop();
+            }
+            input.ReadMessage(MonsterId);
+            break;
+          }
+          case 16: {
+            ItemId = input.ReadInt32();
+            break;
+          }
+          case 29: {
+            DropRate = input.ReadFloat();
+            break;
+          }
+          case 32: {
+            MinCount = input.ReadInt32();
+            break;
+          }
+          case 40: {
+            MaxCount = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+      if ((tag & 7) == 4) {
+        // Abort on any end group tag.
+        return;
+      }
+      switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 10: {
+            if (monsterId_ == null) {
+              MonsterId = new global::DATAMANAGERTABLE.MonsterDrop();
+            }
+            input.ReadMessage(MonsterId);
+            break;
+          }
+          case 16: {
+            ItemId = input.ReadInt32();
+            break;
+          }
+          case 29: {
+            DropRate = input.ReadFloat();
+            break;
+          }
+          case 32: {
+            MinCount = input.ReadInt32();
+            break;
+          }
+          case 40: {
+            MaxCount = input.ReadInt32();
             break;
           }
         }

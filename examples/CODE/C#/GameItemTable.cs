@@ -25,19 +25,19 @@ namespace DATAMANAGERTABLE {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "ChNHYW1lSXRlbVRhYmxlLnByb3RvEhJEQVRBX01BTkFHRVJfVEFCTEUaFENv",
-            "bW1vbkVudW1UeXBlLnByb3RvGhJJdGVtRW51bVR5cGUucHJvdG8iewoRR2Ft",
-            "ZUl0ZW1UeXBlVGFibGUSLgoIaXRlbVR5cGUYASABKA4yHC5EQVRBX01BTkFH",
-            "RVJfVEFCTEUuSXRlbVR5cGUSEAoIdHlwZU5hbWUYAiABKAkSEgoKaXNUcmFk",
-            "YWJsZRgDIAEoCBIQCghpY29uUGF0aBgEIAEoCSLHAQoIR2FtZUl0ZW0SDgoG",
-            "aXRlbUlkGAEgASgFEgwKBG5hbWUYAiABKAkSNwoIaXRlbVR5cGUYAyABKAsy",
-            "JS5EQVRBX01BTkFHRVJfVEFCTEUuR2FtZUl0ZW1UeXBlVGFibGUSLQoGcmFy",
-            "aXR5GAQgASgOMh0uREFUQV9NQU5BR0VSX1RBQkxFLkdyYWRlVHlwZRIQCght",
-            "YXhTdGFjaxgFIAEoBRINCgVwcmljZRgGIAEoBRIUCgxkZXNjcmlwdGlvbnMY",
-            "ByABKAlCFloULi9EQVRBX01BTkFHRVJfVEFCTEViBnByb3RvMw=="));
+            "bW1vbkVudW1UeXBlLnByb3RvGhJJdGVtRW51bVR5cGUucHJvdG8ieQoPR2Ft",
+            "ZUl0ZW1UeXBlRGVmEi4KCGl0ZW1UeXBlGAEgASgOMhwuREFUQV9NQU5BR0VS",
+            "X1RBQkxFLkl0ZW1UeXBlEhAKCHR5cGVOYW1lGAIgASgJEhIKCmlzVHJhZGFi",
+            "bGUYAyABKAgSEAoIaWNvblBhdGgYBCABKAkixQEKCEdhbWVJdGVtEg4KBml0",
+            "ZW1JZBgBIAEoBRIMCgRuYW1lGAIgASgJEjUKCGl0ZW1UeXBlGAMgASgLMiMu",
+            "REFUQV9NQU5BR0VSX1RBQkxFLkdhbWVJdGVtVHlwZURlZhItCgZyYXJpdHkY",
+            "BCABKA4yHS5EQVRBX01BTkFHRVJfVEFCTEUuR3JhZGVUeXBlEhAKCG1heFN0",
+            "YWNrGAUgASgFEg0KBXByaWNlGAYgASgFEhQKDGRlc2NyaXB0aW9ucxgHIAEo",
+            "CUIWWhQuL0RBVEFfTUFOQUdFUl9UQUJMRWIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::DATAMANAGERTABLE.CommonEnumTypeReflection.Descriptor, global::DATAMANAGERTABLE.ItemEnumTypeReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::DATAMANAGERTABLE.GameItemTypeTable), global::DATAMANAGERTABLE.GameItemTypeTable.Parser, new[]{ "ItemType", "TypeName", "IsTradable", "IconPath" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::DATAMANAGERTABLE.GameItemTypeDef), global::DATAMANAGERTABLE.GameItemTypeDef.Parser, new[]{ "ItemType", "TypeName", "IsTradable", "IconPath" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::DATAMANAGERTABLE.GameItem), global::DATAMANAGERTABLE.GameItem.Parser, new[]{ "ItemId", "Name", "ItemType", "Rarity", "MaxStack", "Price", "Descriptions" }, null, null, null, null)
           }));
     }
@@ -46,16 +46,16 @@ namespace DATAMANAGERTABLE {
   }
   #region Messages
   [global::System.Diagnostics.DebuggerDisplayAttribute("{ToString(),nq}")]
-  public sealed partial class GameItemTypeTable : pb::IMessage<GameItemTypeTable>
+  public sealed partial class GameItemTypeDef : pb::IMessage<GameItemTypeDef>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<GameItemTypeTable> _parser = new pb::MessageParser<GameItemTypeTable>(() => new GameItemTypeTable());
+    private static readonly pb::MessageParser<GameItemTypeDef> _parser = new pb::MessageParser<GameItemTypeDef>(() => new GameItemTypeDef());
     private pb::UnknownFieldSet _unknownFields;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<GameItemTypeTable> Parser { get { return _parser; } }
+    public static pb::MessageParser<GameItemTypeDef> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -71,7 +71,7 @@ namespace DATAMANAGERTABLE {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public GameItemTypeTable() {
+    public GameItemTypeDef() {
       OnConstruction();
     }
 
@@ -79,7 +79,7 @@ namespace DATAMANAGERTABLE {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public GameItemTypeTable(GameItemTypeTable other) : this() {
+    public GameItemTypeDef(GameItemTypeDef other) : this() {
       itemType_ = other.itemType_;
       typeName_ = other.typeName_;
       isTradable_ = other.isTradable_;
@@ -89,8 +89,8 @@ namespace DATAMANAGERTABLE {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public GameItemTypeTable Clone() {
-      return new GameItemTypeTable(this);
+    public GameItemTypeDef Clone() {
+      return new GameItemTypeDef(this);
     }
 
     /// <summary>Field number for the "itemType" field.</summary>
@@ -147,12 +147,12 @@ namespace DATAMANAGERTABLE {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
-      return Equals(other as GameItemTypeTable);
+      return Equals(other as GameItemTypeDef);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(GameItemTypeTable other) {
+    public bool Equals(GameItemTypeDef other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -264,7 +264,7 @@ namespace DATAMANAGERTABLE {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(GameItemTypeTable other) {
+    public void MergeFrom(GameItemTypeDef other) {
       if (other == null) {
         return;
       }
@@ -437,10 +437,10 @@ namespace DATAMANAGERTABLE {
 
     /// <summary>Field number for the "itemType" field.</summary>
     public const int ItemTypeFieldNumber = 3;
-    private global::DATAMANAGERTABLE.GameItemTypeTable itemType_;
+    private global::DATAMANAGERTABLE.GameItemTypeDef itemType_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public global::DATAMANAGERTABLE.GameItemTypeTable ItemType {
+    public global::DATAMANAGERTABLE.GameItemTypeDef ItemType {
       get { return itemType_; }
       set {
         itemType_ = value;
@@ -666,7 +666,7 @@ namespace DATAMANAGERTABLE {
       }
       if (other.itemType_ != null) {
         if (itemType_ == null) {
-          ItemType = new global::DATAMANAGERTABLE.GameItemTypeTable();
+          ItemType = new global::DATAMANAGERTABLE.GameItemTypeDef();
         }
         ItemType.MergeFrom(other.ItemType);
       }
@@ -711,7 +711,7 @@ namespace DATAMANAGERTABLE {
           }
           case 26: {
             if (itemType_ == null) {
-              ItemType = new global::DATAMANAGERTABLE.GameItemTypeTable();
+              ItemType = new global::DATAMANAGERTABLE.GameItemTypeDef();
             }
             input.ReadMessage(ItemType);
             break;
@@ -761,7 +761,7 @@ namespace DATAMANAGERTABLE {
           }
           case 26: {
             if (itemType_ == null) {
-              ItemType = new global::DATAMANAGERTABLE.GameItemTypeTable();
+              ItemType = new global::DATAMANAGERTABLE.GameItemTypeDef();
             }
             input.ReadMessage(ItemType);
             break;

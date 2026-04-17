@@ -60,10 +60,10 @@ class GameItem;
 struct GameItemDefaultTypeInternal;
 extern GameItemDefaultTypeInternal _GameItem_default_instance_;
 extern const ::google::protobuf::internal::ClassDataFull GameItem_class_data_;
-class GameItemTypeTable;
-struct GameItemTypeTableDefaultTypeInternal;
-extern GameItemTypeTableDefaultTypeInternal _GameItemTypeTable_default_instance_;
-extern const ::google::protobuf::internal::ClassDataFull GameItemTypeTable_class_data_;
+class GameItemTypeDef;
+struct GameItemTypeDefDefaultTypeInternal;
+extern GameItemTypeDefDefaultTypeInternal _GameItemTypeDef_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull GameItemTypeDef_class_data_;
 }  // namespace DATA_MANAGER_TABLE
 namespace google {
 namespace protobuf {
@@ -77,30 +77,30 @@ namespace DATA_MANAGER_TABLE {
 
 // -------------------------------------------------------------------
 
-class  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GameItemTypeTable final : public ::google::protobuf::Message
-/* @@protoc_insertion_point(class_definition:DATA_MANAGER_TABLE.GameItemTypeTable) */ {
+class  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GameItemTypeDef final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:DATA_MANAGER_TABLE.GameItemTypeDef) */ {
  public:
-  inline GameItemTypeTable() : GameItemTypeTable(nullptr) {}
-  ~GameItemTypeTable() PROTOBUF_FINAL;
+  inline GameItemTypeDef() : GameItemTypeDef(nullptr) {}
+  ~GameItemTypeDef() PROTOBUF_FINAL;
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-  void operator delete(GameItemTypeTable* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
+  void operator delete(GameItemTypeDef* PROTOBUF_NONNULL msg, ::std::destroying_delete_t) {
     SharedDtor(*msg);
-    ::google::protobuf::internal::SizedDelete(msg, sizeof(GameItemTypeTable));
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(GameItemTypeDef));
   }
 #endif
 
   template <typename = void>
-  explicit constexpr GameItemTypeTable(::google::protobuf::internal::ConstantInitialized);
+  explicit constexpr GameItemTypeDef(::google::protobuf::internal::ConstantInitialized);
 
-  inline GameItemTypeTable(const GameItemTypeTable& from) : GameItemTypeTable(nullptr, from) {}
-  inline GameItemTypeTable(GameItemTypeTable&& from) noexcept
-      : GameItemTypeTable(nullptr, ::std::move(from)) {}
-  inline GameItemTypeTable& operator=(const GameItemTypeTable& from) {
+  inline GameItemTypeDef(const GameItemTypeDef& from) : GameItemTypeDef(nullptr, from) {}
+  inline GameItemTypeDef(GameItemTypeDef&& from) noexcept
+      : GameItemTypeDef(nullptr, ::std::move(from)) {}
+  inline GameItemTypeDef& operator=(const GameItemTypeDef& from) {
     CopyFrom(from);
     return *this;
   }
-  inline GameItemTypeTable& operator=(GameItemTypeTable&& from) noexcept {
+  inline GameItemTypeDef& operator=(GameItemTypeDef&& from) noexcept {
     if (this == &from) return *this;
     if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
       InternalSwap(&from);
@@ -129,13 +129,13 @@ class  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GameItemTypeTable final : public ::
   [[nodiscard]] static const ::google::protobuf::Reflection* PROTOBUF_NONNULL GetReflection() {
     return default_instance().GetMetadata().reflection;
   }
-  [[nodiscard]] static const GameItemTypeTable& default_instance() {
-    return *reinterpret_cast<const GameItemTypeTable*>(
-        &_GameItemTypeTable_default_instance_);
+  [[nodiscard]] static const GameItemTypeDef& default_instance() {
+    return *reinterpret_cast<const GameItemTypeDef*>(
+        &_GameItemTypeDef_default_instance_);
   }
   static constexpr int kIndexInFileMessages = 0;
-  friend void swap(GameItemTypeTable& a, GameItemTypeTable& b) { a.Swap(&b); }
-  inline void Swap(GameItemTypeTable* PROTOBUF_NONNULL other) {
+  friend void swap(GameItemTypeDef& a, GameItemTypeDef& b) { a.Swap(&b); }
+  inline void Swap(GameItemTypeDef* PROTOBUF_NONNULL other) {
     if (other == this) return;
     if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
       InternalSwap(other);
@@ -143,7 +143,7 @@ class  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GameItemTypeTable final : public ::
       ::google::protobuf::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(GameItemTypeTable* PROTOBUF_NONNULL other) {
+  void UnsafeArenaSwap(GameItemTypeDef* PROTOBUF_NONNULL other) {
     if (other == this) return;
     ABSL_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -151,14 +151,14 @@ class  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GameItemTypeTable final : public ::
 
   // implements Message ----------------------------------------------
 
-  [[nodiscard]] GameItemTypeTable* PROTOBUF_NONNULL
+  [[nodiscard]] GameItemTypeDef* PROTOBUF_NONNULL
   New(::google::protobuf::Arena* PROTOBUF_NULLABLE arena = nullptr) const {
-    return ::google::protobuf::Message::DefaultConstruct<GameItemTypeTable>(arena);
+    return ::google::protobuf::Message::DefaultConstruct<GameItemTypeDef>(arena);
   }
   using ::google::protobuf::Message::CopyFrom;
-  void CopyFrom(const GameItemTypeTable& from);
+  void CopyFrom(const GameItemTypeDef& from);
   using ::google::protobuf::Message::MergeFrom;
-  void MergeFrom(const GameItemTypeTable& from) { GameItemTypeTable::MergeImpl(*this, from); }
+  void MergeFrom(const GameItemTypeDef& from) { GameItemTypeDef::MergeImpl(*this, from); }
 
   private:
   static void MergeImpl(::google::protobuf::MessageLite& to_msg,
@@ -196,17 +196,17 @@ class  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GameItemTypeTable final : public ::
   private:
   void SharedCtor(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
   static void SharedDtor(MessageLite& self);
-  void InternalSwap(GameItemTypeTable* PROTOBUF_NONNULL other);
+  void InternalSwap(GameItemTypeDef* PROTOBUF_NONNULL other);
  private:
   template <typename T>
   friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
-  static ::absl::string_view FullMessageName() { return "DATA_MANAGER_TABLE.GameItemTypeTable"; }
+  static ::absl::string_view FullMessageName() { return "DATA_MANAGER_TABLE.GameItemTypeDef"; }
 
-  explicit GameItemTypeTable(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
-  GameItemTypeTable(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const GameItemTypeTable& from);
-  GameItemTypeTable(
-      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, GameItemTypeTable&& from) noexcept
-      : GameItemTypeTable(arena) {
+  explicit GameItemTypeDef(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  GameItemTypeDef(::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const GameItemTypeDef& from);
+  GameItemTypeDef(
+      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, GameItemTypeDef&& from) noexcept
+      : GameItemTypeDef(arena) {
     *this = ::std::move(from);
   }
   const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL GetClassData() const PROTOBUF_FINAL;
@@ -278,12 +278,12 @@ class  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GameItemTypeTable final : public ::
   void _internal_set_istradable(bool value);
 
   public:
-  // @@protoc_insertion_point(class_scope:DATA_MANAGER_TABLE.GameItemTypeTable)
+  // @@protoc_insertion_point(class_scope:DATA_MANAGER_TABLE.GameItemTypeDef)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<2, 4,
-                                   0, 61,
+                                   0, 59,
                                    2>
       _table_;
 
@@ -303,7 +303,7 @@ class  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GameItemTypeTable final : public ::
     inline explicit Impl_(
         ::google::protobuf::internal::InternalVisibility visibility,
         ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
-        const GameItemTypeTable& from_msg);
+        const GameItemTypeDef& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::internal::ArenaStringPtr typename__;
@@ -316,7 +316,7 @@ class  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GameItemTypeTable final : public ::
   friend struct ::TableStruct_GameItemTable_2eproto;
 };
 
-extern const ::google::protobuf::internal::ClassDataFull GameItemTypeTable_class_data_;
+extern const ::google::protobuf::internal::ClassDataFull GameItemTypeDef_class_data_;
 // -------------------------------------------------------------------
 
 class  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GameItem final : public ::google::protobuf::Message
@@ -503,20 +503,20 @@ class  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GameItem final : public ::google::p
   ::std::string* PROTOBUF_NONNULL _internal_mutable_descriptions();
 
   public:
-  // .DATA_MANAGER_TABLE.GameItemTypeTable itemType = 3;
+  // .DATA_MANAGER_TABLE.GameItemTypeDef itemType = 3;
   [[nodiscard]] bool has_itemtype()
       const;
   void clear_itemtype() ;
-  [[nodiscard]] const ::DATA_MANAGER_TABLE::GameItemTypeTable& itemtype() const;
-  [[nodiscard]] ::DATA_MANAGER_TABLE::GameItemTypeTable* PROTOBUF_NULLABLE release_itemtype();
-  ::DATA_MANAGER_TABLE::GameItemTypeTable* PROTOBUF_NONNULL mutable_itemtype();
-  void set_allocated_itemtype(::DATA_MANAGER_TABLE::GameItemTypeTable* PROTOBUF_NULLABLE value);
-  void unsafe_arena_set_allocated_itemtype(::DATA_MANAGER_TABLE::GameItemTypeTable* PROTOBUF_NULLABLE value);
-  ::DATA_MANAGER_TABLE::GameItemTypeTable* PROTOBUF_NULLABLE unsafe_arena_release_itemtype();
+  [[nodiscard]] const ::DATA_MANAGER_TABLE::GameItemTypeDef& itemtype() const;
+  [[nodiscard]] ::DATA_MANAGER_TABLE::GameItemTypeDef* PROTOBUF_NULLABLE release_itemtype();
+  ::DATA_MANAGER_TABLE::GameItemTypeDef* PROTOBUF_NONNULL mutable_itemtype();
+  void set_allocated_itemtype(::DATA_MANAGER_TABLE::GameItemTypeDef* PROTOBUF_NULLABLE value);
+  void unsafe_arena_set_allocated_itemtype(::DATA_MANAGER_TABLE::GameItemTypeDef* PROTOBUF_NULLABLE value);
+  ::DATA_MANAGER_TABLE::GameItemTypeDef* PROTOBUF_NULLABLE unsafe_arena_release_itemtype();
 
   private:
-  const ::DATA_MANAGER_TABLE::GameItemTypeTable& _internal_itemtype() const;
-  ::DATA_MANAGER_TABLE::GameItemTypeTable* PROTOBUF_NONNULL _internal_mutable_itemtype();
+  const ::DATA_MANAGER_TABLE::GameItemTypeDef& _internal_itemtype() const;
+  ::DATA_MANAGER_TABLE::GameItemTypeDef* PROTOBUF_NONNULL _internal_mutable_itemtype();
 
   public:
   // int32 itemId = 1;
@@ -589,7 +589,7 @@ class  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GameItem final : public ::google::p
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::internal::ArenaStringPtr name_;
     ::google::protobuf::internal::ArenaStringPtr descriptions_;
-    ::DATA_MANAGER_TABLE::GameItemTypeTable* PROTOBUF_NULLABLE itemtype_;
+    ::DATA_MANAGER_TABLE::GameItemTypeDef* PROTOBUF_NULLABLE itemtype_;
     ::int32_t itemid_;
     int rarity_;
     ::int32_t maxstack_;
@@ -616,74 +616,74 @@ extern const ::google::protobuf::internal::ClassDataFull GameItem_class_data_;
 #endif  // __GNUC__
 // -------------------------------------------------------------------
 
-// GameItemTypeTable
+// GameItemTypeDef
 
 // .DATA_MANAGER_TABLE.ItemType itemType = 1;
-inline void GameItemTypeTable::clear_itemtype() {
+inline void GameItemTypeDef::clear_itemtype() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.itemtype_ = 0;
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000004U);
 }
-inline ::DATA_MANAGER_TABLE::ItemType GameItemTypeTable::itemtype() const {
-  // @@protoc_insertion_point(field_get:DATA_MANAGER_TABLE.GameItemTypeTable.itemType)
+inline ::DATA_MANAGER_TABLE::ItemType GameItemTypeDef::itemtype() const {
+  // @@protoc_insertion_point(field_get:DATA_MANAGER_TABLE.GameItemTypeDef.itemType)
   return _internal_itemtype();
 }
-inline void GameItemTypeTable::set_itemtype(::DATA_MANAGER_TABLE::ItemType value) {
+inline void GameItemTypeDef::set_itemtype(::DATA_MANAGER_TABLE::ItemType value) {
   _internal_set_itemtype(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000004U);
-  // @@protoc_insertion_point(field_set:DATA_MANAGER_TABLE.GameItemTypeTable.itemType)
+  // @@protoc_insertion_point(field_set:DATA_MANAGER_TABLE.GameItemTypeDef.itemType)
 }
-inline ::DATA_MANAGER_TABLE::ItemType GameItemTypeTable::_internal_itemtype() const {
+inline ::DATA_MANAGER_TABLE::ItemType GameItemTypeDef::_internal_itemtype() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return static_cast<::DATA_MANAGER_TABLE::ItemType>(_impl_.itemtype_);
 }
-inline void GameItemTypeTable::_internal_set_itemtype(::DATA_MANAGER_TABLE::ItemType value) {
+inline void GameItemTypeDef::_internal_set_itemtype(::DATA_MANAGER_TABLE::ItemType value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.itemtype_ = value;
 }
 
 // string typeName = 2;
-inline void GameItemTypeTable::clear_typename_() {
+inline void GameItemTypeDef::clear_typename_() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.typename__.ClearToEmpty();
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000001U);
 }
-inline const ::std::string& GameItemTypeTable::typename_() const
+inline const ::std::string& GameItemTypeDef::typename_() const
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:DATA_MANAGER_TABLE.GameItemTypeTable.typeName)
+  // @@protoc_insertion_point(field_get:DATA_MANAGER_TABLE.GameItemTypeDef.typeName)
   return _internal_typename_();
 }
 template <typename Arg_, typename... Args_>
-PROTOBUF_ALWAYS_INLINE void GameItemTypeTable::set_typename_(Arg_&& arg, Args_... args) {
+PROTOBUF_ALWAYS_INLINE void GameItemTypeDef::set_typename_(Arg_&& arg, Args_... args) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
   _impl_.typename__.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:DATA_MANAGER_TABLE.GameItemTypeTable.typeName)
+  // @@protoc_insertion_point(field_set:DATA_MANAGER_TABLE.GameItemTypeDef.typeName)
 }
-inline ::std::string* PROTOBUF_NONNULL GameItemTypeTable::mutable_typename_()
+inline ::std::string* PROTOBUF_NONNULL GameItemTypeDef::mutable_typename_()
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
   SetHasBit(_impl_._has_bits_[0], 0x00000001U);
   ::std::string* _s = _internal_mutable_typename_();
-  // @@protoc_insertion_point(field_mutable:DATA_MANAGER_TABLE.GameItemTypeTable.typeName)
+  // @@protoc_insertion_point(field_mutable:DATA_MANAGER_TABLE.GameItemTypeDef.typeName)
   return _s;
 }
-inline const ::std::string& GameItemTypeTable::_internal_typename_() const {
+inline const ::std::string& GameItemTypeDef::_internal_typename_() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.typename__.Get();
 }
-inline void GameItemTypeTable::_internal_set_typename_(const ::std::string& value) {
+inline void GameItemTypeDef::_internal_set_typename_(const ::std::string& value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.typename__.Set(value, GetArena());
 }
-inline ::std::string* PROTOBUF_NONNULL GameItemTypeTable::_internal_mutable_typename_() {
+inline ::std::string* PROTOBUF_NONNULL GameItemTypeDef::_internal_mutable_typename_() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   return _impl_.typename__.Mutable( GetArena());
 }
-inline ::std::string* PROTOBUF_NULLABLE GameItemTypeTable::release_typename_() {
+inline ::std::string* PROTOBUF_NULLABLE GameItemTypeDef::release_typename_() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:DATA_MANAGER_TABLE.GameItemTypeTable.typeName)
+  // @@protoc_insertion_point(field_release:DATA_MANAGER_TABLE.GameItemTypeDef.typeName)
   if (!CheckHasBit(_impl_._has_bits_[0], 0x00000001U)) {
     return nullptr;
   }
@@ -694,7 +694,7 @@ inline ::std::string* PROTOBUF_NULLABLE GameItemTypeTable::release_typename_() {
   }
   return released;
 }
-inline void GameItemTypeTable::set_allocated_typename_(::std::string* PROTOBUF_NULLABLE value) {
+inline void GameItemTypeDef::set_allocated_typename_(::std::string* PROTOBUF_NULLABLE value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   if (value != nullptr) {
     SetHasBit(_impl_._has_bits_[0], 0x00000001U);
@@ -705,75 +705,75 @@ inline void GameItemTypeTable::set_allocated_typename_(::std::string* PROTOBUF_N
   if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.typename__.IsDefault()) {
     _impl_.typename__.Set("", GetArena());
   }
-  // @@protoc_insertion_point(field_set_allocated:DATA_MANAGER_TABLE.GameItemTypeTable.typeName)
+  // @@protoc_insertion_point(field_set_allocated:DATA_MANAGER_TABLE.GameItemTypeDef.typeName)
 }
 
 // bool isTradable = 3;
-inline void GameItemTypeTable::clear_istradable() {
+inline void GameItemTypeDef::clear_istradable() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.istradable_ = false;
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000008U);
 }
-inline bool GameItemTypeTable::istradable() const {
-  // @@protoc_insertion_point(field_get:DATA_MANAGER_TABLE.GameItemTypeTable.isTradable)
+inline bool GameItemTypeDef::istradable() const {
+  // @@protoc_insertion_point(field_get:DATA_MANAGER_TABLE.GameItemTypeDef.isTradable)
   return _internal_istradable();
 }
-inline void GameItemTypeTable::set_istradable(bool value) {
+inline void GameItemTypeDef::set_istradable(bool value) {
   _internal_set_istradable(value);
   SetHasBit(_impl_._has_bits_[0], 0x00000008U);
-  // @@protoc_insertion_point(field_set:DATA_MANAGER_TABLE.GameItemTypeTable.isTradable)
+  // @@protoc_insertion_point(field_set:DATA_MANAGER_TABLE.GameItemTypeDef.isTradable)
 }
-inline bool GameItemTypeTable::_internal_istradable() const {
+inline bool GameItemTypeDef::_internal_istradable() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.istradable_;
 }
-inline void GameItemTypeTable::_internal_set_istradable(bool value) {
+inline void GameItemTypeDef::_internal_set_istradable(bool value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.istradable_ = value;
 }
 
 // string iconPath = 4;
-inline void GameItemTypeTable::clear_iconpath() {
+inline void GameItemTypeDef::clear_iconpath() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.iconpath_.ClearToEmpty();
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000002U);
 }
-inline const ::std::string& GameItemTypeTable::iconpath() const
+inline const ::std::string& GameItemTypeDef::iconpath() const
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:DATA_MANAGER_TABLE.GameItemTypeTable.iconPath)
+  // @@protoc_insertion_point(field_get:DATA_MANAGER_TABLE.GameItemTypeDef.iconPath)
   return _internal_iconpath();
 }
 template <typename Arg_, typename... Args_>
-PROTOBUF_ALWAYS_INLINE void GameItemTypeTable::set_iconpath(Arg_&& arg, Args_... args) {
+PROTOBUF_ALWAYS_INLINE void GameItemTypeDef::set_iconpath(Arg_&& arg, Args_... args) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   SetHasBit(_impl_._has_bits_[0], 0x00000002U);
   _impl_.iconpath_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:DATA_MANAGER_TABLE.GameItemTypeTable.iconPath)
+  // @@protoc_insertion_point(field_set:DATA_MANAGER_TABLE.GameItemTypeDef.iconPath)
 }
-inline ::std::string* PROTOBUF_NONNULL GameItemTypeTable::mutable_iconpath()
+inline ::std::string* PROTOBUF_NONNULL GameItemTypeDef::mutable_iconpath()
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
   SetHasBit(_impl_._has_bits_[0], 0x00000002U);
   ::std::string* _s = _internal_mutable_iconpath();
-  // @@protoc_insertion_point(field_mutable:DATA_MANAGER_TABLE.GameItemTypeTable.iconPath)
+  // @@protoc_insertion_point(field_mutable:DATA_MANAGER_TABLE.GameItemTypeDef.iconPath)
   return _s;
 }
-inline const ::std::string& GameItemTypeTable::_internal_iconpath() const {
+inline const ::std::string& GameItemTypeDef::_internal_iconpath() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.iconpath_.Get();
 }
-inline void GameItemTypeTable::_internal_set_iconpath(const ::std::string& value) {
+inline void GameItemTypeDef::_internal_set_iconpath(const ::std::string& value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.iconpath_.Set(value, GetArena());
 }
-inline ::std::string* PROTOBUF_NONNULL GameItemTypeTable::_internal_mutable_iconpath() {
+inline ::std::string* PROTOBUF_NONNULL GameItemTypeDef::_internal_mutable_iconpath() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   return _impl_.iconpath_.Mutable( GetArena());
 }
-inline ::std::string* PROTOBUF_NULLABLE GameItemTypeTable::release_iconpath() {
+inline ::std::string* PROTOBUF_NULLABLE GameItemTypeDef::release_iconpath() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:DATA_MANAGER_TABLE.GameItemTypeTable.iconPath)
+  // @@protoc_insertion_point(field_release:DATA_MANAGER_TABLE.GameItemTypeDef.iconPath)
   if (!CheckHasBit(_impl_._has_bits_[0], 0x00000002U)) {
     return nullptr;
   }
@@ -784,7 +784,7 @@ inline ::std::string* PROTOBUF_NULLABLE GameItemTypeTable::release_iconpath() {
   }
   return released;
 }
-inline void GameItemTypeTable::set_allocated_iconpath(::std::string* PROTOBUF_NULLABLE value) {
+inline void GameItemTypeDef::set_allocated_iconpath(::std::string* PROTOBUF_NULLABLE value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   if (value != nullptr) {
     SetHasBit(_impl_._has_bits_[0], 0x00000002U);
@@ -795,7 +795,7 @@ inline void GameItemTypeTable::set_allocated_iconpath(::std::string* PROTOBUF_NU
   if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.iconpath_.IsDefault()) {
     _impl_.iconpath_.Set("", GetArena());
   }
-  // @@protoc_insertion_point(field_set_allocated:DATA_MANAGER_TABLE.GameItemTypeTable.iconPath)
+  // @@protoc_insertion_point(field_set_allocated:DATA_MANAGER_TABLE.GameItemTypeDef.iconPath)
 }
 
 // -------------------------------------------------------------------
@@ -892,7 +892,7 @@ inline void GameItem::set_allocated_name(::std::string* PROTOBUF_NULLABLE value)
   // @@protoc_insertion_point(field_set_allocated:DATA_MANAGER_TABLE.GameItem.name)
 }
 
-// .DATA_MANAGER_TABLE.GameItemTypeTable itemType = 3;
+// .DATA_MANAGER_TABLE.GameItemTypeDef itemType = 3;
 inline bool GameItem::has_itemtype() const {
   bool value = CheckHasBit(_impl_._has_bits_[0], 0x00000004U);
   PROTOBUF_ASSUME(!value || _impl_.itemtype_ != nullptr);
@@ -904,22 +904,22 @@ inline void GameItem::clear_itemtype() {
   ClearHasBit(_impl_._has_bits_[0],
                   0x00000004U);
 }
-inline const ::DATA_MANAGER_TABLE::GameItemTypeTable& GameItem::_internal_itemtype() const {
+inline const ::DATA_MANAGER_TABLE::GameItemTypeDef& GameItem::_internal_itemtype() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  const ::DATA_MANAGER_TABLE::GameItemTypeTable* p = _impl_.itemtype_;
-  return p != nullptr ? *p : reinterpret_cast<const ::DATA_MANAGER_TABLE::GameItemTypeTable&>(::DATA_MANAGER_TABLE::_GameItemTypeTable_default_instance_);
+  const ::DATA_MANAGER_TABLE::GameItemTypeDef* p = _impl_.itemtype_;
+  return p != nullptr ? *p : reinterpret_cast<const ::DATA_MANAGER_TABLE::GameItemTypeDef&>(::DATA_MANAGER_TABLE::_GameItemTypeDef_default_instance_);
 }
-inline const ::DATA_MANAGER_TABLE::GameItemTypeTable& GameItem::itemtype() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+inline const ::DATA_MANAGER_TABLE::GameItemTypeDef& GameItem::itemtype() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
   // @@protoc_insertion_point(field_get:DATA_MANAGER_TABLE.GameItem.itemType)
   return _internal_itemtype();
 }
 inline void GameItem::unsafe_arena_set_allocated_itemtype(
-    ::DATA_MANAGER_TABLE::GameItemTypeTable* PROTOBUF_NULLABLE value) {
+    ::DATA_MANAGER_TABLE::GameItemTypeDef* PROTOBUF_NULLABLE value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.itemtype_);
   }
-  _impl_.itemtype_ = reinterpret_cast<::DATA_MANAGER_TABLE::GameItemTypeTable*>(value);
+  _impl_.itemtype_ = reinterpret_cast<::DATA_MANAGER_TABLE::GameItemTypeDef*>(value);
   if (value != nullptr) {
     SetHasBit(_impl_._has_bits_[0], 0x00000004U);
   } else {
@@ -927,11 +927,11 @@ inline void GameItem::unsafe_arena_set_allocated_itemtype(
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:DATA_MANAGER_TABLE.GameItem.itemType)
 }
-inline ::DATA_MANAGER_TABLE::GameItemTypeTable* PROTOBUF_NULLABLE GameItem::release_itemtype() {
+inline ::DATA_MANAGER_TABLE::GameItemTypeDef* PROTOBUF_NULLABLE GameItem::release_itemtype() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
 
   ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
-  ::DATA_MANAGER_TABLE::GameItemTypeTable* released = _impl_.itemtype_;
+  ::DATA_MANAGER_TABLE::GameItemTypeDef* released = _impl_.itemtype_;
   _impl_.itemtype_ = nullptr;
   if (::google::protobuf::internal::DebugHardenForceCopyInRelease()) {
     auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
@@ -946,31 +946,31 @@ inline ::DATA_MANAGER_TABLE::GameItemTypeTable* PROTOBUF_NULLABLE GameItem::rele
   }
   return released;
 }
-inline ::DATA_MANAGER_TABLE::GameItemTypeTable* PROTOBUF_NULLABLE GameItem::unsafe_arena_release_itemtype() {
+inline ::DATA_MANAGER_TABLE::GameItemTypeDef* PROTOBUF_NULLABLE GameItem::unsafe_arena_release_itemtype() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   // @@protoc_insertion_point(field_release:DATA_MANAGER_TABLE.GameItem.itemType)
 
   ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
-  ::DATA_MANAGER_TABLE::GameItemTypeTable* temp = _impl_.itemtype_;
+  ::DATA_MANAGER_TABLE::GameItemTypeDef* temp = _impl_.itemtype_;
   _impl_.itemtype_ = nullptr;
   return temp;
 }
-inline ::DATA_MANAGER_TABLE::GameItemTypeTable* PROTOBUF_NONNULL GameItem::_internal_mutable_itemtype() {
+inline ::DATA_MANAGER_TABLE::GameItemTypeDef* PROTOBUF_NONNULL GameItem::_internal_mutable_itemtype() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   if (_impl_.itemtype_ == nullptr) {
-    auto* p = ::google::protobuf::Message::DefaultConstruct<::DATA_MANAGER_TABLE::GameItemTypeTable>(GetArena());
-    _impl_.itemtype_ = reinterpret_cast<::DATA_MANAGER_TABLE::GameItemTypeTable*>(p);
+    auto* p = ::google::protobuf::Message::DefaultConstruct<::DATA_MANAGER_TABLE::GameItemTypeDef>(GetArena());
+    _impl_.itemtype_ = reinterpret_cast<::DATA_MANAGER_TABLE::GameItemTypeDef*>(p);
   }
   return _impl_.itemtype_;
 }
-inline ::DATA_MANAGER_TABLE::GameItemTypeTable* PROTOBUF_NONNULL GameItem::mutable_itemtype()
+inline ::DATA_MANAGER_TABLE::GameItemTypeDef* PROTOBUF_NONNULL GameItem::mutable_itemtype()
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
   SetHasBit(_impl_._has_bits_[0], 0x00000004U);
-  ::DATA_MANAGER_TABLE::GameItemTypeTable* _msg = _internal_mutable_itemtype();
+  ::DATA_MANAGER_TABLE::GameItemTypeDef* _msg = _internal_mutable_itemtype();
   // @@protoc_insertion_point(field_mutable:DATA_MANAGER_TABLE.GameItem.itemType)
   return _msg;
 }
-inline void GameItem::set_allocated_itemtype(::DATA_MANAGER_TABLE::GameItemTypeTable* PROTOBUF_NULLABLE value) {
+inline void GameItem::set_allocated_itemtype(::DATA_MANAGER_TABLE::GameItemTypeDef* PROTOBUF_NULLABLE value) {
   ::google::protobuf::Arena* message_arena = GetArena();
   ::google::protobuf::internal::TSanWrite(&_impl_);
   if (message_arena == nullptr) {
@@ -987,7 +987,7 @@ inline void GameItem::set_allocated_itemtype(::DATA_MANAGER_TABLE::GameItemTypeT
     ClearHasBit(_impl_._has_bits_[0], 0x00000004U);
   }
 
-  _impl_.itemtype_ = reinterpret_cast<::DATA_MANAGER_TABLE::GameItemTypeTable*>(value);
+  _impl_.itemtype_ = reinterpret_cast<::DATA_MANAGER_TABLE::GameItemTypeDef*>(value);
   // @@protoc_insertion_point(field_set_allocated:DATA_MANAGER_TABLE.GameItem.itemType)
 }
 

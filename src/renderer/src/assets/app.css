@@ -175,7 +175,7 @@ html, body, #root {
 
 /* Column rows */
 .columns-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-.column-row { display: flex; gap: 8px; align-items: center; }
+.column-row { display: flex; gap: 8px; align-items: center; min-height: 60px; padding: 6px 0; }
 .column-row .form-input, .column-row .form-select { flex: 1; }
 
 /* Checkbox */

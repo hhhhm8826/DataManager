@@ -21,7 +21,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type GameItemTypeTable struct {
+type GameItemTypeDef struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// @PK
 	ItemType      ItemType `protobuf:"varint,1,opt,name=itemType,proto3,enum=DATA_MANAGER_TABLE.ItemType" json:"itemType,omitempty"`
@@ -32,20 +32,20 @@ type GameItemTypeTable struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GameItemTypeTable) Reset() {
-	*x = GameItemTypeTable{}
+func (x *GameItemTypeDef) Reset() {
+	*x = GameItemTypeDef{}
 	mi := &file_GameItemTable_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GameItemTypeTable) String() string {
+func (x *GameItemTypeDef) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GameItemTypeTable) ProtoMessage() {}
+func (*GameItemTypeDef) ProtoMessage() {}
 
-func (x *GameItemTypeTable) ProtoReflect() protoreflect.Message {
+func (x *GameItemTypeDef) ProtoReflect() protoreflect.Message {
 	mi := &file_GameItemTable_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -57,33 +57,33 @@ func (x *GameItemTypeTable) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GameItemTypeTable.ProtoReflect.Descriptor instead.
-func (*GameItemTypeTable) Descriptor() ([]byte, []int) {
+// Deprecated: Use GameItemTypeDef.ProtoReflect.Descriptor instead.
+func (*GameItemTypeDef) Descriptor() ([]byte, []int) {
 	return file_GameItemTable_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *GameItemTypeTable) GetItemType() ItemType {
+func (x *GameItemTypeDef) GetItemType() ItemType {
 	if x != nil {
 		return x.ItemType
 	}
 	return ItemType_ItemType_NONE
 }
 
-func (x *GameItemTypeTable) GetTypeName() string {
+func (x *GameItemTypeDef) GetTypeName() string {
 	if x != nil {
 		return x.TypeName
 	}
 	return ""
 }
 
-func (x *GameItemTypeTable) GetIsTradable() bool {
+func (x *GameItemTypeDef) GetIsTradable() bool {
 	if x != nil {
 		return x.IsTradable
 	}
 	return false
 }
 
-func (x *GameItemTypeTable) GetIconPath() string {
+func (x *GameItemTypeDef) GetIconPath() string {
 	if x != nil {
 		return x.IconPath
 	}
@@ -93,13 +93,13 @@ func (x *GameItemTypeTable) GetIconPath() string {
 type GameItem struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// @PK
-	ItemId        int32              `protobuf:"varint,1,opt,name=itemId,proto3" json:"itemId,omitempty"`
-	Name          string             `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	ItemType      *GameItemTypeTable `protobuf:"bytes,3,opt,name=itemType,proto3" json:"itemType,omitempty"`
-	Rarity        GradeType          `protobuf:"varint,4,opt,name=rarity,proto3,enum=DATA_MANAGER_TABLE.GradeType" json:"rarity,omitempty"`
-	MaxStack      int32              `protobuf:"varint,5,opt,name=maxStack,proto3" json:"maxStack,omitempty"`
-	Price         int32              `protobuf:"varint,6,opt,name=price,proto3" json:"price,omitempty"`
-	Descriptions  string             `protobuf:"bytes,7,opt,name=descriptions,proto3" json:"descriptions,omitempty"`
+	ItemId        int32            `protobuf:"varint,1,opt,name=itemId,proto3" json:"itemId,omitempty"`
+	Name          string           `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	ItemType      *GameItemTypeDef `protobuf:"bytes,3,opt,name=itemType,proto3" json:"itemType,omitempty"`
+	Rarity        GradeType        `protobuf:"varint,4,opt,name=rarity,proto3,enum=DATA_MANAGER_TABLE.GradeType" json:"rarity,omitempty"`
+	MaxStack      int32            `protobuf:"varint,5,opt,name=maxStack,proto3" json:"maxStack,omitempty"`
+	Price         int32            `protobuf:"varint,6,opt,name=price,proto3" json:"price,omitempty"`
+	Descriptions  string           `protobuf:"bytes,7,opt,name=descriptions,proto3" json:"descriptions,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -148,7 +148,7 @@ func (x *GameItem) GetName() string {
 	return ""
 }
 
-func (x *GameItem) GetItemType() *GameItemTypeTable {
+func (x *GameItem) GetItemType() *GameItemTypeDef {
 	if x != nil {
 		return x.ItemType
 	}
@@ -187,18 +187,18 @@ var File_GameItemTable_proto protoreflect.FileDescriptor
 
 const file_GameItemTable_proto_rawDesc = "" +
 	"\n" +
-	"\x13GameItemTable.proto\x12\x12DATA_MANAGER_TABLE\x1a\x14CommonEnumType.proto\x1a\x12ItemEnumType.proto\"\xa5\x01\n" +
-	"\x11GameItemTypeTable\x128\n" +
+	"\x13GameItemTable.proto\x12\x12DATA_MANAGER_TABLE\x1a\x14CommonEnumType.proto\x1a\x12ItemEnumType.proto\"\xa3\x01\n" +
+	"\x0fGameItemTypeDef\x128\n" +
 	"\bitemType\x18\x01 \x01(\x0e2\x1c.DATA_MANAGER_TABLE.ItemTypeR\bitemType\x12\x1a\n" +
 	"\btypeName\x18\x02 \x01(\tR\btypeName\x12\x1e\n" +
 	"\n" +
 	"isTradable\x18\x03 \x01(\bR\n" +
 	"isTradable\x12\x1a\n" +
-	"\biconPath\x18\x04 \x01(\tR\biconPath\"\x86\x02\n" +
+	"\biconPath\x18\x04 \x01(\tR\biconPath\"\x84\x02\n" +
 	"\bGameItem\x12\x16\n" +
 	"\x06itemId\x18\x01 \x01(\x05R\x06itemId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12A\n" +
-	"\bitemType\x18\x03 \x01(\v2%.DATA_MANAGER_TABLE.GameItemTypeTableR\bitemType\x125\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12?\n" +
+	"\bitemType\x18\x03 \x01(\v2#.DATA_MANAGER_TABLE.GameItemTypeDefR\bitemType\x125\n" +
 	"\x06rarity\x18\x04 \x01(\x0e2\x1d.DATA_MANAGER_TABLE.GradeTypeR\x06rarity\x12\x1a\n" +
 	"\bmaxStack\x18\x05 \x01(\x05R\bmaxStack\x12\x14\n" +
 	"\x05price\x18\x06 \x01(\x05R\x05price\x12\"\n" +
@@ -218,14 +218,14 @@ func file_GameItemTable_proto_rawDescGZIP() []byte {
 
 var file_GameItemTable_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_GameItemTable_proto_goTypes = []any{
-	(*GameItemTypeTable)(nil), // 0: DATA_MANAGER_TABLE.GameItemTypeTable
-	(*GameItem)(nil),          // 1: DATA_MANAGER_TABLE.GameItem
-	(ItemType)(0),             // 2: DATA_MANAGER_TABLE.ItemType
-	(GradeType)(0),            // 3: DATA_MANAGER_TABLE.GradeType
+	(*GameItemTypeDef)(nil), // 0: DATA_MANAGER_TABLE.GameItemTypeDef
+	(*GameItem)(nil),        // 1: DATA_MANAGER_TABLE.GameItem
+	(ItemType)(0),           // 2: DATA_MANAGER_TABLE.ItemType
+	(GradeType)(0),          // 3: DATA_MANAGER_TABLE.GradeType
 }
 var file_GameItemTable_proto_depIdxs = []int32{
-	2, // 0: DATA_MANAGER_TABLE.GameItemTypeTable.itemType:type_name -> DATA_MANAGER_TABLE.ItemType
-	0, // 1: DATA_MANAGER_TABLE.GameItem.itemType:type_name -> DATA_MANAGER_TABLE.GameItemTypeTable
+	2, // 0: DATA_MANAGER_TABLE.GameItemTypeDef.itemType:type_name -> DATA_MANAGER_TABLE.ItemType
+	0, // 1: DATA_MANAGER_TABLE.GameItem.itemType:type_name -> DATA_MANAGER_TABLE.GameItemTypeDef
 	3, // 2: DATA_MANAGER_TABLE.GameItem.rarity:type_name -> DATA_MANAGER_TABLE.GradeType
 	3, // [3:3] is the sub-list for method output_type
 	3, // [3:3] is the sub-list for method input_type

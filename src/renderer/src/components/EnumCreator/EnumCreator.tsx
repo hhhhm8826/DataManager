@@ -20,6 +20,16 @@ export function EnumCreator(): React.JSX.Element {
   const { parsed, loadProto } = useAppStore()
   const [mode, setMode] = useState<Mode>('list')
   const [editTarget, setEditTarget] = useState<ProtoEnum | null>(null)
+  const [expandedEnums, setExpandedEnums] = useState<Set<string>>(new Set())
+
+  const toggleExpand = (key: string): void => {
+    setExpandedEnums((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
 
   // 폼 상태
   const [enumName, setEnumName] = useState('')
@@ -173,18 +183,46 @@ export function EnumCreator(): React.JSX.Element {
                     </tr>
                   </thead>
                   <tbody>
-                    {enums.map((e) => (
-                      <tr key={e.name}>
-                        <td>{e.name}</td>
-                        <td>{e.values.length}</td>
-                        <td>
-                          <div style={{ display: 'flex', gap: 6 }}>
-                            <button className="btn btn-ghost" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => openEdit(e)}>✏️ 수정</button>
-                            <button className="btn btn-danger" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => handleDelete(e)}>🗑 삭제</button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                    {enums.map((e) => {
+                      const expandKey = `${sourceFile}::${e.name}`
+                      const isExpanded = expandedEnums.has(expandKey)
+                      return (
+                        <>
+                          <tr key={e.name}>
+                            <td
+                              style={{ cursor: 'pointer', userSelect: 'none' }}
+                              onClick={() => toggleExpand(expandKey)}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <span style={{ fontSize: 10, color: '#6b7280', minWidth: 10 }}>{isExpanded ? '▼' : '▶'}</span>
+                                <span>{e.name}</span>
+                              </div>
+                            </td>
+                            <td>{e.values.length}</td>
+                            <td>
+                              <div style={{ display: 'flex', gap: 6 }}>
+                                <button className="btn btn-ghost" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => openEdit(e)}>✏️ 수정</button>
+                                <button className="btn btn-danger" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => handleDelete(e)}>🗑 삭제</button>
+                              </div>
+                            </td>
+                          </tr>
+                          {isExpanded && (
+                            <tr key={`${e.name}__values`}>
+                              <td colSpan={3} style={{ padding: '6px 12px 10px 28px', background: '#111827' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                  {e.values.map((v) => (
+                                    <span key={v.name} style={{ fontSize: 12, color: '#d1d5db', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                      <span style={{ color: '#a0c4ff', minWidth: 200 }}>{v.name}</span>
+                                      <span style={{ color: '#6b7280' }}>= {v.number}</span>
+                                    </span>
+                                  ))}
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </>
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>

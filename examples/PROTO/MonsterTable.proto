@@ -9,7 +9,15 @@ option go_package = "./DATA_MANAGER_TABLE";
 
 
 
-message MonsterTable {
+
+
+message MonsterTest {
+  // @PK
+  int32 ID = 1;
+  MonsterDrop MonsterDrop = 2;
+}
+
+message Monster {
   // @PK
   int32 monsterId = 1;
   string name = 2;
@@ -22,16 +30,10 @@ message MonsterTable {
 
 message MonsterDrop {
   // @PK
-  MonsterTable monsterId = 1;
+  Monster monsterId = 1;
   // @PK
   int32 itemId = 2;
   float dropRate = 3;
   int32 minCount = 4;
   int32 maxCount = 5;
-}
-
-message MonsterTest {
-  // @PK
-  int32 ID = 1;
-  MonsterDrop MonsterDrop = 2;
 }
