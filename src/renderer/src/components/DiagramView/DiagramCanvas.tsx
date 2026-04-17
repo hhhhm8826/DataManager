@@ -21,34 +21,72 @@ const NODE_TYPES = { tableNode: TableNode }
 const NODE_WIDTH = 260
 const NODE_HEIGHT_BASE = 60
 const NODE_FIELD_HEIGHT = 30
-const COLUMN_GAP = 100
-const ROW_GAP = 60
+const COLUMN_GAP = 260
+const ROW_GAP = 80
 
-function buildLayout(messages: ProtoMessage[]): { x: number; y: number }[] {
+/** 위상 정렬(Kahn) 기반 DAG 레이아웃: 참조하는 쪽 왼쪽, 참조받는 쪽 오른쪽 */
+function buildLayout(
+  messages: ProtoMessage[],
+  edges: { source: string; target: string }[]
+): { x: number; y: number }[] {
   if (messages.length === 0) return []
-  const cols = Math.ceil(Math.sqrt(messages.length))
-  const numRows = Math.ceil(messages.length / cols)
 
-  // 각 노드의 실제 높이 계산
-  const heights = messages.map((msg) => NODE_HEIGHT_BASE + msg.fields.length * NODE_FIELD_HEIGHT)
+  const nameToIdx = new Map(messages.map((m, i) => [m.name, i]))
 
-  // 행별 최대 높이
-  const rowMaxHeights = Array<number>(numRows).fill(0)
-  messages.forEach((_, i) => {
-    const row = Math.floor(i / cols)
-    rowMaxHeights[row] = Math.max(rowMaxHeights[row], heights[i])
-  })
-
-  // 행별 누적 y 오프셋
-  const rowYOffsets = Array<number>(numRows).fill(0)
-  for (let r = 1; r < numRows; r++) {
-    rowYOffsets[r] = rowYOffsets[r - 1] + rowMaxHeights[r - 1] + ROW_GAP
+  // in-degree & adjacency
+  const inDegree = new Array(messages.length).fill(0)
+  const adj = new Array(messages.length).fill(null).map(() => [] as number[])
+  for (const e of edges) {
+    const s = nameToIdx.get(e.source)
+    const t = nameToIdx.get(e.target)
+    if (s !== undefined && t !== undefined && s !== t) {
+      adj[s].push(t)
+      inDegree[t]++
+    }
   }
 
-  return messages.map((_, i) => ({
-    x: (i % cols) * (NODE_WIDTH + COLUMN_GAP),
-    y: rowYOffsets[Math.floor(i / cols)]
-  }))
+  // Kahn's BFS → depth(column) 할당
+  const depth = new Array(messages.length).fill(0)
+  const queue: number[] = []
+  inDegree.forEach((d, i) => { if (d === 0) queue.push(i) })
+
+  while (queue.length) {
+    const cur = queue.shift()!
+    for (const nxt of adj[cur]) {
+      depth[nxt] = Math.max(depth[nxt], depth[cur] + 1)
+      inDegree[nxt]--
+      if (inDegree[nxt] === 0) queue.push(nxt)
+    }
+  }
+
+  // 깊이별 노드 그룹
+  const cols = new Map<number, number[]>()
+  depth.forEach((d, i) => {
+    if (!cols.has(d)) cols.set(d, [])
+    cols.get(d)!.push(i)
+  })
+
+  // 각 노드 높이
+  const heights = messages.map((msg) => NODE_HEIGHT_BASE + msg.fields.length * NODE_FIELD_HEIGHT)
+
+  const positions = new Array(messages.length).fill(null).map(() => ({ x: 0, y: 0 }))
+  const sortedDepths = [...cols.keys()].sort((a, b) => a - b)
+
+  sortedDepths.forEach((d) => {
+    const group = cols.get(d)!
+    const x = d * (NODE_WIDTH + COLUMN_GAP)
+
+    // 해당 열의 총 높이 계산 후 수직 중앙 정렬
+    const totalH = group.reduce((sum, i) => sum + heights[i] + ROW_GAP, -ROW_GAP)
+    let y = -totalH / 2
+
+    group.forEach((i) => {
+      positions[i] = { x, y }
+      y += heights[i] + ROW_GAP
+    })
+  })
+
+  return positions
 }
 
 export function DiagramView(): React.JSX.Element {
@@ -68,18 +106,18 @@ export function DiagramView(): React.JSX.Element {
     if (!parsed) return
     const { messages, enums } = parsed
 
-    const positions = buildLayout(messages)
-
     // 엣지 빌드 + 참조되는 필드 수집
     const messageNames = new Set(messages.map((m) => m.name))
     const newEdges: Edge[] = []
     const edgeSet = new Set<string>()
-    // msgName -> 실제로 target handle로 연결되는 필드명 Set
     const referencedFieldsMap = new Map<string, Set<string>>()
+    // 레이아웃용 간선 목록
+    const layoutEdges: { source: string; target: string }[] = []
 
     messages.forEach((msg) => {
       msg.fields.forEach((field) => {
         if (messageNames.has(field.type) && field.type !== msg.name) {
+          layoutEdges.push({ source: msg.name, target: field.type })
           const edgeId = `${msg.name}.${field.name}->${field.type}`
           if (!edgeSet.has(edgeId)) {
             edgeSet.add(edgeId)
@@ -91,10 +129,12 @@ export function DiagramView(): React.JSX.Element {
             }
             newEdges.push({
               id: edgeId,
+              type: 'smoothstep',
               source: msg.name,
               sourceHandle: `src-${field.name}`,
               target: field.type,
               targetHandle: targetPk ? `tgt-${targetPk}` : undefined,
+              zIndex: 10,
               style: { stroke: '#a0c4ff', strokeWidth: 1.5 },
               labelStyle: { fontSize: 10, fill: '#9ca3af' }
             })
@@ -102,6 +142,8 @@ export function DiagramView(): React.JSX.Element {
         }
       })
     })
+
+    const positions = buildLayout(messages, layoutEdges)
 
     const newNodes: Node[] = messages.map((msg, i) => ({
       id: msg.name,
@@ -205,6 +247,7 @@ export function DiagramView(): React.JSX.Element {
             onConnect={onConnect}
             nodeTypes={NODE_TYPES}
             fitView
+            elevateEdgesOnSelect={false}
             style={{ background: '#1a1a2e' }}
           >
             <Background color="#0f3460" gap={24} />

@@ -10,7 +10,7 @@ type SubTab = 'generate' | 'json'
 export function ExcelPanel(): React.JSX.Element {
   const { parsed, settings } = useAppStore()
 
-  const [activeTab, setActiveTab] = useState<SubTab>('generate')
+  const [activeTab, setActiveTab] = useState<SubTab>('json')
   const [fileInfos, setFileInfos] = useState<ExcelFileInfo[]>([])
   const [loadingInfos, setLoadingInfos] = useState(false)
 

@@ -21,6 +21,7 @@ export function EnumCreator(): React.JSX.Element {
   const [mode, setMode] = useState<Mode>('list')
   const [editTarget, setEditTarget] = useState<ProtoEnum | null>(null)
   const [expandedEnums, setExpandedEnums] = useState<Set<string>>(new Set())
+  const [confirmDeleteEnum, setConfirmDeleteEnum] = useState<ProtoEnum | null>(null)
 
   const toggleExpand = (key: string): void => {
     setExpandedEnums((prev) => {
@@ -87,10 +88,12 @@ export function EnumCreator(): React.JSX.Element {
     setValues((prev) => prev.map((v, idx) => (idx === i ? { ...v, ...patch } : v)))
 
   const handleDelete = async (protoEnum: ProtoEnum): Promise<void> => {
-    if (!window.confirm(`'${protoEnum.name}' Enum을 삭제하시겠습니까?`)) return
     const result = await ipcInvoke(IPC.PROTO_DELETE_ENUM, { sourceFile: protoEnum.sourceFile, enumName: protoEnum.name })
     if (result.success) {
       toast.success(`'${protoEnum.name}' 이 삭제되었습니다.`)
+      setConfirmDeleteEnum(null)
+      resetForm()
+      setMode('list')
       await loadProto()
     } else {
       toast.error(result.error ?? '삭제 실패')
@@ -98,11 +101,18 @@ export function EnumCreator(): React.JSX.Element {
   }
 
   const handleSubmit = async (): Promise<void> => {
+    const IDENT_RE = /^[a-zA-Z_][a-zA-Z0-9_]*$/
     if (!enumName.trim()) { toast.error('Enum 이름을 입력하세요.'); return }
+    if (!IDENT_RE.test(enumName.trim())) { toast.error(`Enum 이름 '​${enumName.trim()}'은 유효하지 않습니다. (영문자/언더스코어로 시작, 영문자/숫자/언더스코어만 허용)`); return }
     if (!fileName.trim()) { toast.error('저장할 파일 이름을 입력하세요.'); return }
     // 새 파일 입력 시 {Name}EnumType.proto 형식으로 자동 변환 (기존 파일 선택은 그대로 사용)
     const resolvedFileName = mode === 'edit' ? fileName.trim() : buildEnumFileName(fileName)
     if (values.some((v) => !v.name.trim())) { toast.error('모든 Enum 값 이름을 입력하세요.'); return }
+    const invalidValues = values.filter((v) => v.name.trim() && !IDENT_RE.test(v.name.trim()))
+    if (invalidValues.length > 0) {
+      toast.error(`유효하지 않은 Enum 값 이름: ${invalidValues.map((v) => `'​${v.name}'`).join(', ')}\n(영문자/언더스코어로 시작, 영문자/숫자/언더스코어만 허용)`)
+      return
+    }
 
     // 값 이름 중복 검사
     const nameSet = new Set<string>()
@@ -202,10 +212,21 @@ export function EnumCreator(): React.JSX.Element {
                             <td>
                               <div style={{ display: 'flex', gap: 6 }}>
                                 <button className="btn btn-ghost" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => openEdit(e)}>✏️ 수정</button>
-                                <button className="btn btn-danger" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => handleDelete(e)}>🗑 삭제</button>
+                                <button className="btn btn-danger" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => setConfirmDeleteEnum(e)}>🗑 삭제</button>
                               </div>
                             </td>
                           </tr>
+                          {confirmDeleteEnum?.name === e.name && confirmDeleteEnum?.sourceFile === e.sourceFile && (
+                            <tr key={`${e.name}__confirm`}>
+                              <td colSpan={3} style={{ background: '#2d1515', padding: '8px 12px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+                                  <span style={{ color: '#fca5a5' }}>'​{e.name}'을 정말 삭제하시겠습니까?</span>
+                                  <button className="btn btn-danger" style={{ padding: '3px 12px', fontSize: 12 }} onClick={() => handleDelete(e)}>삭제</button>
+                                  <button className="btn btn-ghost" style={{ padding: '3px 12px', fontSize: 12 }} onClick={() => setConfirmDeleteEnum(null)}>취소</button>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
                           {isExpanded && (
                             <tr key={`${e.name}__values`}>
                               <td colSpan={3} style={{ padding: '6px 12px 10px 28px', background: '#111827' }}>

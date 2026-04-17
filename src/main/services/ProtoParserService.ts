@@ -147,13 +147,50 @@ export class ProtoParserService {
     return values
   }
 
-  // ── Message 삭제 ──────────────────────────────────────────
+  // ── 내부 헬퍼: 중괄호 카운팅으로 블록 제거 ─────────────────
+
+  private removeBlock(content: string, keyword: string, name: string): string {
+    const lines = content.split(/\r?\n/)
+
+    // 시작 라인 탐색: keyword name ... { 형태
+    let startIdx = -1
+    for (let i = 0; i < lines.length; i++) {
+      const parts = lines[i].trim().split(/\s+/)
+      if (parts[0] === keyword && parts[1] === name) {
+        startIdx = i
+        break
+      }
+    }
+    if (startIdx === -1) return content
+
+    // 중괄호 카운팅으로 블록 끝 탐색
+    let depth = 0
+    let endIdx = -1
+    for (let i = startIdx; i < lines.length; i++) {
+      for (const ch of lines[i]) {
+        if (ch === '{') depth++
+        else if (ch === '}') {
+          depth--
+          if (depth === 0) { endIdx = i; break }
+        }
+      }
+      if (endIdx !== -1) break
+    }
+    if (endIdx === -1) return content
+
+    // 바로 앞 빈 줄도 함께 제거
+    let removeStart = startIdx
+    if (removeStart > 0 && lines[removeStart - 1].trim() === '') removeStart--
+
+    return [...lines.slice(0, removeStart), ...lines.slice(endIdx + 1)].join('\n')
+  }
+
+  // ── Message 삭제 ──────────────────────────────────────────────
 
   deleteMessage(filePath: string, messageName: string): void {
     if (!fs.existsSync(filePath)) return
     let content = fs.readFileSync(filePath, 'utf-8')
-    const regex = new RegExp(`\n?message\\s+${messageName}\\s*\\{[^}]*\\}`, 'gs')
-    content = content.replace(regex, '')
+    content = this.removeBlock(content, 'message', messageName)
     fs.writeFileSync(filePath, content.trimEnd() + '\n', 'utf-8')
   }
 
@@ -204,8 +241,7 @@ export class ProtoParserService {
   deleteEnum(filePath: string, enumName: string): void {
     if (!fs.existsSync(filePath)) return
     let content = fs.readFileSync(filePath, 'utf-8')
-    const regex = new RegExp(`\n?enum\\s+${enumName}\\s*\\{[^}]*\\}`, 'gs')
-    content = content.replace(regex, '')
+    content = this.removeBlock(content, 'enum', enumName)
     fs.writeFileSync(filePath, content.trimEnd() + '\n', 'utf-8')
   }
 

@@ -51,6 +51,7 @@ export function TableCreator(): React.JSX.Element {
   const [mode, setMode] = useState<Mode>('list')
   const [editTarget, setEditTarget] = useState<ProtoMessage | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [confirmDeleteMsg, setConfirmDeleteMsg] = useState<ProtoMessage | null>(null)
 
   // 폼 상태
   const [tableName, setTableName] = useState('')
@@ -142,10 +143,12 @@ export function TableCreator(): React.JSX.Element {
     })
 
   const handleDelete = async (msg: ProtoMessage): Promise<void> => {
-    if (!window.confirm(`'${msg.name}' 테이블을 삭제하시겠습니까?`)) return
     const result = await ipcInvoke(IPC.PROTO_DELETE_MESSAGE, { sourceFile: msg.sourceFile, messageName: msg.name })
     if (result.success) {
       toast.success(`'${msg.name}' 이 삭제되었습니다.`)
+      setConfirmDeleteMsg(null)
+      resetForm()
+      setMode('list')
       await loadProto()
     } else {
       toast.error(result.error ?? '삭제 실패')
@@ -153,9 +156,16 @@ export function TableCreator(): React.JSX.Element {
   }
 
   const handleSubmit = async (): Promise<void> => {
+    const IDENT_RE = /^[a-zA-Z_][a-zA-Z0-9_]*$/
     if (!tableName.trim()) { toast.error('테이블 이름을 입력하세요.'); return }
+    if (!IDENT_RE.test(tableName.trim())) { toast.error(`테이블 이름 '​${tableName.trim()}'은 유효하지 않습니다. (\uc601문자/언더스코어로 시작, 영문자/숫자/언더스코어만 허용)`); return }
     if (!resolvedProtoFile) { toast.error('저장할 proto 파일을 선택하거나 입력하세요.'); return }
     if (fields.some((f) => !f.name.trim())) { toast.error('모든 필드 이름을 입력하세요.'); return }
+    const invalidFields = fields.filter((f) => f.name.trim() && !IDENT_RE.test(f.name.trim()))
+    if (invalidFields.length > 0) {
+      toast.error(`유효하지 않은 필드 이름: ${invalidFields.map((f) => `'​${f.name}'`).join(', ')}\n(영문자/언더스코어로 시작, 영문자/숫자/언더스코어만 허용)`)
+      return
+    }
 
     setSaving(true)
     const message: ProtoMessage = {
@@ -242,17 +252,30 @@ export function TableCreator(): React.JSX.Element {
                   </thead>
                   <tbody>
                     {msgs.map((msg) => (
-                      <tr key={msg.name}>
-                        <td>{msg.name}</td>
-                        <td>{msg.fields.length}</td>
-                        <td style={{ color: '#6fcf97', fontSize: 12 }}>{msg.pkFields.join(', ')}</td>
-                        <td>
-                          <div style={{ display: 'flex', gap: 6 }}>
-                            <button className="btn btn-ghost" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => openEdit(msg)}>✏️ 수정</button>
-                            <button className="btn btn-danger" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => handleDelete(msg)}>🗑 삭제</button>
-                          </div>
-                        </td>
-                      </tr>
+                      <>
+                        <tr key={msg.name}>
+                          <td>{msg.name}</td>
+                          <td>{msg.fields.length}</td>
+                          <td style={{ color: '#6fcf97', fontSize: 12 }}>{msg.pkFields.join(', ')}</td>
+                          <td>
+                            <div style={{ display: 'flex', gap: 6 }}>
+                              <button className="btn btn-ghost" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => openEdit(msg)}>✏️ 수정</button>
+                              <button className="btn btn-danger" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => setConfirmDeleteMsg(msg)}>🗑 삭제</button>
+                            </div>
+                          </td>
+                        </tr>
+                        {confirmDeleteMsg?.name === msg.name && confirmDeleteMsg?.sourceFile === msg.sourceFile && (
+                          <tr key={`${msg.name}__confirm`}>
+                            <td colSpan={4} style={{ background: '#2d1515', padding: '8px 12px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+                                <span style={{ color: '#fca5a5' }}>'​{msg.name}'을 정말 삭제하시겠습니까?</span>
+                                <button className="btn btn-danger" style={{ padding: '3px 12px', fontSize: 12 }} onClick={() => handleDelete(msg)}>삭제</button>
+                                <button className="btn btn-ghost" style={{ padding: '3px 12px', fontSize: 12 }} onClick={() => setConfirmDeleteMsg(null)}>취소</button>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </>
                     ))}
                   </tbody>
                 </table>
