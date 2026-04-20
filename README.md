@@ -34,7 +34,7 @@ $ npm run build:mac
 ### Start
 
 ```bash
-.\dist\win-unpacked\data-manager.exe
+$ .\dist\win-unpacked\data-manager.exe
 ```
 
 ---
