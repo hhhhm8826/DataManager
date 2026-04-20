@@ -9,3 +9,10 @@ enum TestType {
   TestType_Test2 = 2;
   TestType_MAX = 3;
 }
+
+enum BigTestType {
+  BigTestType_NONE = 0;
+  BigTestType_Unreal32bit1 = 1000;
+  BigTestType_Unreal32bit2 = 1001;
+  BigTestType_MAX = 1002;
+}

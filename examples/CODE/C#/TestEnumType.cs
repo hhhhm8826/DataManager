@@ -26,11 +26,14 @@ namespace DATAMANAGERTABLE {
           string.Concat(
             "ChJUZXN0RW51bVR5cGUucHJvdG8SEkRBVEFfTUFOQUdFUl9UQUJMRSpXCghU",
             "ZXN0VHlwZRIRCg1UZXN0VHlwZV9OT05FEAASEgoOVGVzdFR5cGVfVGVzdDEQ",
-            "ARISCg5UZXN0VHlwZV9UZXN0MhACEhAKDFRlc3RUeXBlX01BWBADQhZaFC4v",
-            "REFUQV9NQU5BR0VSX1RBQkxFYgZwcm90bzM="));
+            "ARISCg5UZXN0VHlwZV9UZXN0MhACEhAKDFRlc3RUeXBlX01BWBADKncKC0Jp",
+            "Z1Rlc3RUeXBlEhQKEEJpZ1Rlc3RUeXBlX05PTkUQABIdChhCaWdUZXN0VHlw",
+            "ZV9VbnJlYWwzMmJpdDEQ6AcSHQoYQmlnVGVzdFR5cGVfVW5yZWFsMzJiaXQy",
+            "EOkHEhQKD0JpZ1Rlc3RUeXBlX01BWBDqB0IWWhQuL0RBVEFfTUFOQUdFUl9U",
+            "QUJMRWIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::DATAMANAGERTABLE.TestType), }, null, null));
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::DATAMANAGERTABLE.TestType), typeof(global::DATAMANAGERTABLE.BigTestType), }, null, null));
     }
     #endregion
 
@@ -41,6 +44,13 @@ namespace DATAMANAGERTABLE {
     [pbr::OriginalName("TestType_Test1")] Test1 = 1,
     [pbr::OriginalName("TestType_Test2")] Test2 = 2,
     [pbr::OriginalName("TestType_MAX")] Max = 3,
+  }
+
+  public enum BigTestType {
+    [pbr::OriginalName("BigTestType_NONE")] None = 0,
+    [pbr::OriginalName("BigTestType_Unreal32bit1")] Unreal32Bit1 = 1000,
+    [pbr::OriginalName("BigTestType_Unreal32bit2")] Unreal32Bit2 = 1001,
+    [pbr::OriginalName("BigTestType_MAX")] Max = 1002,
   }
 
   #endregion

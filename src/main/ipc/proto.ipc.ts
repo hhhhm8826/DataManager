@@ -28,7 +28,7 @@ export function registerProtoIpc(): void {
       }
       const filePath = path.join(settings.protoDir, message.sourceFile)
       const parsed = protoParserService.parseDirectory(settings.protoDir)
-      protoParserService.addMessageToFile(filePath, message, parsed.enums)
+      protoParserService.addMessageToFile(filePath, message, parsed.enums, parsed.messages)
       return { success: true }
     } catch (e) {
       return { success: false, error: String(e) }
@@ -44,7 +44,7 @@ export function registerProtoIpc(): void {
         if (!settings.protoDir) return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
         const filePath = path.join(settings.protoDir, payload.sourceFile)
         const parsed = protoParserService.parseDirectory(settings.protoDir)
-        protoParserService.updateMessage(filePath, payload.oldName, payload.message, parsed.enums)
+        protoParserService.updateMessage(filePath, payload.oldName, payload.message, parsed.enums, parsed.messages)
         return { success: true }
       } catch (e) {
         return { success: false, error: String(e) }

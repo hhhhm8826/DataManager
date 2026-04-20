@@ -30,7 +30,8 @@ export const IPC = {
   // 코드 생성
   CODEGEN_GENERATE: 'codegen:generate',
   CODEGEN_GENERATE_ALL: 'codegen:generate-all',
-  CODEGEN_LIST_LANGUAGES: 'codegen:list-languages'
+  CODEGEN_LIST_LANGUAGES: 'codegen:list-languages',
+  CODEGEN_GENERATE_UNREAL: 'codegen:generate-unreal',
 } as const
 
 export type IpcChannel = (typeof IPC)[keyof typeof IPC]

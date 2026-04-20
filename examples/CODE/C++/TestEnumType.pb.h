@@ -52,11 +52,16 @@ extern "C" {
 extern const ::google::protobuf::internal::DescriptorTable descriptor_table_TestEnumType_2eproto;
 }  // extern "C"
 namespace DATA_MANAGER_TABLE {
+enum BigTestType : int;
+extern const uint32_t BigTestType_internal_data_[];
 enum TestType : int;
 extern const uint32_t TestType_internal_data_[];
 }  // namespace DATA_MANAGER_TABLE
 namespace google {
 namespace protobuf {
+template <>
+internal::EnumTraitsT<::DATA_MANAGER_TABLE::BigTestType_internal_data_>
+    internal::EnumTraitsImpl::value<::DATA_MANAGER_TABLE::BigTestType>;
 template <>
 internal::EnumTraitsT<::DATA_MANAGER_TABLE::TestType_internal_data_>
     internal::EnumTraitsImpl::value<::DATA_MANAGER_TABLE::TestType>;
@@ -106,6 +111,43 @@ template <>
   return ::google::protobuf::internal::ParseNamedEnum<TestType>(TestType_descriptor(), name,
                                            value);
 }
+enum BigTestType : int {
+  BigTestType_NONE = 0,
+  BigTestType_Unreal32bit1 = 1000,
+  BigTestType_Unreal32bit2 = 1001,
+  BigTestType_MAX = 1002,
+  BigTestType_INT_MIN_SENTINEL_DO_NOT_USE_ =
+      ::std::numeric_limits<::int32_t>::min(),
+  BigTestType_INT_MAX_SENTINEL_DO_NOT_USE_ =
+      ::std::numeric_limits<::int32_t>::max(),
+};
+
+extern const uint32_t BigTestType_internal_data_[];
+inline constexpr BigTestType BigTestType_MIN =
+    static_cast<BigTestType>(0);
+inline constexpr BigTestType BigTestType_MAX =
+    static_cast<BigTestType>(1002);
+[[nodiscard]] inline bool BigTestType_IsValid(int value) {
+  return ::google::protobuf::internal::ValidateEnum(value, BigTestType_internal_data_);
+}
+inline constexpr int BigTestType_ARRAYSIZE = 1002 + 1;
+[[nodiscard]] const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL
+BigTestType_descriptor();
+[[nodiscard]] inline auto ProtobufInternalGetEnumDescriptor(BigTestType) {
+  return BigTestType_descriptor();
+}
+template <typename T>
+[[nodiscard]] const ::std::string& BigTestType_Name(T value) {
+  static_assert(::std::is_same<T, BigTestType>::value ||
+                    ::std::is_integral<T>::value,
+                "Incorrect type passed to BigTestType_Name().");
+  return ::google::protobuf::internal::NameOfEnum(BigTestType_descriptor(), value);
+}
+[[nodiscard]] inline bool BigTestType_Parse(
+    ::absl::string_view name, BigTestType* PROTOBUF_NONNULL value) {
+  return ::google::protobuf::internal::ParseNamedEnum<BigTestType>(BigTestType_descriptor(), name,
+                                           value);
+}
 
 // ===================================================================
 
@@ -139,6 +181,12 @@ struct is_proto_enum<::DATA_MANAGER_TABLE::TestType> : std::true_type {};
 template <>
 inline const EnumDescriptor* PROTOBUF_NONNULL GetEnumDescriptor<::DATA_MANAGER_TABLE::TestType>() {
   return ::DATA_MANAGER_TABLE::TestType_descriptor();
+}
+template <>
+struct is_proto_enum<::DATA_MANAGER_TABLE::BigTestType> : std::true_type {};
+template <>
+inline const EnumDescriptor* PROTOBUF_NONNULL GetEnumDescriptor<::DATA_MANAGER_TABLE::BigTestType>() {
+  return ::DATA_MANAGER_TABLE::BigTestType_descriptor();
 }
 
 }  // namespace protobuf

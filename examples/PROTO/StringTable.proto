@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package DATA_MANAGER_TABLE;
+option go_package = "./DATA_MANAGER_TABLE";
+
+message StringData {
+  // @PK
+  int32 Id = 1;
+  int32 ko = 2;
+  int32 en = 3;
+}

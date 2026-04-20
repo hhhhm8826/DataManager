@@ -1,0 +1,54 @@
+[
+  {
+    "monsterId": 1,
+    "name": {
+      "Id": 10000,
+      "kr": "고블린",
+      "en": "Goblin"
+    },
+    "hp": 100,
+    "atk": 5,
+    "def": 5,
+    "moveSpeed": 10,
+    "RewardGroupId": [
+      {
+        "GroupId": 1000,
+        "Memo": "초보자몹 드롭아이템",
+        "RewardItemId01": {
+          "itemId": 1,
+          "name": "뉴비의 장검",
+          "itemType": {
+            "itemType": "ItemType_EQUIPMENT",
+            "typeName": "장비",
+            "isTradable": false,
+            "iconPath": "D:\\icon\\icon.icon"
+          },
+          "rarity": "GradeType_NORMAL",
+          "maxStack": 1,
+          "price": 100,
+          "descriptions": "뉴비가 쓰는 검이다"
+        },
+        "RewardItemRate01": 0.3
+      },
+      {
+        "GroupId": 1000,
+        "Memo": "초보자몹 드롭아이템",
+        "RewardItemId01": {
+          "itemId": 1,
+          "name": "뉴비의 장검",
+          "itemType": {
+            "itemType": "ItemType_EQUIPMENT",
+            "typeName": "장비",
+            "isTradable": false,
+            "iconPath": "D:\\icon\\icon.icon"
+          },
+          "rarity": "GradeType_NORMAL",
+          "maxStack": 1,
+          "price": 100,
+          "descriptions": "뉴비가 쓰는 검이다"
+        },
+        "RewardItemRate01": 0.2
+      }
+    ]
+  }
+]

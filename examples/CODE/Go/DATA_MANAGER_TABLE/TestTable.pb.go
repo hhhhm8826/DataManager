@@ -26,6 +26,7 @@ type GoTest struct {
 	// @PK
 	ID            int32    `protobuf:"varint,1,opt,name=ID,proto3" json:"ID,omitempty"`
 	TestColumn    TestType `protobuf:"varint,2,opt,name=TestColumn,proto3,enum=DATA_MANAGER_TABLE.TestType" json:"TestColumn,omitempty"`
+	Test23        int32    `protobuf:"varint,3,opt,name=Test23,proto3" json:"Test23,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -74,16 +75,24 @@ func (x *GoTest) GetTestColumn() TestType {
 	return TestType_TestType_NONE
 }
 
+func (x *GoTest) GetTest23() int32 {
+	if x != nil {
+		return x.Test23
+	}
+	return 0
+}
+
 var File_TestTable_proto protoreflect.FileDescriptor
 
 const file_TestTable_proto_rawDesc = "" +
 	"\n" +
-	"\x0fTestTable.proto\x12\x12DATA_MANAGER_TABLE\x1a\x12TestEnumType.proto\"V\n" +
+	"\x0fTestTable.proto\x12\x12DATA_MANAGER_TABLE\x1a\x12TestEnumType.proto\"n\n" +
 	"\x06GoTest\x12\x0e\n" +
 	"\x02ID\x18\x01 \x01(\x05R\x02ID\x12<\n" +
 	"\n" +
 	"TestColumn\x18\x02 \x01(\x0e2\x1c.DATA_MANAGER_TABLE.TestTypeR\n" +
-	"TestColumnB\x16Z\x14./DATA_MANAGER_TABLEb\x06proto3"
+	"TestColumn\x12\x16\n" +
+	"\x06Test23\x18\x03 \x01(\x05R\x06Test23B\x16Z\x14./DATA_MANAGER_TABLEb\x06proto3"
 
 var (
 	file_TestTable_proto_rawDescOnce sync.Once

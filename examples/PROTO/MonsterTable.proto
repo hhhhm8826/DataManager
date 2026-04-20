@@ -2,8 +2,10 @@ syntax = "proto3";
 
 package DATA_MANAGER_TABLE;
 option go_package = "./DATA_MANAGER_TABLE";
+import "RewardItemTable.proto";
+import "StringTable.proto";
 
-// 몬스터 테이블
+// 몬스터 테이블
 
 // 몬스터 드롭 아이템 테이블
 
@@ -11,29 +13,22 @@ option go_package = "./DATA_MANAGER_TABLE";
 
 
 
-message MonsterTest {
+
+message MonsterRace {
   // @PK
-  int32 ID = 1;
-  MonsterDrop MonsterDrop = 2;
+  int32 GroupID = 1;
+  // @PK
+  Monster MonsterID = 2;
+  int32 Memo = 3;
 }
 
 message Monster {
   // @PK
   int32 monsterId = 1;
-  string name = 2;
+  StringData name = 2;
   int32 hp = 3;
   int32 atk = 4;
   int32 def = 5;
   float moveSpeed = 6;
-  int32 rewardItemId = 7;
-}
-
-message MonsterDrop {
-  // @PK
-  Monster monsterId = 1;
-  // @PK
-  int32 itemId = 2;
-  float dropRate = 3;
-  int32 minCount = 4;
-  int32 maxCount = 5;
+  RewardItemGroup RewardGroupId = 7;
 }

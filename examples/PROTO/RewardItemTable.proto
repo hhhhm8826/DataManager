@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package DATA_MANAGER_TABLE;
+option go_package = "./DATA_MANAGER_TABLE";
+import "GameItemTable.proto";
+
+message RewardItemGroup {
+  // @Key
+  int32 GroupId = 1;
+  string Memo = 2;
+  GameItem RewardItemId01 = 3;
+  float RewardItemRate01 = 4;
+}

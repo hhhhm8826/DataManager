@@ -73,6 +73,58 @@ func (TestType) EnumDescriptor() ([]byte, []int) {
 	return file_TestEnumType_proto_rawDescGZIP(), []int{0}
 }
 
+type BigTestType int32
+
+const (
+	BigTestType_BigTestType_NONE         BigTestType = 0
+	BigTestType_BigTestType_Unreal32bit1 BigTestType = 1000
+	BigTestType_BigTestType_Unreal32bit2 BigTestType = 1001
+	BigTestType_BigTestType_MAX          BigTestType = 1002
+)
+
+// Enum value maps for BigTestType.
+var (
+	BigTestType_name = map[int32]string{
+		0:    "BigTestType_NONE",
+		1000: "BigTestType_Unreal32bit1",
+		1001: "BigTestType_Unreal32bit2",
+		1002: "BigTestType_MAX",
+	}
+	BigTestType_value = map[string]int32{
+		"BigTestType_NONE":         0,
+		"BigTestType_Unreal32bit1": 1000,
+		"BigTestType_Unreal32bit2": 1001,
+		"BigTestType_MAX":          1002,
+	}
+)
+
+func (x BigTestType) Enum() *BigTestType {
+	p := new(BigTestType)
+	*p = x
+	return p
+}
+
+func (x BigTestType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (BigTestType) Descriptor() protoreflect.EnumDescriptor {
+	return file_TestEnumType_proto_enumTypes[1].Descriptor()
+}
+
+func (BigTestType) Type() protoreflect.EnumType {
+	return &file_TestEnumType_proto_enumTypes[1]
+}
+
+func (x BigTestType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use BigTestType.Descriptor instead.
+func (BigTestType) EnumDescriptor() ([]byte, []int) {
+	return file_TestEnumType_proto_rawDescGZIP(), []int{1}
+}
+
 var File_TestEnumType_proto protoreflect.FileDescriptor
 
 const file_TestEnumType_proto_rawDesc = "" +
@@ -82,7 +134,12 @@ const file_TestEnumType_proto_rawDesc = "" +
 	"\rTestType_NONE\x10\x00\x12\x12\n" +
 	"\x0eTestType_Test1\x10\x01\x12\x12\n" +
 	"\x0eTestType_Test2\x10\x02\x12\x10\n" +
-	"\fTestType_MAX\x10\x03B\x16Z\x14./DATA_MANAGER_TABLEb\x06proto3"
+	"\fTestType_MAX\x10\x03*w\n" +
+	"\vBigTestType\x12\x14\n" +
+	"\x10BigTestType_NONE\x10\x00\x12\x1d\n" +
+	"\x18BigTestType_Unreal32bit1\x10\xe8\a\x12\x1d\n" +
+	"\x18BigTestType_Unreal32bit2\x10\xe9\a\x12\x14\n" +
+	"\x0fBigTestType_MAX\x10\xea\aB\x16Z\x14./DATA_MANAGER_TABLEb\x06proto3"
 
 var (
 	file_TestEnumType_proto_rawDescOnce sync.Once
@@ -96,9 +153,10 @@ func file_TestEnumType_proto_rawDescGZIP() []byte {
 	return file_TestEnumType_proto_rawDescData
 }
 
-var file_TestEnumType_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_TestEnumType_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
 var file_TestEnumType_proto_goTypes = []any{
-	(TestType)(0), // 0: DATA_MANAGER_TABLE.TestType
+	(TestType)(0),    // 0: DATA_MANAGER_TABLE.TestType
+	(BigTestType)(0), // 1: DATA_MANAGER_TABLE.BigTestType
 }
 var file_TestEnumType_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -118,7 +176,7 @@ func file_TestEnumType_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_TestEnumType_proto_rawDesc), len(file_TestEnumType_proto_rawDesc)),
-			NumEnums:      1,
+			NumEnums:      2,
 			NumMessages:   0,
 			NumExtensions: 0,
 			NumServices:   0,

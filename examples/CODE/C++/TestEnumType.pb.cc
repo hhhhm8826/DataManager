@@ -28,7 +28,7 @@ namespace _fl = ::google::protobuf::internal::field_layout;
 namespace DATA_MANAGER_TABLE {
 }  // namespace DATA_MANAGER_TABLE
 static const ::_pb::EnumDescriptor* PROTOBUF_NONNULL
-    file_level_enum_descriptors_TestEnumType_2eproto[1];
+    file_level_enum_descriptors_TestEnumType_2eproto[2];
 static constexpr const ::_pb::ServiceDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
     file_level_service_descriptors_TestEnumType_2eproto = nullptr;
 const ::uint32_t TableStruct_TestEnumType_2eproto::offsets[1] = {};
@@ -40,14 +40,17 @@ const char descriptor_table_protodef_TestEnumType_2eproto[] ABSL_ATTRIBUTE_SECTI
     "\n\022TestEnumType.proto\022\022DATA_MANAGER_TABLE"
     "*W\n\010TestType\022\021\n\rTestType_NONE\020\000\022\022\n\016TestT"
     "ype_Test1\020\001\022\022\n\016TestType_Test2\020\002\022\020\n\014TestT"
-    "ype_MAX\020\003B\026Z\024./DATA_MANAGER_TABLEb\006proto"
-    "3"
+    "ype_MAX\020\003*w\n\013BigTestType\022\024\n\020BigTestType_"
+    "NONE\020\000\022\035\n\030BigTestType_Unreal32bit1\020\350\007\022\035\n"
+    "\030BigTestType_Unreal32bit2\020\351\007\022\024\n\017BigTestT"
+    "ype_MAX\020\352\007B\026Z\024./DATA_MANAGER_TABLEb\006prot"
+    "o3"
 };
 static ::absl::once_flag descriptor_table_TestEnumType_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_TestEnumType_2eproto = {
     false,
     false,
-    161,
+    282,
     descriptor_table_protodef_TestEnumType_2eproto,
     "TestEnumType.proto",
     &descriptor_table_TestEnumType_2eproto_once,
@@ -68,6 +71,13 @@ TestType_descriptor() {
 }
 PROTOBUF_CONSTINIT const uint32_t TestType_internal_data_[] = {
     262144u, 0u, };
+[[nodiscard]] const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL
+BigTestType_descriptor() {
+  ::google::protobuf::internal::AssignDescriptors(&descriptor_table_TestEnumType_2eproto);
+  return file_level_enum_descriptors_TestEnumType_2eproto[1];
+}
+PROTOBUF_CONSTINIT const uint32_t BigTestType_internal_data_[] = {
+    65536u, 196608u, 1001u, 1000u, 1002u, };
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace DATA_MANAGER_TABLE
 namespace google {

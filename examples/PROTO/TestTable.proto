@@ -8,4 +8,5 @@ message GoTest {
   // @PK
   int32 ID = 1;
   TestType TestColumn = 2;
+  int32 Test23 = 3;
 }

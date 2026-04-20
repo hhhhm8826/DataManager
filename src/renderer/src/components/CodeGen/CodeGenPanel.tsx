@@ -15,6 +15,7 @@ const LANGUAGE_LABELS: Record<string, string> = {
   php: 'PHP',
   golang: 'Go',
   rust: 'Rust(지원예정)',
+  unreal: 'Unreal C++',
 }
 
 function getLabel(lang: string): string {
@@ -89,6 +90,14 @@ export function CodeGenPanel(): React.JSX.Element {
 
   const handleGenerate = async (lang: string): Promise<void> => {
     if (dirty) { toast.error('변경된 경로를 먼저 저장하세요.'); return }
+    if (lang === 'unreal') {
+      setGenerating('unreal')
+      const result = await ipcInvoke<string[]>(IPC.CODEGEN_GENERATE_UNREAL)
+      setGenerating(null)
+      if (result.success && result.data) toast.success(`Unreal C++ 헤더 ${result.data.length}개 생성 완료`)
+      else toast.error(result.error ?? 'Unreal 코드 생성 실패')
+      return
+    }
     setGenerating(lang)
     const result = await ipcInvoke(IPC.CODEGEN_GENERATE, lang)
     setGenerating(null)
@@ -102,16 +111,37 @@ export function CodeGenPanel(): React.JSX.Element {
   const handleGenerateAll = async (): Promise<void> => {
     if (dirty) { toast.error('변경된 경로를 먼저 저장하세요.'); return }
     setGenerating('all')
-    const result = await ipcInvoke<string[]>(IPC.CODEGEN_GENERATE_ALL)
-    setGenerating(null)
-    if (result.success && result.data) {
-      toast.success(`${result.data.map(getLabel).join(', ')} 코드가 생성되었습니다.`)
-    } else {
-      toast.error(result.error ?? '코드 생성 실패')
+    const results: string[] = []
+
+    // protoc 언어 생성
+    if (protocConfiguredCount > 0) {
+      const protocResult = await ipcInvoke<string[]>(IPC.CODEGEN_GENERATE_ALL)
+      if (protocResult.success && protocResult.data) results.push(...protocResult.data.map(getLabel))
+      else if (!protocResult.success) {
+        setGenerating(null)
+        toast.error(protocResult.error ?? '코드 생성 실패')
+        return
+      }
     }
+
+    // Unreal 생성 (경로 설정 시)
+    if (unrealOutputDir.trim()) {
+      const unrealResult = await ipcInvoke<string[]>(IPC.CODEGEN_GENERATE_UNREAL)
+      if (unrealResult.success && unrealResult.data) results.push('Unreal C++')
+      else if (!unrealResult.success) {
+        setGenerating(null)
+        toast.error(unrealResult.error ?? 'Unreal 코드 생성 실패')
+        return
+      }
+    }
+
+    setGenerating(null)
+    if (results.length > 0) toast.success(`${results.join(', ')} 코드가 생성되었습니다.`)
   }
 
-  const configuredCount = outputDirs.filter((o) => o.dir.trim()).length
+  const protocConfiguredCount = outputDirs.filter((o) => o.language !== 'unreal' && o.dir.trim()).length
+  const unrealOutputDir = getDirForLang('unreal')
+  const totalConfiguredCount = protocConfiguredCount + (unrealOutputDir.trim() ? 1 : 0)
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -129,18 +159,17 @@ export function CodeGenPanel(): React.JSX.Element {
         <div className="card">
           <div className="card-title">생성 실행</div>
           <p style={{ fontSize: 13, color: '#9ca3af', marginBottom: 16 }}>
-            proto 파일을 <code style={{ color: '#a0c4ff' }}>protoc</code>로 컴파일하여 코드를 생성합니다.
-            경로가 설정된 언어: <strong style={{ color: '#6fcf97' }}>{configuredCount}개</strong>
+            경로가 설정된 언어: <strong style={{ color: '#6fcf97' }}>{totalConfiguredCount}개</strong>
           </p>
 
           <div style={{ marginBottom: 16 }}>
             <button
               className="btn btn-primary"
               onClick={handleGenerateAll}
-              disabled={generating !== null || configuredCount === 0 || !protocPath}
+              disabled={generating !== null || totalConfiguredCount === 0 || (protocConfiguredCount > 0 && !protocPath)}
               style={{ fontSize: 14, padding: '8px 20px' }}
             >
-              {generating === 'all' ? '생성 중...' : `⚡ 전체 생성 (${configuredCount}개 언어)`}
+              {generating === 'all' ? '생성 중...' : `⚡ 전체 생성 (${totalConfiguredCount}개 언어)`}
             </button>
           </div>
 
@@ -157,7 +186,16 @@ export function CodeGenPanel(): React.JSX.Element {
                   {generating === lang ? '생성 중...' : `🛠 ${getLabel(lang)} 생성`}
                 </button>
               ))}
-            {configuredCount === 0 && (
+            {unrealOutputDir.trim() && (
+              <button
+                className="btn btn-ghost"
+                onClick={() => handleGenerate('unreal')}
+                disabled={generating !== null}
+              >
+                {generating === 'unreal' ? '생성 중...' : '🛠 Unreal C++ 생성'}
+              </button>
+            )}
+            {totalConfiguredCount === 0 && (
               <span style={{ fontSize: 13, color: '#4b5563' }}>
                 출력 경로를 설정하면 생성 버튼이 활성화됩니다.
               </span>
@@ -201,8 +239,37 @@ export function CodeGenPanel(): React.JSX.Element {
             </div>
           ))}
 
+          {/* Unreal C++ */}
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">
+              <span style={{
+                display: 'inline-block',
+                background: '#1a3a2a',
+                color: '#4dbb88',
+                borderRadius: 4,
+                padding: '1px 8px',
+                fontSize: 11,
+                marginRight: 8
+              }}>
+                Unreal C++
+              </span>
+              출력 디렉토리
+              <span style={{ marginLeft: 8, fontSize: 11, color: '#6b7280', fontWeight: 400 }}>(protoc 불필요)</span>
+            </label>
+            <div className="path-row">
+              <input
+                className="form-input path-input"
+                placeholder="예: D:\MyProject\Source\MyProject\DataTables"
+                value={unrealOutputDir}
+                onChange={(e) => setDirForLang('unreal', e.target.value)}
+              />
+              <button className="btn btn-ghost" onClick={() => pickDir('unreal')} title="폴더 선택">📂</button>
+              <button className="btn btn-ghost" title="탐색기에서 열기" onClick={() => openDir(unrealOutputDir)}>↗</button>
+            </div>
+          </div>
+
           {dirty && (
-            <div className="toolbar" style={{ marginTop: 4 }}>
+            <div className="toolbar" style={{ marginTop: 12 }}>
               <button className="btn btn-success" onClick={handleSavePaths}>💾 저장</button>
             </div>
           )}

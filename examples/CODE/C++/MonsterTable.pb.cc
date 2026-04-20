@@ -27,49 +27,17 @@ namespace _pbi = ::google::protobuf::internal;
 namespace _fl = ::google::protobuf::internal::field_layout;
 namespace DATA_MANAGER_TABLE {
 
-inline constexpr MonsterDrop::Impl_::Impl_(
-    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
-    ::_pbi::ConstantInitialized) noexcept
-      : _cached_size_{0},
-        monsterid_{nullptr},
-        itemid_{0},
-        droprate_{0},
-        mincount_{0},
-        maxcount_{0} {}
-
-template <typename>
-constexpr MonsterDrop::MonsterDrop(::_pbi::ConstantInitialized)
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(MonsterDrop_class_data_.base()),
-#else   // PROTOBUF_CUSTOM_VTABLE
-    : ::google::protobuf::Message(),
-#endif  // PROTOBUF_CUSTOM_VTABLE
-      _impl_(internal_visibility(), ::_pbi::ConstantInitialized()) {
-}
-struct MonsterDropDefaultTypeInternal {
-  constexpr MonsterDropDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~MonsterDropDefaultTypeInternal() {}
-  union {
-    MonsterDrop _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MonsterDropDefaultTypeInternal _MonsterDrop_default_instance_;
-
 inline constexpr Monster::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
-        name_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
+        name_{nullptr},
+        rewardgroupid_{nullptr},
         monsterid_{0},
         hp_{0},
         atk_{0},
         def_{0},
-        movespeed_{0},
-        rewarditemid_{0} {}
+        movespeed_{0} {}
 
 template <typename>
 constexpr Monster::Monster(::_pbi::ConstantInitialized)
@@ -91,32 +59,33 @@ struct MonsterDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MonsterDefaultTypeInternal _Monster_default_instance_;
 
-inline constexpr MonsterTest::Impl_::Impl_(
+inline constexpr MonsterRace::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
-        monsterdrop_{nullptr},
-        id_{0} {}
+        monsterid_{nullptr},
+        groupid_{0},
+        memo_{0} {}
 
 template <typename>
-constexpr MonsterTest::MonsterTest(::_pbi::ConstantInitialized)
+constexpr MonsterRace::MonsterRace(::_pbi::ConstantInitialized)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(MonsterTest_class_data_.base()),
+    : ::google::protobuf::Message(MonsterRace_class_data_.base()),
 #else   // PROTOBUF_CUSTOM_VTABLE
     : ::google::protobuf::Message(),
 #endif  // PROTOBUF_CUSTOM_VTABLE
       _impl_(internal_visibility(), ::_pbi::ConstantInitialized()) {
 }
-struct MonsterTestDefaultTypeInternal {
-  constexpr MonsterTestDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~MonsterTestDefaultTypeInternal() {}
+struct MonsterRaceDefaultTypeInternal {
+  constexpr MonsterRaceDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~MonsterRaceDefaultTypeInternal() {}
   union {
-    MonsterTest _instance;
+    MonsterRace _instance;
   };
 };
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MonsterTestDefaultTypeInternal _MonsterTest_default_instance_;
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MonsterRaceDefaultTypeInternal _MonsterRace_default_instance_;
 }  // namespace DATA_MANAGER_TABLE
 static constexpr const ::_pb::EnumDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
     file_level_enum_descriptors_MonsterTable_2eproto = nullptr;
@@ -126,12 +95,14 @@ const ::uint32_t
     TableStruct_MonsterTable_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
         protodesc_cold) = {
         0x081, // bitmap
-        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::MonsterTest, _impl_._has_bits_),
-        5, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::MonsterTest, _impl_.id_),
-        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::MonsterTest, _impl_.monsterdrop_),
+        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::MonsterRace, _impl_._has_bits_),
+        6, // hasbit index offset
+        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::MonsterRace, _impl_.groupid_),
+        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::MonsterRace, _impl_.monsterid_),
+        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::MonsterRace, _impl_.memo_),
         1,
         0,
+        2,
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::Monster, _impl_._has_bits_),
         10, // hasbit index offset
@@ -141,65 +112,55 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::Monster, _impl_.atk_),
         PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::Monster, _impl_.def_),
         PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::Monster, _impl_.movespeed_),
-        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::Monster, _impl_.rewarditemid_),
-        1,
-        0,
+        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::Monster, _impl_.rewardgroupid_),
         2,
+        0,
         3,
         4,
         5,
         6,
-        0x081, // bitmap
-        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::MonsterDrop, _impl_._has_bits_),
-        8, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::MonsterDrop, _impl_.monsterid_),
-        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::MonsterDrop, _impl_.itemid_),
-        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::MonsterDrop, _impl_.droprate_),
-        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::MonsterDrop, _impl_.mincount_),
-        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::MonsterDrop, _impl_.maxcount_),
-        0,
         1,
-        2,
-        3,
-        4,
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, sizeof(::DATA_MANAGER_TABLE::MonsterTest)},
-        {7, sizeof(::DATA_MANAGER_TABLE::Monster)},
-        {24, sizeof(::DATA_MANAGER_TABLE::MonsterDrop)},
+        {0, sizeof(::DATA_MANAGER_TABLE::MonsterRace)},
+        {9, sizeof(::DATA_MANAGER_TABLE::Monster)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
-    &::DATA_MANAGER_TABLE::_MonsterTest_default_instance_._instance,
+    &::DATA_MANAGER_TABLE::_MonsterRace_default_instance_._instance,
     &::DATA_MANAGER_TABLE::_Monster_default_instance_._instance,
-    &::DATA_MANAGER_TABLE::_MonsterDrop_default_instance_._instance,
 };
 const char descriptor_table_protodef_MonsterTable_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\022MonsterTable.proto\022\022DATA_MANAGER_TABLE"
-    "\"O\n\013MonsterTest\022\n\n\002ID\030\001 \001(\005\0224\n\013MonsterDr"
-    "op\030\002 \001(\0132\037.DATA_MANAGER_TABLE.MonsterDro"
-    "p\"y\n\007Monster\022\021\n\tmonsterId\030\001 \001(\005\022\014\n\004name\030"
-    "\002 \001(\t\022\n\n\002hp\030\003 \001(\005\022\013\n\003atk\030\004 \001(\005\022\013\n\003def\030\005 "
-    "\001(\005\022\021\n\tmoveSpeed\030\006 \001(\002\022\024\n\014rewardItemId\030\007"
-    " \001(\005\"\207\001\n\013MonsterDrop\0222\n\tmonsterId\030\001 \001(\0132"
-    "\037.DATA_MANAGER_TABLE.MonsterDrop\022\016\n\006item"
-    "Id\030\002 \001(\005\022\020\n\010dropRate\030\003 \001(\002\022\020\n\010minCount\030\004"
-    " \001(\005\022\020\n\010maxCount\030\005 \001(\005B\026Z\024./DATA_MANAGER"
-    "_TABLEb\006proto3"
+    "\032\025RewardItemTable.proto\032\021StringTable.pro"
+    "to\"\\\n\013MonsterRace\022\017\n\007GroupID\030\001 \001(\005\022.\n\tMo"
+    "nsterID\030\002 \001(\0132\033.DATA_MANAGER_TABLE.Monst"
+    "er\022\014\n\004Memo\030\003 \001(\005\"\277\001\n\007Monster\022\021\n\tmonsterI"
+    "d\030\001 \001(\005\022,\n\004name\030\002 \001(\0132\036.DATA_MANAGER_TAB"
+    "LE.StringData\022\n\n\002hp\030\003 \001(\005\022\013\n\003atk\030\004 \001(\005\022\013"
+    "\n\003def\030\005 \001(\005\022\021\n\tmoveSpeed\030\006 \001(\002\022:\n\rReward"
+    "GroupId\030\007 \001(\0132#.DATA_MANAGER_TABLE.Rewar"
+    "dItemGroupB\026Z\024./DATA_MANAGER_TABLEb\006prot"
+    "o3"
+};
+static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
+    descriptor_table_MonsterTable_2eproto_deps[2] = {
+        &::descriptor_table_RewardItemTable_2eproto,
+        &::descriptor_table_StringTable_2eproto,
 };
 static ::absl::once_flag descriptor_table_MonsterTable_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_MonsterTable_2eproto = {
     false,
     false,
-    414,
+    402,
     descriptor_table_protodef_MonsterTable_2eproto,
     "MonsterTable.proto",
     &descriptor_table_MonsterTable_2eproto_once,
-    nullptr,
-    0,
-    3,
+    descriptor_table_MonsterTable_2eproto_deps,
+    2,
+    2,
     schemas,
     file_default_instances,
     TableStruct_MonsterTable_2eproto::offsets,
@@ -209,165 +170,178 @@ PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_MonsterTable_2
 namespace DATA_MANAGER_TABLE {
 // ===================================================================
 
-class MonsterTest::_Internal {
+class MonsterRace::_Internal {
  public:
   using HasBits =
-      decltype(::std::declval<MonsterTest>()._impl_._has_bits_);
+      decltype(::std::declval<MonsterRace>()._impl_._has_bits_);
   static constexpr ::int32_t kHasBitsOffset =
-      8 * PROTOBUF_FIELD_OFFSET(MonsterTest, _impl_._has_bits_);
+      8 * PROTOBUF_FIELD_OFFSET(MonsterRace, _impl_._has_bits_);
 };
 
-MonsterTest::MonsterTest(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
+MonsterRace::MonsterRace(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(arena, MonsterTest_class_data_.base()) {
+    : ::google::protobuf::Message(arena, MonsterRace_class_data_.base()) {
 #else   // PROTOBUF_CUSTOM_VTABLE
     : ::google::protobuf::Message(arena) {
 #endif  // PROTOBUF_CUSTOM_VTABLE
   SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:DATA_MANAGER_TABLE.MonsterTest)
+  // @@protoc_insertion_point(arena_constructor:DATA_MANAGER_TABLE.MonsterRace)
 }
-PROTOBUF_NDEBUG_INLINE MonsterTest::Impl_::Impl_(
+PROTOBUF_NDEBUG_INLINE MonsterRace::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
-    [[maybe_unused]] const ::DATA_MANAGER_TABLE::MonsterTest& from_msg)
+    [[maybe_unused]] const ::DATA_MANAGER_TABLE::MonsterRace& from_msg)
       : _has_bits_{from._has_bits_},
         _cached_size_{0} {}
 
-MonsterTest::MonsterTest(
+MonsterRace::MonsterRace(
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
-    const MonsterTest& from)
+    const MonsterRace& from)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(arena, MonsterTest_class_data_.base()) {
+    : ::google::protobuf::Message(arena, MonsterRace_class_data_.base()) {
 #else   // PROTOBUF_CUSTOM_VTABLE
     : ::google::protobuf::Message(arena) {
 #endif  // PROTOBUF_CUSTOM_VTABLE
-  MonsterTest* const _this = this;
+  MonsterRace* const _this = this;
   (void)_this;
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
   ::uint32_t cached_has_bits = _impl_._has_bits_[0];
-  _impl_.monsterdrop_ = (CheckHasBit(cached_has_bits, 0x00000001U))
-                ? ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.monsterdrop_)
+  _impl_.monsterid_ = (CheckHasBit(cached_has_bits, 0x00000001U))
+                ? ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.monsterid_)
                 : nullptr;
-  _impl_.id_ = from._impl_.id_;
+  ::memcpy(reinterpret_cast<char*>(&_impl_) +
+               offsetof(Impl_, groupid_),
+           reinterpret_cast<const char*>(&from._impl_) +
+               offsetof(Impl_, groupid_),
+           offsetof(Impl_, memo_) -
+               offsetof(Impl_, groupid_) +
+               sizeof(Impl_::memo_));
 
-  // @@protoc_insertion_point(copy_constructor:DATA_MANAGER_TABLE.MonsterTest)
+  // @@protoc_insertion_point(copy_constructor:DATA_MANAGER_TABLE.MonsterRace)
 }
-PROTOBUF_NDEBUG_INLINE MonsterTest::Impl_::Impl_(
+PROTOBUF_NDEBUG_INLINE MonsterRace::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
       : _cached_size_{0} {}
 
-inline void MonsterTest::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
+inline void MonsterRace::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
   ::memset(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, monsterdrop_),
+               offsetof(Impl_, monsterid_),
            0,
-           offsetof(Impl_, id_) -
-               offsetof(Impl_, monsterdrop_) +
-               sizeof(Impl_::id_));
+           offsetof(Impl_, memo_) -
+               offsetof(Impl_, monsterid_) +
+               sizeof(Impl_::memo_));
 }
-MonsterTest::~MonsterTest() {
-  // @@protoc_insertion_point(destructor:DATA_MANAGER_TABLE.MonsterTest)
+MonsterRace::~MonsterRace() {
+  // @@protoc_insertion_point(destructor:DATA_MANAGER_TABLE.MonsterRace)
   SharedDtor(*this);
 }
-inline void MonsterTest::SharedDtor(MessageLite& self) {
-  MonsterTest& this_ = static_cast<MonsterTest&>(self);
+inline void MonsterRace::SharedDtor(MessageLite& self) {
+  MonsterRace& this_ = static_cast<MonsterRace&>(self);
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     this_.CheckHasBitConsistency();
   }
   this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   ABSL_DCHECK(this_.GetArena() == nullptr);
-  delete this_._impl_.monsterdrop_;
+  delete this_._impl_.monsterid_;
   this_._impl_.~Impl_();
 }
 
-inline void* PROTOBUF_NONNULL MonsterTest::PlacementNew_(
+inline void* PROTOBUF_NONNULL MonsterRace::PlacementNew_(
     const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
-  return ::new (mem) MonsterTest(arena);
+  return ::new (mem) MonsterRace(arena);
 }
-constexpr auto MonsterTest::InternalNewImpl_() {
-  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(MonsterTest),
-                                            alignof(MonsterTest));
+constexpr auto MonsterRace::InternalNewImpl_() {
+  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(MonsterRace),
+                                            alignof(MonsterRace));
 }
-constexpr auto MonsterTest::InternalGenerateClassData_() {
+constexpr auto MonsterRace::InternalGenerateClassData_() {
   return ::google::protobuf::internal::ClassDataFull{
       ::google::protobuf::internal::ClassData{
-          &_MonsterTest_default_instance_._instance,
+          &_MonsterRace_default_instance_._instance,
           &_table_.header,
           nullptr,  // IsInitialized
-          &MonsterTest::MergeImpl,
-          ::google::protobuf::Message::GetNewImpl<MonsterTest>(),
+          &MonsterRace::MergeImpl,
+          ::google::protobuf::Message::GetNewImpl<MonsterRace>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-          &MonsterTest::SharedDtor,
-          ::google::protobuf::Message::GetClearImpl<MonsterTest>(), &MonsterTest::ByteSizeLong,
-              &MonsterTest::_InternalSerialize,
+          &MonsterRace::SharedDtor,
+          ::google::protobuf::Message::GetClearImpl<MonsterRace>(), &MonsterRace::ByteSizeLong,
+              &MonsterRace::_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
-          PROTOBUF_FIELD_OFFSET(MonsterTest, _impl_._cached_size_),
+          PROTOBUF_FIELD_OFFSET(MonsterRace, _impl_._cached_size_),
           false,
       },
-      &MonsterTest::kDescriptorMethods,
+      &MonsterRace::kDescriptorMethods,
       &descriptor_table_MonsterTable_2eproto,
       nullptr,  // tracker
   };
 }
 
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
-    ::google::protobuf::internal::ClassDataFull MonsterTest_class_data_ =
-        MonsterTest::InternalGenerateClassData_();
+    ::google::protobuf::internal::ClassDataFull MonsterRace_class_data_ =
+        MonsterRace::InternalGenerateClassData_();
 
 PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
-MonsterTest::GetClassData() const {
-  ::google::protobuf::internal::PrefetchToLocalCache(&MonsterTest_class_data_);
-  ::google::protobuf::internal::PrefetchToLocalCache(MonsterTest_class_data_.tc_table);
-  return MonsterTest_class_data_.base();
+MonsterRace::GetClassData() const {
+  ::google::protobuf::internal::PrefetchToLocalCache(&MonsterRace_class_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(MonsterRace_class_data_.tc_table);
+  return MonsterRace_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<1, 2, 1, 0, 2>
-MonsterTest::_table_ = {
+const ::_pbi::TcParseTable<2, 3, 1, 0, 2>
+MonsterRace::_table_ = {
   {
-    PROTOBUF_FIELD_OFFSET(MonsterTest, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(MonsterRace, _impl_._has_bits_),
     0, // no _extensions_
-    2, 8,  // max_field_number, fast_idx_mask
+    3, 24,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967292,  // skipmap
+    4294967288,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    2,  // num_field_entries
+    3,  // num_field_entries
     1,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
-    MonsterTest_class_data_.base(),
+    MonsterRace_class_data_.base(),
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::GenericFallback,  // fallback
     #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::DATA_MANAGER_TABLE::MonsterTest>(),  // to_prefetch
+    ::_pbi::TcParser::GetTable<::DATA_MANAGER_TABLE::MonsterRace>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // .DATA_MANAGER_TABLE.MonsterDrop MonsterDrop = 2;
+    {::_pbi::TcParser::MiniParse, {}},
+    // int32 GroupID = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(MonsterRace, _impl_.groupid_), 1>(),
+     {8, 1, 0,
+      PROTOBUF_FIELD_OFFSET(MonsterRace, _impl_.groupid_)}},
+    // .DATA_MANAGER_TABLE.Monster MonsterID = 2;
     {::_pbi::TcParser::FastMtS1,
      {18, 0, 0,
-      PROTOBUF_FIELD_OFFSET(MonsterTest, _impl_.monsterdrop_)}},
-    // int32 ID = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(MonsterTest, _impl_.id_), 1>(),
-     {8, 1, 0,
-      PROTOBUF_FIELD_OFFSET(MonsterTest, _impl_.id_)}},
+      PROTOBUF_FIELD_OFFSET(MonsterRace, _impl_.monsterid_)}},
+    // int32 Memo = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(MonsterRace, _impl_.memo_), 2>(),
+     {24, 2, 0,
+      PROTOBUF_FIELD_OFFSET(MonsterRace, _impl_.memo_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // int32 ID = 1;
-    {PROTOBUF_FIELD_OFFSET(MonsterTest, _impl_.id_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
-    // .DATA_MANAGER_TABLE.MonsterDrop MonsterDrop = 2;
-    {PROTOBUF_FIELD_OFFSET(MonsterTest, _impl_.monsterdrop_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
+    // int32 GroupID = 1;
+    {PROTOBUF_FIELD_OFFSET(MonsterRace, _impl_.groupid_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // .DATA_MANAGER_TABLE.Monster MonsterID = 2;
+    {PROTOBUF_FIELD_OFFSET(MonsterRace, _impl_.monsterid_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
+    // int32 Memo = 3;
+    {PROTOBUF_FIELD_OFFSET(MonsterRace, _impl_.memo_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
   }},
   {{
-      {::_pbi::TcParser::GetTable<::DATA_MANAGER_TABLE::MonsterDrop>()},
+      {::_pbi::TcParser::GetTable<::DATA_MANAGER_TABLE::Monster>()},
   }},
   {{
   }},
 };
-PROTOBUF_NOINLINE void MonsterTest::Clear() {
-// @@protoc_insertion_point(message_clear_start:DATA_MANAGER_TABLE.MonsterTest)
+PROTOBUF_NOINLINE void MonsterRace::Clear() {
+// @@protoc_insertion_point(message_clear_start:DATA_MANAGER_TABLE.MonsterRace)
   ::google::protobuf::internal::TSanWrite(&_impl_);
   ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
@@ -375,47 +349,60 @@ PROTOBUF_NOINLINE void MonsterTest::Clear() {
 
   cached_has_bits = _impl_._has_bits_[0];
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    ABSL_DCHECK(_impl_.monsterdrop_ != nullptr);
-    _impl_.monsterdrop_->Clear();
+    ABSL_DCHECK(_impl_.monsterid_ != nullptr);
+    _impl_.monsterid_->Clear();
   }
-  _impl_.id_ = 0;
+  if (BatchCheckHasBit(cached_has_bits, 0x00000006U)) {
+    ::memset(&_impl_.groupid_, 0, static_cast<::size_t>(
+        reinterpret_cast<char*>(&_impl_.memo_) -
+        reinterpret_cast<char*>(&_impl_.groupid_)) + sizeof(_impl_.memo_));
+  }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL MonsterTest::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL MonsterRace::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
-  const MonsterTest& this_ = static_cast<const MonsterTest&>(base);
+  const MonsterRace& this_ = static_cast<const MonsterRace&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
-::uint8_t* PROTOBUF_NONNULL MonsterTest::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL MonsterRace::_InternalSerialize(
     ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
-  const MonsterTest& this_ = *this;
+  const MonsterRace& this_ = *this;
 #endif  // PROTOBUF_CUSTOM_VTABLE
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     this_.CheckHasBitConsistency();
   }
-  // @@protoc_insertion_point(serialize_to_array_start:DATA_MANAGER_TABLE.MonsterTest)
+  // @@protoc_insertion_point(serialize_to_array_start:DATA_MANAGER_TABLE.MonsterRace)
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
   cached_has_bits = this_._impl_._has_bits_[0];
-  // int32 ID = 1;
+  // int32 GroupID = 1;
   if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-    if (this_._internal_id() != 0) {
+    if (this_._internal_groupid() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<1>(
-              stream, this_._internal_id(), target);
+              stream, this_._internal_groupid(), target);
     }
   }
 
-  // .DATA_MANAGER_TABLE.MonsterDrop MonsterDrop = 2;
+  // .DATA_MANAGER_TABLE.Monster MonsterID = 2;
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
     target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-        2, *this_._impl_.monsterdrop_, this_._impl_.monsterdrop_->GetCachedSize(), target,
+        2, *this_._impl_.monsterid_, this_._impl_.monsterid_->GetCachedSize(), target,
         stream);
+  }
+
+  // int32 Memo = 3;
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (this_._internal_memo() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<3>(
+              stream, this_._internal_memo(), target);
+    }
   }
 
   if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
@@ -423,18 +410,18 @@ PROTOBUF_NOINLINE void MonsterTest::Clear() {
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
             this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:DATA_MANAGER_TABLE.MonsterTest)
+  // @@protoc_insertion_point(serialize_to_array_end:DATA_MANAGER_TABLE.MonsterRace)
   return target;
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t MonsterTest::ByteSizeLong(const MessageLite& base) {
-  const MonsterTest& this_ = static_cast<const MonsterTest&>(base);
+::size_t MonsterRace::ByteSizeLong(const MessageLite& base) {
+  const MonsterRace& this_ = static_cast<const MonsterRace&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
-::size_t MonsterTest::ByteSizeLong() const {
-  const MonsterTest& this_ = *this;
+::size_t MonsterRace::ByteSizeLong() const {
+  const MonsterRace& this_ = *this;
 #endif  // PROTOBUF_CUSTOM_VTABLE
-  // @@protoc_insertion_point(message_byte_size_start:DATA_MANAGER_TABLE.MonsterTest)
+  // @@protoc_insertion_point(message_byte_size_start:DATA_MANAGER_TABLE.MonsterRace)
   ::size_t total_size = 0;
 
   ::uint32_t cached_has_bits = 0;
@@ -443,17 +430,24 @@ PROTOBUF_NOINLINE void MonsterTest::Clear() {
 
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
-    // .DATA_MANAGER_TABLE.MonsterDrop MonsterDrop = 2;
+  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
+    // .DATA_MANAGER_TABLE.Monster MonsterID = 2;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       total_size += 1 +
-                    ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.monsterdrop_);
+                    ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.monsterid_);
     }
-    // int32 ID = 1;
+    // int32 GroupID = 1;
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (this_._internal_id() != 0) {
+      if (this_._internal_groupid() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-            this_._internal_id());
+            this_._internal_groupid());
+      }
+    }
+    // int32 Memo = 3;
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (this_._internal_memo() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+            this_._internal_memo());
       }
     }
   }
@@ -461,33 +455,38 @@ PROTOBUF_NOINLINE void MonsterTest::Clear() {
                                              &this_._impl_._cached_size_);
 }
 
-void MonsterTest::MergeImpl(::google::protobuf::MessageLite& to_msg,
+void MonsterRace::MergeImpl(::google::protobuf::MessageLite& to_msg,
                             const ::google::protobuf::MessageLite& from_msg) {
    auto* const _this =
-      static_cast<MonsterTest*>(&to_msg);
-  auto& from = static_cast<const MonsterTest&>(from_msg);
+      static_cast<MonsterRace*>(&to_msg);
+  auto& from = static_cast<const MonsterRace&>(from_msg);
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     from.CheckHasBitConsistency();
   }
   ::google::protobuf::Arena* arena = _this->GetArena();
-  // @@protoc_insertion_point(class_specific_merge_from_start:DATA_MANAGER_TABLE.MonsterTest)
+  // @@protoc_insertion_point(class_specific_merge_from_start:DATA_MANAGER_TABLE.MonsterRace)
   ABSL_DCHECK_NE(&from, _this);
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
   cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      ABSL_DCHECK(from._impl_.monsterdrop_ != nullptr);
-      if (_this->_impl_.monsterdrop_ == nullptr) {
-        _this->_impl_.monsterdrop_ = ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.monsterdrop_);
+      ABSL_DCHECK(from._impl_.monsterid_ != nullptr);
+      if (_this->_impl_.monsterid_ == nullptr) {
+        _this->_impl_.monsterid_ = ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.monsterid_);
       } else {
-        _this->_impl_.monsterdrop_->MergeFrom(*from._impl_.monsterdrop_);
+        _this->_impl_.monsterid_->MergeFrom(*from._impl_.monsterid_);
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (from._internal_id() != 0) {
-        _this->_impl_.id_ = from._impl_.id_;
+      if (from._internal_groupid() != 0) {
+        _this->_impl_.groupid_ = from._impl_.groupid_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+      if (from._internal_memo() != 0) {
+        _this->_impl_.memo_ = from._impl_.memo_;
       }
     }
   }
@@ -496,27 +495,27 @@ void MonsterTest::MergeImpl(::google::protobuf::MessageLite& to_msg,
       from._internal_metadata_);
 }
 
-void MonsterTest::CopyFrom(const MonsterTest& from) {
-  // @@protoc_insertion_point(class_specific_copy_from_start:DATA_MANAGER_TABLE.MonsterTest)
+void MonsterRace::CopyFrom(const MonsterRace& from) {
+  // @@protoc_insertion_point(class_specific_copy_from_start:DATA_MANAGER_TABLE.MonsterRace)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
 
-void MonsterTest::InternalSwap(MonsterTest* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+void MonsterRace::InternalSwap(MonsterRace* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
   using ::std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(MonsterTest, _impl_.id_)
-      + sizeof(MonsterTest::_impl_.id_)
-      - PROTOBUF_FIELD_OFFSET(MonsterTest, _impl_.monsterdrop_)>(
-          reinterpret_cast<char*>(&_impl_.monsterdrop_),
-          reinterpret_cast<char*>(&other->_impl_.monsterdrop_));
+      PROTOBUF_FIELD_OFFSET(MonsterRace, _impl_.memo_)
+      + sizeof(MonsterRace::_impl_.memo_)
+      - PROTOBUF_FIELD_OFFSET(MonsterRace, _impl_.monsterid_)>(
+          reinterpret_cast<char*>(&_impl_.monsterid_),
+          reinterpret_cast<char*>(&other->_impl_.monsterid_));
 }
 
-::google::protobuf::Metadata MonsterTest::GetMetadata() const {
+::google::protobuf::Metadata MonsterRace::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // ===================================================================
@@ -529,6 +528,18 @@ class Monster::_Internal {
       8 * PROTOBUF_FIELD_OFFSET(Monster, _impl_._has_bits_);
 };
 
+void Monster::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.name_ != nullptr) _impl_.name_->Clear();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000001U);
+}
+void Monster::clear_rewardgroupid() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.rewardgroupid_ != nullptr) _impl_.rewardgroupid_->Clear();
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000002U);
+}
 Monster::Monster(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
     : ::google::protobuf::Message(arena, Monster_class_data_.base()) {
@@ -543,8 +554,7 @@ PROTOBUF_NDEBUG_INLINE Monster::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
     [[maybe_unused]] const ::DATA_MANAGER_TABLE::Monster& from_msg)
       : _has_bits_{from._has_bits_},
-        _cached_size_{0},
-        name_(arena, from.name_) {}
+        _cached_size_{0} {}
 
 Monster::Monster(
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
@@ -559,30 +569,36 @@ Monster::Monster(
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::uint32_t cached_has_bits = _impl_._has_bits_[0];
+  _impl_.name_ = (CheckHasBit(cached_has_bits, 0x00000001U))
+                ? ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.name_)
+                : nullptr;
+  _impl_.rewardgroupid_ = (CheckHasBit(cached_has_bits, 0x00000002U))
+                ? ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.rewardgroupid_)
+                : nullptr;
   ::memcpy(reinterpret_cast<char*>(&_impl_) +
                offsetof(Impl_, monsterid_),
            reinterpret_cast<const char*>(&from._impl_) +
                offsetof(Impl_, monsterid_),
-           offsetof(Impl_, rewarditemid_) -
+           offsetof(Impl_, movespeed_) -
                offsetof(Impl_, monsterid_) +
-               sizeof(Impl_::rewarditemid_));
+               sizeof(Impl_::movespeed_));
 
   // @@protoc_insertion_point(copy_constructor:DATA_MANAGER_TABLE.Monster)
 }
 PROTOBUF_NDEBUG_INLINE Monster::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
-      : _cached_size_{0},
-        name_(arena) {}
+      : _cached_size_{0} {}
 
 inline void Monster::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
   ::memset(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, monsterid_),
+               offsetof(Impl_, name_),
            0,
-           offsetof(Impl_, rewarditemid_) -
-               offsetof(Impl_, monsterid_) +
-               sizeof(Impl_::rewarditemid_));
+           offsetof(Impl_, movespeed_) -
+               offsetof(Impl_, name_) +
+               sizeof(Impl_::movespeed_));
 }
 Monster::~Monster() {
   // @@protoc_insertion_point(destructor:DATA_MANAGER_TABLE.Monster)
@@ -595,7 +611,8 @@ inline void Monster::SharedDtor(MessageLite& self) {
   }
   this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   ABSL_DCHECK(this_.GetArena() == nullptr);
-  this_._impl_.name_.Destroy();
+  delete this_._impl_.name_;
+  delete this_._impl_.rewardgroupid_;
   this_._impl_.~Impl_();
 }
 
@@ -605,7 +622,7 @@ inline void* PROTOBUF_NONNULL Monster::PlacementNew_(
   return ::new (mem) Monster(arena);
 }
 constexpr auto Monster::InternalNewImpl_() {
-  return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(Monster),
+  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(Monster),
                                             alignof(Monster));
 }
 constexpr auto Monster::InternalGenerateClassData_() {
@@ -641,7 +658,7 @@ Monster::GetClassData() const {
   return Monster_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 7, 0, 39, 2>
+const ::_pbi::TcParseTable<3, 7, 2, 0, 2>
 Monster::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(Monster, _impl_._has_bits_),
@@ -651,8 +668,8 @@ Monster::_table_ = {
     4294967168,  // skipmap
     offsetof(decltype(_table_), field_entries),
     7,  // num_field_entries
-    0,  // num_aux_entries
-    offsetof(decltype(_table_), field_names),  // no aux_entries
+    2,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
     Monster_class_data_.base(),
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::GenericFallback,  // fallback
@@ -662,56 +679,56 @@ Monster::_table_ = {
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
     // int32 monsterId = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Monster, _impl_.monsterid_), 1>(),
-     {8, 1, 0,
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Monster, _impl_.monsterid_), 2>(),
+     {8, 2, 0,
       PROTOBUF_FIELD_OFFSET(Monster, _impl_.monsterid_)}},
-    // string name = 2;
-    {::_pbi::TcParser::FastUS1,
+    // .DATA_MANAGER_TABLE.StringData name = 2;
+    {::_pbi::TcParser::FastMtS1,
      {18, 0, 0,
       PROTOBUF_FIELD_OFFSET(Monster, _impl_.name_)}},
     // int32 hp = 3;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Monster, _impl_.hp_), 2>(),
-     {24, 2, 0,
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Monster, _impl_.hp_), 3>(),
+     {24, 3, 0,
       PROTOBUF_FIELD_OFFSET(Monster, _impl_.hp_)}},
     // int32 atk = 4;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Monster, _impl_.atk_), 3>(),
-     {32, 3, 0,
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Monster, _impl_.atk_), 4>(),
+     {32, 4, 0,
       PROTOBUF_FIELD_OFFSET(Monster, _impl_.atk_)}},
     // int32 def = 5;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Monster, _impl_.def_), 4>(),
-     {40, 4, 0,
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Monster, _impl_.def_), 5>(),
+     {40, 5, 0,
       PROTOBUF_FIELD_OFFSET(Monster, _impl_.def_)}},
     // float moveSpeed = 6;
     {::_pbi::TcParser::FastF32S1,
-     {53, 5, 0,
+     {53, 6, 0,
       PROTOBUF_FIELD_OFFSET(Monster, _impl_.movespeed_)}},
-    // int32 rewardItemId = 7;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Monster, _impl_.rewarditemid_), 6>(),
-     {56, 6, 0,
-      PROTOBUF_FIELD_OFFSET(Monster, _impl_.rewarditemid_)}},
+    // .DATA_MANAGER_TABLE.RewardItemGroup RewardGroupId = 7;
+    {::_pbi::TcParser::FastMtS1,
+     {58, 1, 1,
+      PROTOBUF_FIELD_OFFSET(Monster, _impl_.rewardgroupid_)}},
   }}, {{
     65535, 65535
   }}, {{
     // int32 monsterId = 1;
-    {PROTOBUF_FIELD_OFFSET(Monster, _impl_.monsterid_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
-    // string name = 2;
-    {PROTOBUF_FIELD_OFFSET(Monster, _impl_.name_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    {PROTOBUF_FIELD_OFFSET(Monster, _impl_.monsterid_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // .DATA_MANAGER_TABLE.StringData name = 2;
+    {PROTOBUF_FIELD_OFFSET(Monster, _impl_.name_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
     // int32 hp = 3;
-    {PROTOBUF_FIELD_OFFSET(Monster, _impl_.hp_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    {PROTOBUF_FIELD_OFFSET(Monster, _impl_.hp_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // int32 atk = 4;
-    {PROTOBUF_FIELD_OFFSET(Monster, _impl_.atk_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    {PROTOBUF_FIELD_OFFSET(Monster, _impl_.atk_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // int32 def = 5;
-    {PROTOBUF_FIELD_OFFSET(Monster, _impl_.def_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    {PROTOBUF_FIELD_OFFSET(Monster, _impl_.def_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
     // float moveSpeed = 6;
-    {PROTOBUF_FIELD_OFFSET(Monster, _impl_.movespeed_), _Internal::kHasBitsOffset + 5, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
-    // int32 rewardItemId = 7;
-    {PROTOBUF_FIELD_OFFSET(Monster, _impl_.rewarditemid_), _Internal::kHasBitsOffset + 6, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    {PROTOBUF_FIELD_OFFSET(Monster, _impl_.movespeed_), _Internal::kHasBitsOffset + 6, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
+    // .DATA_MANAGER_TABLE.RewardItemGroup RewardGroupId = 7;
+    {PROTOBUF_FIELD_OFFSET(Monster, _impl_.rewardgroupid_), _Internal::kHasBitsOffset + 1, 1, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
   }},
-  // no aux_entries
   {{
-    "\32\0\4\0\0\0\0\0"
-    "DATA_MANAGER_TABLE.Monster"
-    "name"
+      {::_pbi::TcParser::GetTable<::DATA_MANAGER_TABLE::StringData>()},
+      {::_pbi::TcParser::GetTable<::DATA_MANAGER_TABLE::RewardItemGroup>()},
+  }},
+  {{
   }},
 };
 PROTOBUF_NOINLINE void Monster::Clear() {
@@ -722,13 +739,20 @@ PROTOBUF_NOINLINE void Monster::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _impl_._has_bits_[0];
-  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    _impl_.name_.ClearNonDefaultToEmpty();
+  if (BatchCheckHasBit(cached_has_bits, 0x00000003U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
+      ABSL_DCHECK(_impl_.name_ != nullptr);
+      _impl_.name_->Clear();
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      ABSL_DCHECK(_impl_.rewardgroupid_ != nullptr);
+      _impl_.rewardgroupid_->Clear();
+    }
   }
-  if (BatchCheckHasBit(cached_has_bits, 0x0000007eU)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000007cU)) {
     ::memset(&_impl_.monsterid_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.rewarditemid_) -
-        reinterpret_cast<char*>(&_impl_.monsterid_)) + sizeof(_impl_.rewarditemid_));
+        reinterpret_cast<char*>(&_impl_.movespeed_) -
+        reinterpret_cast<char*>(&_impl_.monsterid_)) + sizeof(_impl_.movespeed_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -754,7 +778,7 @@ PROTOBUF_NOINLINE void Monster::Clear() {
 
   cached_has_bits = this_._impl_._has_bits_[0];
   // int32 monsterId = 1;
-  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
     if (this_._internal_monsterid() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<1>(
@@ -762,18 +786,15 @@ PROTOBUF_NOINLINE void Monster::Clear() {
     }
   }
 
-  // string name = 2;
+  // .DATA_MANAGER_TABLE.StringData name = 2;
   if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    if (!this_._internal_name().empty()) {
-      const ::std::string& _s = this_._internal_name();
-      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "DATA_MANAGER_TABLE.Monster.name");
-      target = stream->WriteStringMaybeAliased(2, _s, target);
-    }
+    target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+        2, *this_._impl_.name_, this_._impl_.name_->GetCachedSize(), target,
+        stream);
   }
 
   // int32 hp = 3;
-  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
     if (this_._internal_hp() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<3>(
@@ -782,7 +803,7 @@ PROTOBUF_NOINLINE void Monster::Clear() {
   }
 
   // int32 atk = 4;
-  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
     if (this_._internal_atk() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<4>(
@@ -791,7 +812,7 @@ PROTOBUF_NOINLINE void Monster::Clear() {
   }
 
   // int32 def = 5;
-  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
     if (this_._internal_def() != 0) {
       target =
           ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<5>(
@@ -800,7 +821,7 @@ PROTOBUF_NOINLINE void Monster::Clear() {
   }
 
   // float moveSpeed = 6;
-  if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+  if (CheckHasBit(cached_has_bits, 0x00000040U)) {
     if (::absl::bit_cast<::uint32_t>(this_._internal_movespeed()) != 0) {
       target = stream->EnsureSpace(target);
       target = ::_pbi::WireFormatLite::WriteFloatToArray(
@@ -808,13 +829,11 @@ PROTOBUF_NOINLINE void Monster::Clear() {
     }
   }
 
-  // int32 rewardItemId = 7;
-  if (CheckHasBit(cached_has_bits, 0x00000040U)) {
-    if (this_._internal_rewarditemid() != 0) {
-      target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<7>(
-              stream, this_._internal_rewarditemid(), target);
-    }
+  // .DATA_MANAGER_TABLE.RewardItemGroup RewardGroupId = 7;
+  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+    target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+        7, *this_._impl_.rewardgroupid_, this_._impl_.rewardgroupid_->GetCachedSize(), target,
+        stream);
   }
 
   if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
@@ -843,52 +862,48 @@ PROTOBUF_NOINLINE void Monster::Clear() {
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x0000007fU)) {
-    // string name = 2;
+    // .DATA_MANAGER_TABLE.StringData name = 2;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (!this_._internal_name().empty()) {
-        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                        this_._internal_name());
-      }
+      total_size += 1 +
+                    ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.name_);
+    }
+    // .DATA_MANAGER_TABLE.RewardItemGroup RewardGroupId = 7;
+    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      total_size += 1 +
+                    ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.rewardgroupid_);
     }
     // int32 monsterId = 1;
-    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
       if (this_._internal_monsterid() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_monsterid());
       }
     }
     // int32 hp = 3;
-    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
       if (this_._internal_hp() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_hp());
       }
     }
     // int32 atk = 4;
-    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
       if (this_._internal_atk() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_atk());
       }
     }
     // int32 def = 5;
-    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
       if (this_._internal_def() != 0) {
         total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
             this_._internal_def());
       }
     }
     // float moveSpeed = 6;
-    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
       if (::absl::bit_cast<::uint32_t>(this_._internal_movespeed()) != 0) {
         total_size += 5;
-      }
-    }
-    // int32 rewardItemId = 7;
-    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
-      if (this_._internal_rewarditemid() != 0) {
-        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-            this_._internal_rewarditemid());
       }
     }
   }
@@ -904,6 +919,7 @@ void Monster::MergeImpl(::google::protobuf::MessageLite& to_msg,
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     from.CheckHasBitConsistency();
   }
+  ::google::protobuf::Arena* arena = _this->GetArena();
   // @@protoc_insertion_point(class_specific_merge_from_start:DATA_MANAGER_TABLE.Monster)
   ABSL_DCHECK_NE(&from, _this);
   ::uint32_t cached_has_bits = 0;
@@ -912,42 +928,44 @@ void Monster::MergeImpl(::google::protobuf::MessageLite& to_msg,
   cached_has_bits = from._impl_._has_bits_[0];
   if (BatchCheckHasBit(cached_has_bits, 0x0000007fU)) {
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      if (!from._internal_name().empty()) {
-        _this->_internal_set_name(from._internal_name());
+      ABSL_DCHECK(from._impl_.name_ != nullptr);
+      if (_this->_impl_.name_ == nullptr) {
+        _this->_impl_.name_ = ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.name_);
       } else {
-        if (_this->_impl_.name_.IsDefault()) {
-          _this->_internal_set_name("");
-        }
+        _this->_impl_.name_->MergeFrom(*from._impl_.name_);
       }
     }
     if (CheckHasBit(cached_has_bits, 0x00000002U)) {
+      ABSL_DCHECK(from._impl_.rewardgroupid_ != nullptr);
+      if (_this->_impl_.rewardgroupid_ == nullptr) {
+        _this->_impl_.rewardgroupid_ = ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.rewardgroupid_);
+      } else {
+        _this->_impl_.rewardgroupid_->MergeFrom(*from._impl_.rewardgroupid_);
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
       if (from._internal_monsterid() != 0) {
         _this->_impl_.monsterid_ = from._impl_.monsterid_;
       }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
       if (from._internal_hp() != 0) {
         _this->_impl_.hp_ = from._impl_.hp_;
       }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
       if (from._internal_atk() != 0) {
         _this->_impl_.atk_ = from._impl_.atk_;
       }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
       if (from._internal_def() != 0) {
         _this->_impl_.def_ = from._impl_.def_;
       }
     }
-    if (CheckHasBit(cached_has_bits, 0x00000020U)) {
+    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
       if (::absl::bit_cast<::uint32_t>(from._internal_movespeed()) != 0) {
         _this->_impl_.movespeed_ = from._impl_.movespeed_;
-      }
-    }
-    if (CheckHasBit(cached_has_bits, 0x00000040U)) {
-      if (from._internal_rewarditemid() != 0) {
-        _this->_impl_.rewarditemid_ = from._impl_.rewarditemid_;
       }
     }
   }
@@ -966,425 +984,17 @@ void Monster::CopyFrom(const Monster& from) {
 
 void Monster::InternalSwap(Monster* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
   using ::std::swap;
-  auto* arena = GetArena();
-  ABSL_DCHECK_EQ(arena, other->GetArena());
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(Monster, _impl_.rewarditemid_)
-      + sizeof(Monster::_impl_.rewarditemid_)
-      - PROTOBUF_FIELD_OFFSET(Monster, _impl_.monsterid_)>(
-          reinterpret_cast<char*>(&_impl_.monsterid_),
-          reinterpret_cast<char*>(&other->_impl_.monsterid_));
+      PROTOBUF_FIELD_OFFSET(Monster, _impl_.movespeed_)
+      + sizeof(Monster::_impl_.movespeed_)
+      - PROTOBUF_FIELD_OFFSET(Monster, _impl_.name_)>(
+          reinterpret_cast<char*>(&_impl_.name_),
+          reinterpret_cast<char*>(&other->_impl_.name_));
 }
 
 ::google::protobuf::Metadata Monster::GetMetadata() const {
-  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
-}
-// ===================================================================
-
-class MonsterDrop::_Internal {
- public:
-  using HasBits =
-      decltype(::std::declval<MonsterDrop>()._impl_._has_bits_);
-  static constexpr ::int32_t kHasBitsOffset =
-      8 * PROTOBUF_FIELD_OFFSET(MonsterDrop, _impl_._has_bits_);
-};
-
-MonsterDrop::MonsterDrop(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(arena, MonsterDrop_class_data_.base()) {
-#else   // PROTOBUF_CUSTOM_VTABLE
-    : ::google::protobuf::Message(arena) {
-#endif  // PROTOBUF_CUSTOM_VTABLE
-  SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:DATA_MANAGER_TABLE.MonsterDrop)
-}
-PROTOBUF_NDEBUG_INLINE MonsterDrop::Impl_::Impl_(
-    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
-    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
-    [[maybe_unused]] const ::DATA_MANAGER_TABLE::MonsterDrop& from_msg)
-      : _has_bits_{from._has_bits_},
-        _cached_size_{0} {}
-
-MonsterDrop::MonsterDrop(
-    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
-    const MonsterDrop& from)
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-    : ::google::protobuf::Message(arena, MonsterDrop_class_data_.base()) {
-#else   // PROTOBUF_CUSTOM_VTABLE
-    : ::google::protobuf::Message(arena) {
-#endif  // PROTOBUF_CUSTOM_VTABLE
-  MonsterDrop* const _this = this;
-  (void)_this;
-  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
-      from._internal_metadata_);
-  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
-  ::uint32_t cached_has_bits = _impl_._has_bits_[0];
-  _impl_.monsterid_ = (CheckHasBit(cached_has_bits, 0x00000001U))
-                ? ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.monsterid_)
-                : nullptr;
-  ::memcpy(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, itemid_),
-           reinterpret_cast<const char*>(&from._impl_) +
-               offsetof(Impl_, itemid_),
-           offsetof(Impl_, maxcount_) -
-               offsetof(Impl_, itemid_) +
-               sizeof(Impl_::maxcount_));
-
-  // @@protoc_insertion_point(copy_constructor:DATA_MANAGER_TABLE.MonsterDrop)
-}
-PROTOBUF_NDEBUG_INLINE MonsterDrop::Impl_::Impl_(
-    [[maybe_unused]] ::google::protobuf::internal::InternalVisibility visibility,
-    [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
-      : _cached_size_{0} {}
-
-inline void MonsterDrop::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
-  new (&_impl_) Impl_(internal_visibility(), arena);
-  ::memset(reinterpret_cast<char*>(&_impl_) +
-               offsetof(Impl_, monsterid_),
-           0,
-           offsetof(Impl_, maxcount_) -
-               offsetof(Impl_, monsterid_) +
-               sizeof(Impl_::maxcount_));
-}
-MonsterDrop::~MonsterDrop() {
-  // @@protoc_insertion_point(destructor:DATA_MANAGER_TABLE.MonsterDrop)
-  SharedDtor(*this);
-}
-inline void MonsterDrop::SharedDtor(MessageLite& self) {
-  MonsterDrop& this_ = static_cast<MonsterDrop&>(self);
-  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
-    this_.CheckHasBitConsistency();
-  }
-  this_._internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
-  ABSL_DCHECK(this_.GetArena() == nullptr);
-  delete this_._impl_.monsterid_;
-  this_._impl_.~Impl_();
-}
-
-inline void* PROTOBUF_NONNULL MonsterDrop::PlacementNew_(
-    const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
-    ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
-  return ::new (mem) MonsterDrop(arena);
-}
-constexpr auto MonsterDrop::InternalNewImpl_() {
-  return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(MonsterDrop),
-                                            alignof(MonsterDrop));
-}
-constexpr auto MonsterDrop::InternalGenerateClassData_() {
-  return ::google::protobuf::internal::ClassDataFull{
-      ::google::protobuf::internal::ClassData{
-          &_MonsterDrop_default_instance_._instance,
-          &_table_.header,
-          nullptr,  // IsInitialized
-          &MonsterDrop::MergeImpl,
-          ::google::protobuf::Message::GetNewImpl<MonsterDrop>(),
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-          &MonsterDrop::SharedDtor,
-          ::google::protobuf::Message::GetClearImpl<MonsterDrop>(), &MonsterDrop::ByteSizeLong,
-              &MonsterDrop::_InternalSerialize,
-#endif  // PROTOBUF_CUSTOM_VTABLE
-          PROTOBUF_FIELD_OFFSET(MonsterDrop, _impl_._cached_size_),
-          false,
-      },
-      &MonsterDrop::kDescriptorMethods,
-      &descriptor_table_MonsterTable_2eproto,
-      nullptr,  // tracker
-  };
-}
-
-PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
-    ::google::protobuf::internal::ClassDataFull MonsterDrop_class_data_ =
-        MonsterDrop::InternalGenerateClassData_();
-
-PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
-MonsterDrop::GetClassData() const {
-  ::google::protobuf::internal::PrefetchToLocalCache(&MonsterDrop_class_data_);
-  ::google::protobuf::internal::PrefetchToLocalCache(MonsterDrop_class_data_.tc_table);
-  return MonsterDrop_class_data_.base();
-}
-PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 5, 1, 0, 2>
-MonsterDrop::_table_ = {
-  {
-    PROTOBUF_FIELD_OFFSET(MonsterDrop, _impl_._has_bits_),
-    0, // no _extensions_
-    5, 56,  // max_field_number, fast_idx_mask
-    offsetof(decltype(_table_), field_lookup_table),
-    4294967264,  // skipmap
-    offsetof(decltype(_table_), field_entries),
-    5,  // num_field_entries
-    1,  // num_aux_entries
-    offsetof(decltype(_table_), aux_entries),
-    MonsterDrop_class_data_.base(),
-    nullptr,  // post_loop_handler
-    ::_pbi::TcParser::GenericFallback,  // fallback
-    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::DATA_MANAGER_TABLE::MonsterDrop>(),  // to_prefetch
-    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
-  }, {{
-    {::_pbi::TcParser::MiniParse, {}},
-    // .DATA_MANAGER_TABLE.MonsterDrop monsterId = 1;
-    {::_pbi::TcParser::FastMtS1,
-     {10, 0, 0,
-      PROTOBUF_FIELD_OFFSET(MonsterDrop, _impl_.monsterid_)}},
-    // int32 itemId = 2;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(MonsterDrop, _impl_.itemid_), 1>(),
-     {16, 1, 0,
-      PROTOBUF_FIELD_OFFSET(MonsterDrop, _impl_.itemid_)}},
-    // float dropRate = 3;
-    {::_pbi::TcParser::FastF32S1,
-     {29, 2, 0,
-      PROTOBUF_FIELD_OFFSET(MonsterDrop, _impl_.droprate_)}},
-    // int32 minCount = 4;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(MonsterDrop, _impl_.mincount_), 3>(),
-     {32, 3, 0,
-      PROTOBUF_FIELD_OFFSET(MonsterDrop, _impl_.mincount_)}},
-    // int32 maxCount = 5;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(MonsterDrop, _impl_.maxcount_), 4>(),
-     {40, 4, 0,
-      PROTOBUF_FIELD_OFFSET(MonsterDrop, _impl_.maxcount_)}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
-  }}, {{
-    65535, 65535
-  }}, {{
-    // .DATA_MANAGER_TABLE.MonsterDrop monsterId = 1;
-    {PROTOBUF_FIELD_OFFSET(MonsterDrop, _impl_.monsterid_), _Internal::kHasBitsOffset + 0, 0, (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
-    // int32 itemId = 2;
-    {PROTOBUF_FIELD_OFFSET(MonsterDrop, _impl_.itemid_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
-    // float dropRate = 3;
-    {PROTOBUF_FIELD_OFFSET(MonsterDrop, _impl_.droprate_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kFloat)},
-    // int32 minCount = 4;
-    {PROTOBUF_FIELD_OFFSET(MonsterDrop, _impl_.mincount_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
-    // int32 maxCount = 5;
-    {PROTOBUF_FIELD_OFFSET(MonsterDrop, _impl_.maxcount_), _Internal::kHasBitsOffset + 4, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
-  }},
-  {{
-      {::_pbi::TcParser::GetTable<::DATA_MANAGER_TABLE::MonsterDrop>()},
-  }},
-  {{
-  }},
-};
-PROTOBUF_NOINLINE void MonsterDrop::Clear() {
-// @@protoc_insertion_point(message_clear_start:DATA_MANAGER_TABLE.MonsterDrop)
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  cached_has_bits = _impl_._has_bits_[0];
-  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    ABSL_DCHECK(_impl_.monsterid_ != nullptr);
-    _impl_.monsterid_->Clear();
-  }
-  if (BatchCheckHasBit(cached_has_bits, 0x0000001eU)) {
-    ::memset(&_impl_.itemid_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.maxcount_) -
-        reinterpret_cast<char*>(&_impl_.itemid_)) + sizeof(_impl_.maxcount_));
-  }
-  _impl_._has_bits_.Clear();
-  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
-}
-
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL MonsterDrop::_InternalSerialize(
-    const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
-    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
-  const MonsterDrop& this_ = static_cast<const MonsterDrop&>(base);
-#else   // PROTOBUF_CUSTOM_VTABLE
-::uint8_t* PROTOBUF_NONNULL MonsterDrop::_InternalSerialize(
-    ::uint8_t* PROTOBUF_NONNULL target,
-    ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
-  const MonsterDrop& this_ = *this;
-#endif  // PROTOBUF_CUSTOM_VTABLE
-  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
-    this_.CheckHasBitConsistency();
-  }
-  // @@protoc_insertion_point(serialize_to_array_start:DATA_MANAGER_TABLE.MonsterDrop)
-  ::uint32_t cached_has_bits = 0;
-  (void)cached_has_bits;
-
-  cached_has_bits = this_._impl_._has_bits_[0];
-  // .DATA_MANAGER_TABLE.MonsterDrop monsterId = 1;
-  if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-    target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-        1, *this_._impl_.monsterid_, this_._impl_.monsterid_->GetCachedSize(), target,
-        stream);
-  }
-
-  // int32 itemId = 2;
-  if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-    if (this_._internal_itemid() != 0) {
-      target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<2>(
-              stream, this_._internal_itemid(), target);
-    }
-  }
-
-  // float dropRate = 3;
-  if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-    if (::absl::bit_cast<::uint32_t>(this_._internal_droprate()) != 0) {
-      target = stream->EnsureSpace(target);
-      target = ::_pbi::WireFormatLite::WriteFloatToArray(
-          3, this_._internal_droprate(), target);
-    }
-  }
-
-  // int32 minCount = 4;
-  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-    if (this_._internal_mincount() != 0) {
-      target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<4>(
-              stream, this_._internal_mincount(), target);
-    }
-  }
-
-  // int32 maxCount = 5;
-  if (CheckHasBit(cached_has_bits, 0x00000010U)) {
-    if (this_._internal_maxcount() != 0) {
-      target =
-          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<5>(
-              stream, this_._internal_maxcount(), target);
-    }
-  }
-
-  if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
-    target =
-        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-            this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:DATA_MANAGER_TABLE.MonsterDrop)
-  return target;
-}
-
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t MonsterDrop::ByteSizeLong(const MessageLite& base) {
-  const MonsterDrop& this_ = static_cast<const MonsterDrop&>(base);
-#else   // PROTOBUF_CUSTOM_VTABLE
-::size_t MonsterDrop::ByteSizeLong() const {
-  const MonsterDrop& this_ = *this;
-#endif  // PROTOBUF_CUSTOM_VTABLE
-  // @@protoc_insertion_point(message_byte_size_start:DATA_MANAGER_TABLE.MonsterDrop)
-  ::size_t total_size = 0;
-
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void)cached_has_bits;
-
-  ::_pbi::Prefetch5LinesFrom7Lines(&this_);
-  cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
-    // .DATA_MANAGER_TABLE.MonsterDrop monsterId = 1;
-    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      total_size += 1 +
-                    ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.monsterid_);
-    }
-    // int32 itemId = 2;
-    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (this_._internal_itemid() != 0) {
-        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-            this_._internal_itemid());
-      }
-    }
-    // float dropRate = 3;
-    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (::absl::bit_cast<::uint32_t>(this_._internal_droprate()) != 0) {
-        total_size += 5;
-      }
-    }
-    // int32 minCount = 4;
-    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-      if (this_._internal_mincount() != 0) {
-        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-            this_._internal_mincount());
-      }
-    }
-    // int32 maxCount = 5;
-    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
-      if (this_._internal_maxcount() != 0) {
-        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-            this_._internal_maxcount());
-      }
-    }
-  }
-  return this_.MaybeComputeUnknownFieldsSize(total_size,
-                                             &this_._impl_._cached_size_);
-}
-
-void MonsterDrop::MergeImpl(::google::protobuf::MessageLite& to_msg,
-                            const ::google::protobuf::MessageLite& from_msg) {
-   auto* const _this =
-      static_cast<MonsterDrop*>(&to_msg);
-  auto& from = static_cast<const MonsterDrop&>(from_msg);
-  if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
-    from.CheckHasBitConsistency();
-  }
-  ::google::protobuf::Arena* arena = _this->GetArena();
-  // @@protoc_insertion_point(class_specific_merge_from_start:DATA_MANAGER_TABLE.MonsterDrop)
-  ABSL_DCHECK_NE(&from, _this);
-  ::uint32_t cached_has_bits = 0;
-  (void)cached_has_bits;
-
-  cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x0000001fU)) {
-    if (CheckHasBit(cached_has_bits, 0x00000001U)) {
-      ABSL_DCHECK(from._impl_.monsterid_ != nullptr);
-      if (_this->_impl_.monsterid_ == nullptr) {
-        _this->_impl_.monsterid_ = ::google::protobuf::Message::CopyConstruct(arena, *from._impl_.monsterid_);
-      } else {
-        _this->_impl_.monsterid_->MergeFrom(*from._impl_.monsterid_);
-      }
-    }
-    if (CheckHasBit(cached_has_bits, 0x00000002U)) {
-      if (from._internal_itemid() != 0) {
-        _this->_impl_.itemid_ = from._impl_.itemid_;
-      }
-    }
-    if (CheckHasBit(cached_has_bits, 0x00000004U)) {
-      if (::absl::bit_cast<::uint32_t>(from._internal_droprate()) != 0) {
-        _this->_impl_.droprate_ = from._impl_.droprate_;
-      }
-    }
-    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
-      if (from._internal_mincount() != 0) {
-        _this->_impl_.mincount_ = from._impl_.mincount_;
-      }
-    }
-    if (CheckHasBit(cached_has_bits, 0x00000010U)) {
-      if (from._internal_maxcount() != 0) {
-        _this->_impl_.maxcount_ = from._impl_.maxcount_;
-      }
-    }
-  }
-  _this->_impl_._has_bits_[0] |= cached_has_bits;
-  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
-      from._internal_metadata_);
-}
-
-void MonsterDrop::CopyFrom(const MonsterDrop& from) {
-  // @@protoc_insertion_point(class_specific_copy_from_start:DATA_MANAGER_TABLE.MonsterDrop)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-
-void MonsterDrop::InternalSwap(MonsterDrop* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
-  using ::std::swap;
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
-  ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(MonsterDrop, _impl_.maxcount_)
-      + sizeof(MonsterDrop::_impl_.maxcount_)
-      - PROTOBUF_FIELD_OFFSET(MonsterDrop, _impl_.monsterid_)>(
-          reinterpret_cast<char*>(&_impl_.monsterid_),
-          reinterpret_cast<char*>(&other->_impl_.monsterid_));
-}
-
-::google::protobuf::Metadata MonsterDrop::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)
