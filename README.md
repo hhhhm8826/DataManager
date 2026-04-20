@@ -29,6 +29,13 @@ $ npm run build:win
 
 # For macOS (Currently not supported)
 $ npm run build:mac
+```
+
+### Start
+
+```bash
+.\dist\win-unpacked\data-manager.exe
+```
 
 ---
 
