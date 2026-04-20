@@ -8,6 +8,13 @@ const STORE_CWD = app.isPackaged
   ? path.dirname(app.getPath('exe'))
   : app.getAppPath()
 
+// 상대경로는 STORE_CWD 기준으로 절대경로로 변환
+function resolvePath(p: string): string {
+  if (!p) return p
+  if (path.isAbsolute(p)) return p
+  return path.resolve(STORE_CWD, p)
+}
+
 const DEFAULT_SETTINGS: AppSettings = {
   protoDir: '',
   excelDir: '',
@@ -24,11 +31,11 @@ const store = new Store<AppSettings>({
 export class SettingsService {
   get(): AppSettings {
     return {
-      protoDir: store.get('protoDir'),
-      excelDir: store.get('excelDir'),
-      jsonDir: store.get('jsonDir'),
-      outputDirs: store.get('outputDirs'),
-      protocPath: store.get('protocPath')
+      protoDir: resolvePath(store.get('protoDir')),
+      excelDir: resolvePath(store.get('excelDir')),
+      jsonDir: resolvePath(store.get('jsonDir')),
+      outputDirs: store.get('outputDirs').map((o) => ({ ...o, dir: resolvePath(o.dir) })),
+      protocPath: resolvePath(store.get('protocPath'))
     }
   }
 

@@ -54,6 +54,14 @@ export function TableCreator(): React.JSX.Element {
   const [editTarget, setEditTarget] = useState<ProtoMessage | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [confirmDeleteMsg, setConfirmDeleteMsg] = useState<ProtoMessage | null>(null)
+  const [expandedTables, setExpandedTables] = useState<Set<string>>(new Set())
+
+  const toggleExpand = (key: string): void =>
+    setExpandedTables((prev) => {
+      const next = new Set(prev)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
+    })
 
   // 폼 상태
   const [tableName, setTableName] = useState('')
@@ -254,39 +262,70 @@ export function TableCreator(): React.JSX.Element {
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th>테이블 이름</th>
-                      <th>컬럼 수</th>
-                      <th>PK</th>
-                      <th style={{ width: 150 }}></th>
+                      <th style={{ width: '35%' }}>테이블 이름</th>
+                      <th>PK / Key</th>
+                      <th style={{ width: '20%' }}></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {msgs.map((msg) => (
-                      <>
-                        <tr key={msg.name}>
-                          <td>{msg.name}</td>
-                          <td>{msg.fields.length}</td>
-                          <td style={{ color: '#6fcf97', fontSize: 12 }}>{msg.pkFields.join(', ')}</td>
-                          <td>
-                            <div style={{ display: 'flex', gap: 6 }}>
-                              <button className="btn btn-ghost" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => openEdit(msg)}>✏️ 수정</button>
-                              <button className="btn btn-danger" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => setConfirmDeleteMsg(msg)}>🗑 삭제</button>
-                            </div>
-                          </td>
-                        </tr>
-                        {confirmDeleteMsg?.name === msg.name && confirmDeleteMsg?.sourceFile === msg.sourceFile && (
-                          <tr key={`${msg.name}__confirm`}>
-                            <td colSpan={4} style={{ background: '#2d1515', padding: '8px 12px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
-                                <span style={{ color: '#fca5a5' }}>'​{msg.name}'을 정말 삭제하시겠습니까?</span>
-                                <button className="btn btn-danger" style={{ padding: '3px 12px', fontSize: 12 }} onClick={() => handleDelete(msg)}>삭제</button>
-                                <button className="btn btn-ghost" style={{ padding: '3px 12px', fontSize: 12 }} onClick={() => setConfirmDeleteMsg(null)}>취소</button>
+                    {msgs.map((msg) => {
+                      const expandKey = `${protoFile}::${msg.name}`
+                      const isExpanded = expandedTables.has(expandKey)
+                      return (
+                        <>
+                          <tr key={msg.name}>
+                            <td
+                              style={{ cursor: 'pointer', userSelect: 'none' }}
+                              onClick={() => toggleExpand(expandKey)}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <span style={{ fontSize: 10, color: '#6b7280', minWidth: 10 }}>{isExpanded ? '▼' : '▶'}</span>
+                                <span>{msg.name}</span>
+                              </div>
+                            </td>
+                            <td style={{ fontSize: 12 }}>
+                              {msg.pkFields.length > 0 && <span style={{ color: '#f0c040' }}>PK: {msg.pkFields.join(', ')}</span>}
+                              {msg.keyFields && msg.keyFields.length > 0 && <span style={{ color: '#4dbb88' }}>Key: {msg.keyFields.join(', ')}</span>}
+                            </td>
+                            <td style={{ textAlign: 'center' }}>
+                              <div style={{ display: 'flex', justifyContent: 'center', gap: 6 }}>
+                                <button className="btn btn-ghost" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => openEdit(msg)}>✏️ 수정</button>
+                                <button className="btn btn-danger" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => setConfirmDeleteMsg(msg)}>🗑 삭제</button>
                               </div>
                             </td>
                           </tr>
-                        )}
-                      </>
-                    ))}
+                          {confirmDeleteMsg?.name === msg.name && confirmDeleteMsg?.sourceFile === msg.sourceFile && (
+                            <tr key={`${msg.name}__confirm`}>
+                              <td colSpan={3} style={{ background: '#2d1515', padding: '8px 12px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+                                  <span style={{ color: '#fca5a5' }}>'​{msg.name}'을 정말 삭제하시겠습니까?</span>
+                                  <button className="btn btn-danger" style={{ padding: '3px 12px', fontSize: 12 }} onClick={() => handleDelete(msg)}>삭제</button>
+                                  <button className="btn btn-ghost" style={{ padding: '3px 12px', fontSize: 12 }} onClick={() => setConfirmDeleteMsg(null)}>취소</button>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                          {isExpanded && (
+                            <tr key={`${msg.name}__fields`}>
+                              <td colSpan={3} style={{ padding: '6px 12px 10px 28px', background: '#111827' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                  {msg.fields.map((f) => (
+                                    <span key={f.name} className="table-field-row">
+                                      <span className="table-field-badges">
+                                        {f.isPk && <span className="badge badge-pk" style={{ fontSize: 10 }}>PK</span>}
+                                        {f.isKey && <span className="badge badge-key" style={{ fontSize: 10 }}>Key</span>}
+                                      </span>
+                                      <span className="table-field-name">{f.name}</span>
+                                      <span className="table-field-type">{f.isRepeated ? `repeated ${f.type}` : f.type}</span>
+                                    </span>
+                                  ))}
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </>
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>

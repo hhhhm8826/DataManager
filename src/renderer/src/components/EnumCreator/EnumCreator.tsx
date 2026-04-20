@@ -20,8 +20,17 @@ export function EnumCreator(): React.JSX.Element {
   const { parsed, loadProto } = useAppStore()
   const [mode, setMode] = useState<Mode>('list')
   const [editTarget, setEditTarget] = useState<ProtoEnum | null>(null)
+  const [selectedFile, setSelectedFile] = useState<string | null>(null)
   const [expandedEnums, setExpandedEnums] = useState<Set<string>>(new Set())
   const [confirmDeleteEnum, setConfirmDeleteEnum] = useState<ProtoEnum | null>(null)
+
+  const selectFile = (file: string): void => {
+    setSelectedFile((prev) => (prev === file ? null : file))
+    setExpandedEnums(() => {
+      const enums = parsed?.enums.filter((e) => e.sourceFile === file) ?? []
+      return new Set(enums.map((e) => `${file}::${e.name}`))
+    })
+  }
 
   const toggleExpand = (key: string): void => {
     setExpandedEnums((prev) => {
@@ -181,84 +190,118 @@ export function EnumCreator(): React.JSX.Element {
         {mode === 'list' && (
           enumGroups.length === 0
             ? <div className="card"><p className="empty-state">등록된 Enum이 없습니다. proto 디렉토리를 설정하거나 Enum을 추가하세요.</p></div>
-            : enumGroups.map(([sourceFile, enums]) => (
-              <div className="card" key={sourceFile}>
-                <div className="card-title" style={{ color: '#a0c4ff', fontSize: 13 }}>{sourceFile}</div>
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>Enum 이름</th>
-                      <th>값 개수</th>
-                      <th style={{ width: 150 }}></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {enums.map((e) => {
-                      const expandKey = `${sourceFile}::${e.name}`
-                      const isExpanded = expandedEnums.has(expandKey)
+            : (
+              <>
+                {/* 파일 선택 목록 */}
+                <div className="card" style={{ marginBottom: 12 }}>
+                  <div className="card-title" style={{ fontSize: 13, marginBottom: 10 }}>Enum 파일 선택</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {enumGroups.map(([sourceFile, enums]) => {
+                      const isSelected = selectedFile === sourceFile
                       return (
-                        <>
-                          <tr key={e.name}>
-                            <td
-                              style={{ cursor: 'pointer', userSelect: 'none' }}
-                              onClick={() => toggleExpand(expandKey)}
-                            >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <span style={{ fontSize: 10, color: '#6b7280', minWidth: 10 }}>{isExpanded ? '▼' : '▶'}</span>
-                                <span>{e.name}</span>
-                              </div>
-                            </td>
-                            <td>{e.values.length}</td>
-                            <td>
-                              <div style={{ display: 'flex', gap: 6 }}>
-                                <button className="btn btn-ghost" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => openEdit(e)}>✏️ 수정</button>
-                                <button className="btn btn-danger" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => setConfirmDeleteEnum(e)}>🗑 삭제</button>
-                              </div>
-                            </td>
-                          </tr>
-                          {confirmDeleteEnum?.name === e.name && confirmDeleteEnum?.sourceFile === e.sourceFile && (
-                            <tr key={`${e.name}__confirm`}>
-                              <td colSpan={3} style={{ background: '#2d1515', padding: '8px 12px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
-                                  <span style={{ color: '#fca5a5' }}>'​{e.name}'을 정말 삭제하시겠습니까?</span>
-                                  <button className="btn btn-danger" style={{ padding: '3px 12px', fontSize: 12 }} onClick={() => handleDelete(e)}>삭제</button>
-                                  <button className="btn btn-ghost" style={{ padding: '3px 12px', fontSize: 12 }} onClick={() => setConfirmDeleteEnum(null)}>취소</button>
-                                </div>
-                              </td>
-                            </tr>
-                          )}
-                          {isExpanded && (
-                            <tr key={`${e.name}__values`}>
-                              <td colSpan={3} style={{ padding: '6px 12px 10px 28px', background: '#111827' }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                                  {e.values.map((v) => (
-                                    <span key={v.name} style={{ fontSize: 12, color: '#d1d5db', display: 'flex', alignItems: 'center', gap: 8 }}>
-                                      <span style={{ color: '#a0c4ff', minWidth: 200 }}>{v.name}</span>
-                                      <span style={{ color: '#6b7280' }}>= {v.number}</span>
-                                    </span>
-                                  ))}
-                                </div>
-                              </td>
-                            </tr>
-                          )}
-                        </>
+                        <div
+                          key={sourceFile}
+                          onClick={() => selectFile(sourceFile)}
+                          style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: '8px 12px', borderRadius: 6, cursor: 'pointer', userSelect: 'none',
+                            background: isSelected ? '#1e3a5f' : '#1a2235',
+                            border: `1px solid ${isSelected ? '#4a90d9' : '#2a3a55'}`,
+                            transition: 'background 0.15s, border-color 0.15s'
+                          }}
+                        >
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ fontSize: 10, color: isSelected ? '#7ab3f0' : '#6b7280' }}>
+                              {isSelected ? '▼' : '▶'}
+                            </span>
+                            <span style={{ color: isSelected ? '#a0c4ff' : '#9ca3af', fontSize: 13 }}>{sourceFile}</span>
+                          </span>
+                          <span style={{ fontSize: 11, color: '#6b7280' }}>{enums.length}개</span>
+                        </div>
                       )
                     })}
-                  </tbody>
-                </table>
-              </div>
-            ))
+                  </div>
+                </div>
+
+                {/* 선택된 파일의 Enum 목록 */}
+                {selectedFile && (() => {
+                  const enums = enumGroups.find(([f]) => f === selectedFile)?.[1] ?? []
+                  return (
+                    <div className="card" key={selectedFile}>
+                      <div className="card-title" style={{ color: '#a0c4ff', fontSize: 13 }}>{selectedFile}</div>
+                      <table className="data-table">
+                        <thead>
+                          <tr>
+                            <th>Enum 이름</th>
+                            <th>값 개수</th>
+                            <th style={{ width: 150 }}></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {enums.map((e) => {
+                            const expandKey = `${selectedFile}::${e.name}`
+                            const isExpanded = expandedEnums.has(expandKey)
+                            return (
+                              <>
+                                <tr key={e.name}>
+                                  <td
+                                    style={{ cursor: 'pointer', userSelect: 'none' }}
+                                    onClick={() => toggleExpand(expandKey)}
+                                  >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                      <span style={{ fontSize: 10, color: '#6b7280', minWidth: 10 }}>{isExpanded ? '▼' : '▶'}</span>
+                                      <span>{e.name}</span>
+                                    </div>
+                                  </td>
+                                  <td>{e.values.length}</td>
+                                  <td>
+                                    <div style={{ display: 'flex', gap: 6 }}>
+                                      <button className="btn btn-ghost" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => openEdit(e)}>✏️ 수정</button>
+                                      <button className="btn btn-danger" style={{ padding: '3px 10px', fontSize: 12 }} onClick={() => setConfirmDeleteEnum(e)}>🗑 삭제</button>
+                                    </div>
+                                  </td>
+                                </tr>
+                                {confirmDeleteEnum?.name === e.name && confirmDeleteEnum?.sourceFile === e.sourceFile && (
+                                  <tr key={`${e.name}__confirm`}>
+                                    <td colSpan={3} style={{ background: '#2d1515', padding: '8px 12px' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+                                        <span style={{ color: '#fca5a5' }}>'​{e.name}'을 정말 삭제하시겠습니까?</span>
+                                        <button className="btn btn-danger" style={{ padding: '3px 12px', fontSize: 12 }} onClick={() => handleDelete(e)}>삭제</button>
+                                        <button className="btn btn-ghost" style={{ padding: '3px 12px', fontSize: 12 }} onClick={() => setConfirmDeleteEnum(null)}>취소</button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                )}
+                                {isExpanded && (
+                                  <tr key={`${e.name}__values`}>
+                                    <td colSpan={3} style={{ padding: '6px 12px 10px 28px', background: '#111827' }}>
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                        {e.values.map((v) => (
+                                          <span key={v.name} style={{ fontSize: 12, color: '#d1d5db', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <span style={{ color: '#a0c4ff', minWidth: 200 }}>{v.name}</span>
+                                            <span style={{ color: '#6b7280' }}>= {v.number}</span>
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </td>
+                                  </tr>
+                                )}
+                              </>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )
+                })()}
+              </>
+            )
         )}
 
         {/* ── 추가/수정 폼 ── */}
         {mode !== 'list' && (
           <div className="card">
             <div className="card-title">{mode === 'edit' ? `'${editTarget?.name}' 수정` : '새 Enum'}</div>
-
-            <div className="form-group">
-              <label className="form-label">Enum 이름</label>
-              <input className="form-input" placeholder="예: MonsterTypeEnum" value={enumName} onChange={(e) => setEnumName(e.target.value)} />
-            </div>
 
             <div className="form-group">
               <label className="form-label">저장 파일 (EnumType.proto)</label>
@@ -275,6 +318,11 @@ export function EnumCreator(): React.JSX.Element {
               {mode === 'add' && fileName.trim() && (
                 <span style={{ fontSize: 11, color: '#6fcf97' }}>→ {buildEnumFileName(fileName)} 에 저장됩니다</span>
               )}
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Enum 이름</label>
+              <input className="form-input" placeholder="예: MonsterTypeEnum" value={enumName} onChange={(e) => setEnumName(e.target.value)} />
               <span style={{ fontSize: 11, color: '#4b5563' }}>
                 _NONE=0 과 _MAX 값은 없으면 자동으로 추가됩니다.
               </span>
