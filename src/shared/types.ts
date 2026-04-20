@@ -5,6 +5,7 @@ export interface ProtoField {
   type: string // 'string' | 'int32' | 'int64' | 'bool' | 'float' | 'double' | 'bytes' | MessageName
   fieldNumber: number
   isPk: boolean
+  isKey: boolean
   isRepeated: boolean
   comment?: string
 }
@@ -13,6 +14,7 @@ export interface ProtoMessage {
   name: string
   fields: ProtoField[]
   pkFields: string[] // PK 필드 이름 목록 (합성키 지원)
+  keyFields: string[] // Key 필드 이름 목록 (배열 그룹화 기준)
   sourceFile: string
 }
 

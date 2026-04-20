@@ -13,6 +13,7 @@ interface FieldDraft {
   typeCategory: string  // 'primitive' | sourceFile
   fieldNumber: number
   isPk: boolean
+  isKey: boolean
   isRepeated: boolean
 }
 
@@ -30,7 +31,7 @@ function getTypeCategory(
 }
 
 function makeField(index: number): FieldDraft {
-  return { name: '', type: 'int32', typeCategory: 'primitive', fieldNumber: index + 1, isPk: false, isRepeated: false }
+  return { name: '', type: 'int32', typeCategory: 'primitive', fieldNumber: index + 1, isPk: false, isKey: false, isRepeated: false }
 }
 
 function messageToDrafts(msg: ProtoMessage, allEnums: ProtoEnum[], allMessages: ProtoMessage[]): FieldDraft[] {
@@ -40,6 +41,7 @@ function messageToDrafts(msg: ProtoMessage, allEnums: ProtoEnum[], allMessages: 
     typeCategory: getTypeCategory(f.type, allEnums, allMessages),
     fieldNumber: f.fieldNumber,
     isPk: f.isPk,
+    isKey: f.isKey,
     isRepeated: f.isRepeated,
   }))
 }
@@ -168,10 +170,18 @@ export function TableCreator(): React.JSX.Element {
     }
 
     setSaving(true)
+    const hasPk = fields.some((f) => f.isPk)
+    const hasKey = fields.some((f) => f.isKey)
+    if (hasPk && hasKey) {
+      toast.error('PK와 Key는 동시에 사용할 수 없습니다. 하나만 선택하세요.')
+      setSaving(false)
+      return
+    }
     const message: ProtoMessage = {
       name: tableName.trim(),
       fields: fields.map((f, idx): ProtoField => ({ ...f, fieldNumber: idx + 1, comment: '' })),
       pkFields: fields.filter((f) => f.isPk).map((f) => f.name),
+      keyFields: fields.filter((f) => f.isKey).map((f) => f.name),
       sourceFile: resolvedProtoFile,
     }
 
@@ -318,7 +328,10 @@ export function TableCreator(): React.JSX.Element {
             <label className="form-label" style={{ display: 'block', marginBottom: 8 }}>컬럼</label>
 
             <div className="columns-list">
-              {fields.map((field, i) => (
+              {(() => {
+                const tablePkMode = fields.some((f) => f.isPk)
+                const tableKeyMode = fields.some((f) => f.isKey)
+                return fields.map((field, i) => (
                 <div key={i} className="column-row">
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
                     <button className="btn btn-ghost" style={{ padding: '0 6px', lineHeight: '16px', fontSize: 11 }} onClick={() => moveField(i, -1)} disabled={i === 0} title="위로">▲</button>
@@ -380,8 +393,20 @@ export function TableCreator(): React.JSX.Element {
                     )}
                   </div>
                   <label className="checkbox-group" title="기본키(PK)">
-                    <input type="checkbox" checked={field.isPk} onChange={(e) => updateField(i, { isPk: e.target.checked })} />
+                    <input type="checkbox" checked={field.isPk} disabled={tableKeyMode}
+                      onChange={(e) => {
+                        if (e.target.checked) updateField(i, { isPk: true, isKey: false })
+                        else updateField(i, { isPk: false })
+                      }} />
                     PK
+                  </label>
+                  <label className="checkbox-group" title="모아서 배열로 (Key)">
+                    <input type="checkbox" checked={field.isKey} disabled={tablePkMode}
+                      onChange={(e) => {
+                        if (e.target.checked) updateField(i, { isKey: true, isPk: false })
+                        else updateField(i, { isKey: false })
+                      }} />
+                    Key
                   </label>
                   <label className="checkbox-group" title="repeated">
                     <input type="checkbox" checked={field.isRepeated} onChange={(e) => updateField(i, { isRepeated: e.target.checked })} />
@@ -389,7 +414,9 @@ export function TableCreator(): React.JSX.Element {
                   </label>
                   <button className="btn btn-danger" style={{ padding: '4px 10px', flexShrink: 0 }} onClick={() => removeField(i)} disabled={fields.length === 1}>✕</button>
                 </div>
-              ))}
+              ))
+              })()
+            }
             </div>
 
             <div className="toolbar">

@@ -24,16 +24,19 @@ function resolveInlineReferences(
   const msgNameSet = new Set(allMessageDefs.map((m) => m.name))
   const presentNames = new Set(results.map((r) => r.messageName))
 
-  // ── 원본 PK 인덱스 (임베드 전 원시 PK값 기준, 임베드 후에도 조회에 사용) ──
-  // key: msgName → { firstPk: string, entries: Array<{ rawKey: unknown, rowIdx: number }> }
-  const rawPkIndex = new Map<string, { firstPk: string; entries: { rawKey: unknown; rowIdx: number }[] }>()
+  // ── 원본 PK/Key 인덱스 (임베드 전 원시값 기준) ──
+  // key: msgName → { firstPk: string | null, firstKey: string | null, isKeyMode: boolean, entries: Array<{ rawKey: unknown, rowIdx: number }> }
+  const rawPkIndex = new Map<string, { firstPk: string | null; firstKey: string | null; isKeyMode: boolean; entries: { rawKey: unknown; rowIdx: number }[] }>()
   for (const result of results) {
     const msgDef = allMessageDefs.find((m) => m.name === result.messageName)
     if (!msgDef) continue
-    const firstPk = msgDef.pkFields[0]
-    if (!firstPk) continue
-    const entries = result.rows.map((row, idx) => ({ rawKey: row[firstPk], rowIdx: idx }))
-    rawPkIndex.set(result.messageName, { firstPk, entries })
+    const isKeyMode = msgDef.keyFields && msgDef.keyFields.length > 0
+    const firstPk = msgDef.pkFields[0] ?? null
+    const firstKey = (msgDef.keyFields && msgDef.keyFields[0]) ?? null
+    const indexField = isKeyMode ? firstKey : firstPk
+    if (!indexField) continue
+    const entries = result.rows.map((row, idx) => ({ rawKey: row[indexField], rowIdx: idx }))
+    rawPkIndex.set(result.messageName, { firstPk, firstKey, isKeyMode, entries })
   }
 
   // ── 임베드 진행 중인 행 배열 (처리 후 갱신) ──
@@ -101,12 +104,19 @@ function resolveInlineReferences(
         const refMsgDef = allMessageDefs.find((m) => m.name === field.type)
         if (!refMsgDef) continue
 
-        // 원본 PK 인덱스로 행 인덱스를 찾아 → 임베드 완료된 행을 가져옴
+        // 원본 PK/Key 인덱스로 행 인덱스를 찾아 → 임베드 완료된 행을 가져옴
         const pkIdx = rawPkIndex.get(field.type)
         if (!pkIdx) continue
         const refResolved = resolvedRows.get(field.type) ?? []
 
-        if (refMsgDef.pkFields.length > 1) {
+        if (pkIdx.isKeyMode) {
+          // Key 모드: Key 값이 일치하는 모든 행을 배열로
+          const matchIndices = pkIdx.entries
+            .filter((e) => pkMatch(e.rawKey, rawVal))
+            .map((e) => e.rowIdx)
+          const matches = matchIndices.map((i) => refResolved[i]).filter(Boolean)
+          if (matches.length > 0) newRow[field.name] = matches as unknown as ExcelRowData[string]
+        } else if (refMsgDef.pkFields.length > 1) {
           // 합성 PK: 첫 번째 PK가 일치하는 모든 행을 배열로
           const matchIndices = pkIdx.entries
             .filter((e) => pkMatch(e.rawKey, rawVal))

@@ -137,6 +137,7 @@ export function TableNode({ data }: NodeProps): React.JSX.Element {
               >
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   {field.isPk && <span className="badge badge-pk">PK</span>}
+                  {field.isKey && <span className="badge badge-key">Key</span>}
                   <span style={{ color: '#e0e0e0' }}>{field.name}</span>
                 </span>
                 <span

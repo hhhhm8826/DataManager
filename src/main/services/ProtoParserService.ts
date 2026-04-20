@@ -58,7 +58,8 @@ export class ProtoParserService {
       const body = match[2]
       const fields = this.parseFields(body)
       const pkFields = fields.filter((f) => f.isPk).map((f) => f.name)
-      messages.push({ name, fields, pkFields, sourceFile })
+      const keyFields = fields.filter((f) => f.isKey).map((f) => f.name)
+      messages.push({ name, fields, pkFields, keyFields, sourceFile })
     }
 
     return messages
@@ -68,14 +69,14 @@ export class ProtoParserService {
     const fields: ProtoField[] = []
     const lines = body.split('\n')
     let pendingPk = false
+    let pendingKey = false
 
     for (const rawLine of lines) {
       const line = rawLine.trim()
 
       if (line.startsWith('//')) {
-        if (line.includes('@PK')) {
-          pendingPk = true
-        }
+        if (line.includes('@PK')) pendingPk = true
+        if (line.includes('@Key')) pendingKey = true
         continue
       }
 
@@ -92,9 +93,11 @@ export class ProtoParserService {
           type,
           fieldNumber,
           isPk: pendingPk,
+          isKey: pendingKey,
           isRepeated
         })
         pendingPk = false
+        pendingKey = false
       }
     }
 
@@ -225,9 +228,9 @@ export class ProtoParserService {
 
     const fieldLines = message.fields
       .map((f) => {
-        const pkComment = f.isPk ? '  // @PK\n' : ''
+        const comment = f.isPk ? '  // @PK\n' : f.isKey ? '  // @Key\n' : ''
         const repeated = f.isRepeated ? 'repeated ' : ''
-        return `${pkComment}  ${repeated}${f.type} ${f.name} = ${f.fieldNumber};`
+        return `${comment}  ${repeated}${f.type} ${f.name} = ${f.fieldNumber};`
       })
       .join('\n')
 
