@@ -325,6 +325,9 @@ export function ExcelPanel(): React.JSX.Element {
             <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 12 }}>
               Excel 파일이 존재하는 시트만 표시됩니다. 시트 단위로 선택하여 JSON으로 내보냅니다.
             </p>
+            <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 12 }}>
+              Excel 파일 이름을 더블클릭하면 해당 파일이 열립니다.
+            </p>
 
             {loadingInfos ? (
               <p className="empty-state" style={{ padding: '16px 0' }}>로딩 중...</p>
@@ -355,7 +358,30 @@ export function ExcelPanel(): React.JSX.Element {
                           />
                         </td>
                         <td style={{ color: '#e0e0e0' }}>{s.msgName}</td>
-                        <td style={{ color: '#6fcf97', fontSize: 12 }}>{s.excelFile}</td>
+                        <td>
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 5,
+                              padding: '2px 8px',
+                              borderRadius: 4,
+                              border: '1px solid #2a4a2a',
+                              background: '#1a2e1a',
+                              color: '#6fcf97',
+                              fontSize: 12,
+                              cursor: 'pointer',
+                              userSelect: 'none',
+                              transition: 'background 0.15s',
+                            }}
+                            title={`더블클릭: ${s.excelFile} 열기`}
+                            onDoubleClick={() => ipcInvoke(IPC.SETTINGS_OPEN_DIR, s.excelPath)}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = '#223a22')}
+                            onMouseLeave={(e) => (e.currentTarget.style.background = '#1a2e1a')}
+                          >
+                            📄 {s.excelFile}
+                          </span>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

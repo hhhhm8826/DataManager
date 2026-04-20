@@ -6,7 +6,7 @@ import { excelService } from '../services/ExcelService'
 import { jsonService } from '../services/JsonService'
 import { settingsService } from '../services/SettingsService'
 import { protoParserService } from '../services/ProtoParserService'
-import type { IpcResult, ExcelReadResult, ExcelFileInfo, ExcelRowData } from '../../shared/types'
+import type { IpcResult, ExcelReadResult, ExcelFileInfo, ExcelRowData, ProtoMessage } from '../../shared/types'
 
 // ── 인라인 임베드 헬퍼 ────────────────────────────────────────────────────────
 
@@ -144,6 +144,45 @@ function resolveInlineReferences(
   }))
 }
 
+// ── PK 유효성 검사 ────────────────────────────────────────────────────────────
+
+function validatePrimaryKeys(
+  results: ExcelReadResult[],
+  allMessageDefs: ProtoMessage[]
+): string | null {
+  for (const result of results) {
+    const msgDef = allMessageDefs.find((m) => m.name === result.messageName)
+    if (!msgDef || msgDef.pkFields.length === 0) continue
+
+    const pkFields = msgDef.pkFields
+    const seen = new Set<string>()
+
+    for (let rowIndex = 0; rowIndex < result.rows.length; rowIndex++) {
+      const row = result.rows[rowIndex]
+
+      // 빈 값 체크
+      for (const pk of pkFields) {
+        const val = row[pk]
+        if (val === null || val === undefined || val === '') {
+          return `[${result.messageName}] ${rowIndex + 2}행: PK 필드 '${pk}'의 값이 비어있습니다.`
+        }
+      }
+
+      // 중복 체크 (단일 PK 또는 Composite Key)
+      const compositeKey = pkFields.map((pk) => String(row[pk])).join('\0')
+      if (seen.has(compositeKey)) {
+        const keyDisplay =
+          pkFields.length === 1
+            ? `'${pkFields[0]}' = ${row[pkFields[0]]}`
+            : pkFields.map((pk) => `${pk}=${row[pk]}`).join(', ')
+        return `[${result.messageName}] PK 중복 오류 (${rowIndex + 2}행): ${keyDisplay}`
+      }
+      seen.add(compositeKey)
+    }
+  }
+  return null
+}
+
 export function registerExcelIpc(): void {
   // proto 기반 Excel 파일 생성 (selectedProtoFiles 가 있으면 해당 파일만, 없으면 전체)
   // backup=true 이면 기존 파일을 {Name}_bak.xlsx 로 백업한 뒤 생성
@@ -251,7 +290,15 @@ export function registerExcelIpc(): void {
         }
       }
 
+      const allMessageDefs = settings.protoDir
+        ? protoParserService.parseDirectory(settings.protoDir).messages
+        : []
+
       const results = await excelService.readExcel(excelFilePath, allowedMessages)
+
+      const pkError = validatePrimaryKeys(results, allMessageDefs)
+      if (pkError) return { success: false, error: pkError }
+
       jsonService.exportExcelToJson(settings.jsonDir, results)
 
       return { success: true, data: results }
@@ -282,6 +329,10 @@ export function registerExcelIpc(): void {
           const rows = await excelService.readExcel(req.excelPath, req.sheets)
           allResults.push(...rows)
         }
+
+        // 1-1. PK 유효성 검사
+        const pkError = validatePrimaryKeys(allResults, allMessageDefs)
+        if (pkError) return { success: false, error: pkError }
 
         // 2. 인라인 임베드 처리
         const embedded: string[] = []

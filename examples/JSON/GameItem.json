@@ -12,5 +12,19 @@
     "maxStack": 1,
     "price": 100,
     "descriptions": "뉴비가 쓰는 검이다"
+  },
+  {
+    "itemId": 2,
+    "name": "뉴비의 단검",
+    "itemType": {
+      "itemType": "ItemType_EQUIPMENT",
+      "typeName": "장비",
+      "isTradable": false,
+      "iconPath": "D:\\icon\\icon.icon"
+    },
+    "rarity": "GradeType_NORMAL",
+    "maxStack": 1,
+    "price": 100,
+    "descriptions": "뉴비가 쓰는 단검이다"
   }
 ]

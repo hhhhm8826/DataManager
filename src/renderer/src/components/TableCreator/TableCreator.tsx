@@ -252,6 +252,13 @@ export function TableCreator(): React.JSX.Element {
       </div>
       <div className="page-body">
 
+        {/* ── PK / Key 설명 ── */}
+        <div style={{ display: 'flex', gap: 16, marginBottom: 12, fontSize: 12, color: '#6b7280' }}>
+          <span><span style={{ color: '#f0c040', fontWeight: 600 }}>PK</span> — Primary Key. 행을 고유하게 식별하는 기준 필드. 2개 이상이면 Composite Key로 동작합니다.</span>
+          <span style={{ color: '#4b5563' }}>|</span>
+          <span><span style={{ color: '#4dbb88', fontWeight: 600 }}>Key</span> — 같은 Key 값을 가진 행들을 배열로 묶어 그룹으로 사용합니다.</span>
+        </div>
+
         {/* ── 목록 뷰 ── */}
         {mode === 'list' && (
           protoGroups.length === 0
@@ -379,11 +386,11 @@ export function TableCreator(): React.JSX.Element {
                   <span style={{ width: 22, textAlign: 'center', color: '#6b7280', fontSize: 12, flexShrink: 0 }}>{i + 1}</span>
                   <input className="form-input" placeholder="필드 이름" value={field.name} onChange={(e) => updateField(i, { name: e.target.value })} />
                   {/* 두 단계 타입 선택 */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 140, flexShrink: 0 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 180, flexShrink: 0 }}>
                     {/* 1단계: 카테고리(파일) 선택 */}
                     <select
                       className="form-select"
-                      style={{ fontSize: 11, padding: '2px 4px' }}
+                      style={{ fontSize: 13, padding: '3px 6px' }}
                       value={field.typeCategory}
                       onChange={(e) => {
                         const cat = e.target.value
@@ -412,7 +419,7 @@ export function TableCreator(): React.JSX.Element {
                     {field.typeCategory === 'primitive' ? (
                       <select
                         className="form-select"
-                        style={{ fontSize: 11, padding: '2px 4px' }}
+                        style={{ fontSize: 13, padding: '3px 6px' }}
                         value={field.type}
                         onChange={(e) => updateField(i, { type: e.target.value })}
                       >
@@ -421,7 +428,7 @@ export function TableCreator(): React.JSX.Element {
                     ) : (
                       <select
                         className="form-select"
-                        style={{ fontSize: 11, padding: '2px 4px' }}
+                        style={{ fontSize: 13, padding: '3px 6px' }}
                         value={field.type}
                         onChange={(e) => updateField(i, { type: e.target.value })}
                       >
