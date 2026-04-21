@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package DATA_MANAGER_TABLE;
 option go_package = "./DATA_MANAGER_TABLE";
+import "StringTable.proto";
 import "TestEnumType.proto";
 
 message GoTest {
@@ -9,4 +10,11 @@ message GoTest {
   int32 ID = 1;
   TestType TestColumn = 2;
   int32 Test23 = 3;
+  int32 Test45 = 4;
+}
+
+message NameTest {
+  // @PK
+  int32 ID = 1;
+  StringData Name = 2;
 }

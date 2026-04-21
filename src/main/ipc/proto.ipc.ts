@@ -11,7 +11,7 @@ export function registerProtoIpc(): void {
     IPC.PROTO_LOAD,
     async (): Promise<IpcResult<ReturnType<typeof protoParserService.parseDirectory>>> => {
       try {
-        const settings = settingsService.get()
+        const settings = settingsService.getResolved()
         if (!settings.protoDir)
           return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
         const parsed = protoParserService.parseDirectory(settings.protoDir)
@@ -27,7 +27,7 @@ export function registerProtoIpc(): void {
     IPC.PROTO_ADD_MESSAGE,
     async (_event, message: ProtoMessage): Promise<IpcResult> => {
       try {
-        const settings = settingsService.get()
+        const settings = settingsService.getResolved()
         if (!settings.protoDir)
           return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
         if (!message.sourceFile || !message.sourceFile.endsWith('Table.proto')) {
@@ -54,7 +54,7 @@ export function registerProtoIpc(): void {
       payload: { sourceFile: string; oldName: string; message: ProtoMessage }
     ): Promise<IpcResult> => {
       try {
-        const settings = settingsService.get()
+        const settings = settingsService.getResolved()
         if (!settings.protoDir)
           return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
         const filePath = path.join(settings.protoDir, payload.sourceFile)
@@ -78,7 +78,7 @@ export function registerProtoIpc(): void {
     IPC.PROTO_DELETE_MESSAGE,
     async (_event, payload: { sourceFile: string; messageName: string }): Promise<IpcResult> => {
       try {
-        const settings = settingsService.get()
+        const settings = settingsService.getResolved()
         if (!settings.protoDir)
           return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
         const filePath = path.join(settings.protoDir, payload.sourceFile)
@@ -95,7 +95,7 @@ export function registerProtoIpc(): void {
     IPC.PROTO_ADD_ENUM,
     async (_event, payload: { fileName: string; protoEnum: ProtoEnum }): Promise<IpcResult> => {
       try {
-        const settings = settingsService.get()
+        const settings = settingsService.getResolved()
         if (!settings.protoDir)
           return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
         const filePath = path.join(settings.protoDir, payload.fileName)
@@ -116,7 +116,7 @@ export function registerProtoIpc(): void {
       payload: { sourceFile: string; oldName: string; protoEnum: ProtoEnum }
     ): Promise<IpcResult> => {
       try {
-        const settings = settingsService.get()
+        const settings = settingsService.getResolved()
         if (!settings.protoDir)
           return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
         const filePath = path.join(settings.protoDir, payload.sourceFile)
@@ -138,7 +138,7 @@ export function registerProtoIpc(): void {
     IPC.PROTO_DELETE_ENUM,
     async (_event, payload: { sourceFile: string; enumName: string }): Promise<IpcResult> => {
       try {
-        const settings = settingsService.get()
+        const settings = settingsService.getResolved()
         if (!settings.protoDir)
           return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
         const filePath = path.join(settings.protoDir, payload.sourceFile)

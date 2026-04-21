@@ -17,7 +17,7 @@ export function registerCodegenIpc(): void {
   // 특정 언어 코드 생성
   ipcMain.handle(IPC.CODEGEN_GENERATE, async (_event, language: string): Promise<IpcResult> => {
     try {
-      const settings = settingsService.get()
+      const settings = settingsService.getResolved()
       if (!settings.protocPath)
         return { success: false, error: 'protoc 경로가 설정되지 않았습니다.' }
       if (!settings.protoDir)
@@ -37,7 +37,7 @@ export function registerCodegenIpc(): void {
   // 설정된 모든 언어 일괄 생성
   ipcMain.handle(IPC.CODEGEN_GENERATE_ALL, async (): Promise<IpcResult<string[]>> => {
     try {
-      const settings = settingsService.get()
+      const settings = settingsService.getResolved()
       if (!settings.protocPath)
         return { success: false, error: 'protoc 경로가 설정되지 않았습니다.' }
       if (!settings.protoDir)
@@ -61,7 +61,7 @@ export function registerCodegenIpc(): void {
   // Unreal C++ 헤더 생성
   ipcMain.handle(IPC.CODEGEN_GENERATE_UNREAL, async (): Promise<IpcResult<string[]>> => {
     try {
-      const settings = settingsService.get()
+      const settings = settingsService.getResolved()
       if (!settings.protoDir)
         return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
       const unrealDir = settings.outputDirs.find((o) => o.language === 'unreal')?.dir

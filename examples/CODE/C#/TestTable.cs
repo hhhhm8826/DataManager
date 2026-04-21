@@ -25,13 +25,14 @@ namespace DATAMANAGERTABLE {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Cg9UZXN0VGFibGUucHJvdG8SEkRBVEFfTUFOQUdFUl9UQUJMRRoSVGVzdEVu",
-            "dW1UeXBlLnByb3RvIlYKBkdvVGVzdBIKCgJJRBgBIAEoBRIwCgpUZXN0Q29s",
+            "dW1UeXBlLnByb3RvImYKBkdvVGVzdBIKCgJJRBgBIAEoBRIwCgpUZXN0Q29s",
             "dW1uGAIgASgOMhwuREFUQV9NQU5BR0VSX1RBQkxFLlRlc3RUeXBlEg4KBlRl",
-            "c3QyMxgDIAEoBUIWWhQuL0RBVEFfTUFOQUdFUl9UQUJMRWIGcHJvdG8z"));
+            "c3QyMxgDIAEoBRIOCgZUZXN0NDUYBCABKAVCFloULi9EQVRBX01BTkFHRVJf",
+            "VEFCTEViBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::DATAMANAGERTABLE.TestEnumTypeReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::DATAMANAGERTABLE.GoTest), global::DATAMANAGERTABLE.GoTest.Parser, new[]{ "ID", "TestColumn", "Test23" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::DATAMANAGERTABLE.GoTest), global::DATAMANAGERTABLE.GoTest.Parser, new[]{ "ID", "TestColumn", "Test23", "Test45" }, null, null, null, null)
           }));
     }
     #endregion
@@ -76,6 +77,7 @@ namespace DATAMANAGERTABLE {
       iD_ = other.iD_;
       testColumn_ = other.testColumn_;
       test23_ = other.test23_;
+      test45_ = other.test45_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -124,6 +126,18 @@ namespace DATAMANAGERTABLE {
       }
     }
 
+    /// <summary>Field number for the "Test45" field.</summary>
+    public const int Test45FieldNumber = 4;
+    private int test45_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int Test45 {
+      get { return test45_; }
+      set {
+        test45_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -142,6 +156,7 @@ namespace DATAMANAGERTABLE {
       if (ID != other.ID) return false;
       if (TestColumn != other.TestColumn) return false;
       if (Test23 != other.Test23) return false;
+      if (Test45 != other.Test45) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -152,6 +167,7 @@ namespace DATAMANAGERTABLE {
       if (ID != 0) hash ^= ID.GetHashCode();
       if (TestColumn != global::DATAMANAGERTABLE.TestType.None) hash ^= TestColumn.GetHashCode();
       if (Test23 != 0) hash ^= Test23.GetHashCode();
+      if (Test45 != 0) hash ^= Test45.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -182,6 +198,10 @@ namespace DATAMANAGERTABLE {
         output.WriteRawTag(24);
         output.WriteInt32(Test23);
       }
+      if (Test45 != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(Test45);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -204,6 +224,10 @@ namespace DATAMANAGERTABLE {
         output.WriteRawTag(24);
         output.WriteInt32(Test23);
       }
+      if (Test45 != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(Test45);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -222,6 +246,9 @@ namespace DATAMANAGERTABLE {
       }
       if (Test23 != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(Test23);
+      }
+      if (Test45 != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Test45);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -243,6 +270,9 @@ namespace DATAMANAGERTABLE {
       }
       if (other.Test23 != 0) {
         Test23 = other.Test23;
+      }
+      if (other.Test45 != 0) {
+        Test45 = other.Test45;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -275,6 +305,10 @@ namespace DATAMANAGERTABLE {
             Test23 = input.ReadInt32();
             break;
           }
+          case 32: {
+            Test45 = input.ReadInt32();
+            break;
+          }
         }
       }
     #endif
@@ -304,6 +338,10 @@ namespace DATAMANAGERTABLE {
           }
           case 24: {
             Test23 = input.ReadInt32();
+            break;
+          }
+          case 32: {
+            Test45 = input.ReadInt32();
             break;
           }
         }

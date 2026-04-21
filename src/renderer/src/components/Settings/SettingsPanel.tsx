@@ -12,7 +12,9 @@ export function SettingsPanel(): React.JSX.Element {
     excelDir: '',
     jsonDir: '',
     outputDirs: [],
-    protocPath: ''
+    protocPath: '',
+    fileColors: {},
+    diagramMaxPerCol: 8
   })
 
   useEffect(() => {
@@ -128,6 +130,30 @@ export function SettingsPanel(): React.JSX.Element {
               >
                 ↗
               </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-title">관계도 설정</div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">열당 최대 테이블 수</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <input
+                type="number"
+                className="form-input"
+                min={1}
+                max={50}
+                style={{ width: 80 }}
+                value={draft.diagramMaxPerCol}
+                onChange={(e) =>
+                  setDraft((p) => ({
+                    ...p,
+                    diagramMaxPerCol: Math.max(1, parseInt(e.target.value) || 1)
+                  }))
+                }
+              />
+              <span style={{ fontSize: 13, color: '#9ca3af' }}>열당 노드 수가 이 값을 넘으면 다음 서브 열로 분할됩니다. (기본값: 8)</span>
             </div>
           </div>
         </div>

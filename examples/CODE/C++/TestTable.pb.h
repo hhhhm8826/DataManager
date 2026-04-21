@@ -221,6 +221,7 @@ class  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GoTest final : public ::google::pro
     kIDFieldNumber = 1,
     kTestColumnFieldNumber = 2,
     kTest23FieldNumber = 3,
+    kTest45FieldNumber = 4,
   };
   // int32 ID = 1;
   void clear_id() ;
@@ -252,11 +253,21 @@ class  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GoTest final : public ::google::pro
   void _internal_set_test23(::int32_t value);
 
   public:
+  // int32 Test45 = 4;
+  void clear_test45() ;
+  [[nodiscard]] ::int32_t test45() const;
+  void set_test45(::int32_t value);
+
+  private:
+  ::int32_t _internal_test45() const;
+  void _internal_set_test45(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:DATA_MANAGER_TABLE.GoTest)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<2, 3,
+  static const ::google::protobuf::internal::TcParseTable<2, 4,
                                    0, 0,
                                    2>
       _table_;
@@ -283,6 +294,7 @@ class  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GoTest final : public ::google::pro
     ::int32_t id_;
     int testcolumn_;
     ::int32_t test23_;
+    ::int32_t test45_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -380,6 +392,31 @@ inline ::int32_t GoTest::_internal_test23() const {
 inline void GoTest::_internal_set_test23(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.test23_ = value;
+}
+
+// int32 Test45 = 4;
+inline void GoTest::clear_test45() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.test45_ = 0;
+  ClearHasBit(_impl_._has_bits_[0],
+                  0x00000008U);
+}
+inline ::int32_t GoTest::test45() const {
+  // @@protoc_insertion_point(field_get:DATA_MANAGER_TABLE.GoTest.Test45)
+  return _internal_test45();
+}
+inline void GoTest::set_test45(::int32_t value) {
+  _internal_set_test45(value);
+  SetHasBit(_impl_._has_bits_[0], 0x00000008U);
+  // @@protoc_insertion_point(field_set:DATA_MANAGER_TABLE.GoTest.Test45)
+}
+inline ::int32_t GoTest::_internal_test45() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.test45_;
+}
+inline void GoTest::_internal_set_test45(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.test45_ = value;
 }
 
 #ifdef __GNUC__

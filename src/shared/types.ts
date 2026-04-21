@@ -44,6 +44,7 @@ export interface AppSettings {
   outputDirs: OutputDirConfig[]
   protocPath: string
   fileColors: Record<string, string>
+  diagramMaxPerCol: number
 }
 
 export interface OutputDirConfig {

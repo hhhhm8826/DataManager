@@ -154,5 +154,8 @@ struct FGoTest : public FTableRowBase
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     int32 Test23 = 0;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    int32 Test45 = 0;
+
     void ParseFromJson(const TSharedPtr<FJsonObject>& Obj);
 };

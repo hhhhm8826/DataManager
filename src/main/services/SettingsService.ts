@@ -19,7 +19,8 @@ const DEFAULT_SETTINGS: AppSettings = {
   jsonDir: '',
   outputDirs: [],
   protocPath: '',
-  fileColors: {}
+  fileColors: {},
+  diagramMaxPerCol: 8
 }
 
 const store = new Store<AppSettings>({
@@ -28,14 +29,29 @@ const store = new Store<AppSettings>({
 })
 
 export class SettingsService {
+  /** UI 표시용: config에 저장된 경로 그대로 반환 (상대경로 유지) */
   get(): AppSettings {
+    return {
+      protoDir: store.get('protoDir'),
+      excelDir: store.get('excelDir'),
+      jsonDir: store.get('jsonDir'),
+      outputDirs: store.get('outputDirs'),
+      protocPath: store.get('protocPath'),
+      fileColors: (store.get('fileColors') as Record<string, string>) ?? {},
+      diagramMaxPerCol: (store.get('diagramMaxPerCol') as number) ?? 8
+    }
+  }
+
+  /** 파일 조작용: 상대경로를 STORE_CWD 기준 절대경로로 변환 */
+  getResolved(): AppSettings {
     return {
       protoDir: resolvePath(store.get('protoDir')),
       excelDir: resolvePath(store.get('excelDir')),
       jsonDir: resolvePath(store.get('jsonDir')),
       outputDirs: store.get('outputDirs').map((o) => ({ ...o, dir: resolvePath(o.dir) })),
       protocPath: resolvePath(store.get('protocPath')),
-      fileColors: (store.get('fileColors') as Record<string, string>) ?? {}
+      fileColors: (store.get('fileColors') as Record<string, string>) ?? {},
+      diagramMaxPerCol: (store.get('diagramMaxPerCol') as number) ?? 8
     }
   }
 
@@ -46,6 +62,7 @@ export class SettingsService {
     if (settings.outputDirs !== undefined) store.set('outputDirs', settings.outputDirs)
     if (settings.protocPath !== undefined) store.set('protocPath', settings.protocPath)
     if (settings.fileColors !== undefined) store.set('fileColors', settings.fileColors)
+    if (settings.diagramMaxPerCol !== undefined) store.set('diagramMaxPerCol', settings.diagramMaxPerCol)
   }
 }
 

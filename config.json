@@ -24,5 +24,6 @@
 	"fileColors": {
 		"GameItemTable.proto": "#0f611d",
 		"RewardItemTable.proto": "#0f611d"
-	}
+	},
+	"diagramMaxPerCol": 8
 }

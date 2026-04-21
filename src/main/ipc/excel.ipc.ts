@@ -211,7 +211,7 @@ export function registerExcelIpc(): void {
       backup?: boolean
     ): Promise<IpcResult<{ created: string[]; backedUp: string[] }>> => {
       try {
-        const settings = settingsService.get()
+        const settings = settingsService.getResolved()
         if (!settings.protoDir)
           return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
         if (!settings.excelDir)
@@ -269,7 +269,7 @@ export function registerExcelIpc(): void {
   // proto 파일별 Excel 파일 목록 + 존재 여부 반환
   ipcMain.handle(IPC.EXCEL_LIST_EXISTING, async (): Promise<IpcResult<ExcelFileInfo[]>> => {
     try {
-      const settings = settingsService.get()
+      const settings = settingsService.getResolved()
       if (!settings.protoDir) return { success: true, data: [] }
 
       const parsed = protoParserService.parseDirectory(settings.protoDir)
@@ -304,7 +304,7 @@ export function registerExcelIpc(): void {
       specificSheets?: string[]
     ): Promise<IpcResult<ExcelReadResult[]>> => {
       try {
-        const settings = settingsService.get()
+        const settings = settingsService.getResolved()
         if (!settings.jsonDir)
           return { success: false, error: 'JSON 디렉토리가 설정되지 않았습니다.' }
 
@@ -356,7 +356,7 @@ export function registerExcelIpc(): void {
       requests: { excelPath: string; sheets: string[] }[]
     ): Promise<IpcResult<{ exported: number; embedded: string[] }>> => {
       try {
-        const settings = settingsService.get()
+        const settings = settingsService.getResolved()
         if (!settings.jsonDir)
           return { success: false, error: 'JSON 디렉토리가 설정되지 않았습니다.' }
         if (!settings.protoDir)

@@ -77,4 +77,5 @@ void FGoTest::ParseFromJson(const TSharedPtr<FJsonObject>& Obj)
     { double _N; if (Obj->TryGetNumberField(TEXT("ID"), _N)) ID = static_cast<int32>(_N); }
     { FString _S; if (Obj->TryGetStringField(TEXT("TestColumn"), _S)) TestColumn = ParseEnumFromString<ETestType>(_S); }
     { double _N; if (Obj->TryGetNumberField(TEXT("Test23"), _N)) Test23 = static_cast<int32>(_N); }
+    { double _N; if (Obj->TryGetNumberField(TEXT("Test45"), _N)) Test45 = static_cast<int32>(_N); }
 }

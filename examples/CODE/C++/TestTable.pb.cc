@@ -33,7 +33,8 @@ inline constexpr GoTest::Impl_::Impl_(
       : _cached_size_{0},
         id_{0},
         testcolumn_{static_cast< ::DATA_MANAGER_TABLE::TestType >(0)},
-        test23_{0} {}
+        test23_{0},
+        test45_{0} {}
 
 template <typename>
 constexpr GoTest::GoTest(::_pbi::ConstantInitialized)
@@ -64,13 +65,15 @@ const ::uint32_t
         protodesc_cold) = {
         0x081, // bitmap
         PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::GoTest, _impl_._has_bits_),
-        6, // hasbit index offset
+        7, // hasbit index offset
         PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::GoTest, _impl_.id_),
         PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::GoTest, _impl_.testcolumn_),
         PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::GoTest, _impl_.test23_),
+        PROTOBUF_FIELD_OFFSET(::DATA_MANAGER_TABLE::GoTest, _impl_.test45_),
         0,
         1,
         2,
+        3,
 };
 
 static const ::_pbi::MigrationSchema
@@ -83,10 +86,10 @@ static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
 const char descriptor_table_protodef_TestTable_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\017TestTable.proto\022\022DATA_MANAGER_TABLE\032\022T"
-    "estEnumType.proto\"V\n\006GoTest\022\n\n\002ID\030\001 \001(\005\022"
+    "estEnumType.proto\"f\n\006GoTest\022\n\n\002ID\030\001 \001(\005\022"
     "0\n\nTestColumn\030\002 \001(\0162\034.DATA_MANAGER_TABLE"
-    ".TestType\022\016\n\006Test23\030\003 \001(\005B\026Z\024./DATA_MANA"
-    "GER_TABLEb\006proto3"
+    ".TestType\022\016\n\006Test23\030\003 \001(\005\022\016\n\006Test45\030\004 \001("
+    "\005B\026Z\024./DATA_MANAGER_TABLEb\006proto3"
 };
 static const ::_pbi::DescriptorTable* PROTOBUF_NONNULL const
     descriptor_table_TestTable_2eproto_deps[1] = {
@@ -96,7 +99,7 @@ static ::absl::once_flag descriptor_table_TestTable_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_TestTable_2eproto = {
     false,
     false,
-    177,
+    193,
     descriptor_table_protodef_TestTable_2eproto,
     "TestTable.proto",
     &descriptor_table_TestTable_2eproto_once,
@@ -150,9 +153,9 @@ inline void GoTest::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   ::memset(reinterpret_cast<char*>(&_impl_) +
                offsetof(Impl_, id_),
            0,
-           offsetof(Impl_, test23_) -
+           offsetof(Impl_, test45_) -
                offsetof(Impl_, id_) +
-               sizeof(Impl_::test23_));
+               sizeof(Impl_::test45_));
 }
 GoTest::~GoTest() {
   // @@protoc_insertion_point(destructor:DATA_MANAGER_TABLE.GoTest)
@@ -210,16 +213,16 @@ GoTest::GetClassData() const {
   return GoTest_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 3, 0, 0, 2>
+const ::_pbi::TcParseTable<2, 4, 0, 0, 2>
 GoTest::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(GoTest, _impl_._has_bits_),
     0, // no _extensions_
-    3, 24,  // max_field_number, fast_idx_mask
+    4, 24,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967288,  // skipmap
+    4294967280,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    3,  // num_field_entries
+    4,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     GoTest_class_data_.base(),
@@ -229,7 +232,10 @@ GoTest::_table_ = {
     ::_pbi::TcParser::GetTable<::DATA_MANAGER_TABLE::GoTest>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    {::_pbi::TcParser::MiniParse, {}},
+    // int32 Test45 = 4;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(GoTest, _impl_.test45_), 3>(),
+     {32, 3, 0,
+      PROTOBUF_FIELD_OFFSET(GoTest, _impl_.test45_)}},
     // int32 ID = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(GoTest, _impl_.id_), 0>(),
      {8, 0, 0,
@@ -251,6 +257,8 @@ GoTest::_table_ = {
     {PROTOBUF_FIELD_OFFSET(GoTest, _impl_.testcolumn_), _Internal::kHasBitsOffset + 1, 0, (0 | ::_fl::kFcOptional | ::_fl::kOpenEnum)},
     // int32 Test23 = 3;
     {PROTOBUF_FIELD_OFFSET(GoTest, _impl_.test23_), _Internal::kHasBitsOffset + 2, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // int32 Test45 = 4;
+    {PROTOBUF_FIELD_OFFSET(GoTest, _impl_.test45_), _Internal::kHasBitsOffset + 3, 0, (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
   }},
   // no aux_entries
   {{
@@ -264,10 +272,10 @@ PROTOBUF_NOINLINE void GoTest::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
     ::memset(&_impl_.id_, 0, static_cast<::size_t>(
-        reinterpret_cast<char*>(&_impl_.test23_) -
-        reinterpret_cast<char*>(&_impl_.id_)) + sizeof(_impl_.test23_));
+        reinterpret_cast<char*>(&_impl_.test45_) -
+        reinterpret_cast<char*>(&_impl_.id_)) + sizeof(_impl_.test45_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -319,6 +327,15 @@ PROTOBUF_NOINLINE void GoTest::Clear() {
     }
   }
 
+  // int32 Test45 = 4;
+  if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+    if (this_._internal_test45() != 0) {
+      target =
+          ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<4>(
+              stream, this_._internal_test45(), target);
+    }
+  }
+
   if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -344,7 +361,7 @@ PROTOBUF_NOINLINE void GoTest::Clear() {
 
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
     // int32 ID = 1;
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (this_._internal_id() != 0) {
@@ -366,6 +383,13 @@ PROTOBUF_NOINLINE void GoTest::Clear() {
             this_._internal_test23());
       }
     }
+    // int32 Test45 = 4;
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (this_._internal_test45() != 0) {
+        total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+            this_._internal_test45());
+      }
+    }
   }
   return this_.MaybeComputeUnknownFieldsSize(total_size,
                                              &this_._impl_._cached_size_);
@@ -385,7 +409,7 @@ void GoTest::MergeImpl(::google::protobuf::MessageLite& to_msg,
   (void)cached_has_bits;
 
   cached_has_bits = from._impl_._has_bits_[0];
-  if (BatchCheckHasBit(cached_has_bits, 0x00000007U)) {
+  if (BatchCheckHasBit(cached_has_bits, 0x0000000fU)) {
     if (CheckHasBit(cached_has_bits, 0x00000001U)) {
       if (from._internal_id() != 0) {
         _this->_impl_.id_ = from._impl_.id_;
@@ -399,6 +423,11 @@ void GoTest::MergeImpl(::google::protobuf::MessageLite& to_msg,
     if (CheckHasBit(cached_has_bits, 0x00000004U)) {
       if (from._internal_test23() != 0) {
         _this->_impl_.test23_ = from._impl_.test23_;
+      }
+    }
+    if (CheckHasBit(cached_has_bits, 0x00000008U)) {
+      if (from._internal_test45() != 0) {
+        _this->_impl_.test45_ = from._impl_.test45_;
       }
     }
   }
@@ -420,8 +449,8 @@ void GoTest::InternalSwap(GoTest* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(GoTest, _impl_.test23_)
-      + sizeof(GoTest::_impl_.test23_)
+      PROTOBUF_FIELD_OFFSET(GoTest, _impl_.test45_)
+      + sizeof(GoTest::_impl_.test45_)
       - PROTOBUF_FIELD_OFFSET(GoTest, _impl_.id_)>(
           reinterpret_cast<char*>(&_impl_.id_),
           reinterpret_cast<char*>(&other->_impl_.id_));

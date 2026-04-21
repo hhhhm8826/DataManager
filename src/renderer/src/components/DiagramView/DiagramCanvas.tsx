@@ -7,9 +7,12 @@ import {
   addEdge,
   useNodesState,
   useEdgesState,
+  getSmoothStepPath,
+  BaseEdge,
   type Node,
   type Edge,
-  type Connection
+  type Connection,
+  type EdgeProps
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { useAppStore } from '../../store/appStore'
@@ -18,6 +21,58 @@ import { toast } from 'sonner'
 import type { ProtoMessage } from '../../../../shared/types'
 
 const NODE_TYPES = { tableNode: TableNode }
+
+const PARALLEL_OFFSET = 7
+
+function OffsetEdge({
+  sourceX,
+  sourceY,
+  sourcePosition,
+  targetX,
+  targetY,
+  targetPosition,
+  markerEnd,
+  style,
+  data,
+  label,
+  labelStyle,
+  labelBgStyle,
+  labelBgPadding,
+  labelBgBorderRadius
+}: EdgeProps): React.JSX.Element {
+  const offset = (data as { parallelOffset?: number })?.parallelOffset ?? 0
+  // 엣지 방향에 수직인 방향으로 오프셋 → 가로/세로 엣지 모두 분리
+  const dx = targetX - sourceX
+  const dy = targetY - sourceY
+  const len = Math.sqrt(dx * dx + dy * dy) || 1
+  const perpX = (-dy / len) * offset
+  const perpY = (dx / len) * offset
+  const [edgePath, labelX, labelY] = getSmoothStepPath({
+    sourceX: sourceX + perpX,
+    sourceY: sourceY + perpY,
+    sourcePosition,
+    targetX: targetX + perpX,
+    targetY: targetY + perpY,
+    targetPosition
+  })
+  return (
+    <BaseEdge
+      path={edgePath}
+      markerEnd={markerEnd}
+      style={style}
+      label={label}
+      labelX={labelX}
+      labelY={labelY}
+      labelStyle={labelStyle}
+      labelBgStyle={labelBgStyle}
+      labelBgPadding={labelBgPadding}
+      labelBgBorderRadius={labelBgBorderRadius}
+    />
+  )
+}
+
+const EDGE_TYPES = { offsetEdge: OffsetEdge }
+
 const NODE_WIDTH = 260
 const NODE_HEIGHT_BASE = 60
 const NODE_FIELD_HEIGHT = 30
@@ -27,7 +82,8 @@ const ROW_GAP = 80
 /** 위상 정렬(Kahn) 기반 DAG 레이아웃: 참조하는 쪽 왼쪽, 참조받는 쪽 오른쪽 */
 function buildLayout(
   messages: ProtoMessage[],
-  edges: { source: string; target: string }[]
+  edges: { source: string; target: string }[],
+  maxPerCol: number
 ): { x: number; y: number }[] {
   if (messages.length === 0) return []
 
@@ -75,7 +131,7 @@ function buildLayout(
   const sortedDepths = [...cols.keys()].sort((a, b) => a - b)
 
   // 열당 최대 노드 수 — 초과 시 서브 열로 분할
-  const MAX_PER_COL = 8
+  const MAX_PER_COL = maxPerCol
   const SUB_COL_GAP = 40
 
   // 각 depth 가 몇 개의 서브 열을 차지하는지 계산 → 누적 x 결정
@@ -156,12 +212,12 @@ export function DiagramView(): React.JSX.Element {
             }
             newEdges.push({
               id: edgeId,
-              type: 'smoothstep',
+              type: 'offsetEdge',
               source: msg.name,
               sourceHandle: `src-${field.name}`,
               target: field.type,
               targetHandle: targetPk ? `tgt-${targetPk}` : undefined,
-              zIndex: 10,
+              zIndex: 0,
               style: { stroke: '#a0c4ff', strokeWidth: 1.5 },
               labelStyle: { fontSize: 10, fill: '#9ca3af' }
             })
@@ -170,7 +226,7 @@ export function DiagramView(): React.JSX.Element {
       })
     })
 
-    const positions = buildLayout(messages, layoutEdges)
+    const positions = buildLayout(messages, layoutEdges, settings?.diagramMaxPerCol ?? 8)
 
     const newNodes: Node[] = messages.map((msg, i) => ({
       id: msg.name,
@@ -185,9 +241,24 @@ export function DiagramView(): React.JSX.Element {
       }
     }))
 
+    // 동일 (source, target) 쌍 엣지에 Y 오프셋 부여 → 겹침 분리
+    const pairGroups = new Map<string, string[]>()
+    newEdges.forEach((e) => {
+      const key = `${e.source}--${e.target}`
+      if (!pairGroups.has(key)) pairGroups.set(key, [])
+      pairGroups.get(key)!.push(e.id)
+    })
+    const edgesWithOffset: Edge[] = newEdges.map((e) => {
+      const key = `${e.source}--${e.target}`
+      const group = pairGroups.get(key)!
+      const idx = group.indexOf(e.id)
+      const offset = (idx - (group.length - 1) / 2) * PARALLEL_OFFSET
+      return { ...e, data: { parallelOffset: offset } }
+    })
+
     setNodes(newNodes)
-    setEdges(newEdges)
-  }, [parsed])
+    setEdges(edgesWithOffset)
+  }, [parsed, settings?.diagramMaxPerCol, setNodes, setEdges])
 
   const onConnect = useCallback(
     (connection: Connection) => setEdges((eds) => addEdge(connection, eds)),
@@ -244,7 +315,7 @@ export function DiagramView(): React.JSX.Element {
     return {
       ...edge,
       animated: isActive,
-      zIndex: isActive ? 1000 : 10,
+      zIndex: isActive ? 1000 : 0,
       style: isActive
         ? { stroke: '#ffaa44', strokeWidth: 3 }
         : { stroke: '#a0c4ff', strokeWidth: 1.5, opacity: hoveredPair ? 0.2 : 1 },
@@ -328,6 +399,7 @@ export function DiagramView(): React.JSX.Element {
           </div>
         ) : (
           <ReactFlow
+            key={settings?.diagramMaxPerCol ?? 8}
             nodes={displayNodes}
             edges={displayEdges}
             onNodesChange={onNodesChange}
@@ -336,6 +408,7 @@ export function DiagramView(): React.JSX.Element {
             onEdgeMouseEnter={onEdgeMouseEnter}
             onEdgeMouseLeave={onEdgeMouseLeave}
             nodeTypes={NODE_TYPES}
+            edgeTypes={EDGE_TYPES}
             fitView
             elevateEdgesOnSelect={false}
             style={{ background: '#1a1a2e' }}
