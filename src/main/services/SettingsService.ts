@@ -4,9 +4,7 @@ import * as path from 'path'
 import type { AppSettings } from '../../shared/types'
 
 // 패키징 시: 실행 파일(.exe) 옆, 개발 시: 프로젝트 루트
-const STORE_CWD = app.isPackaged
-  ? path.dirname(app.getPath('exe'))
-  : app.getAppPath()
+const STORE_CWD = app.isPackaged ? path.dirname(app.getPath('exe')) : app.getAppPath()
 
 // 상대경로는 STORE_CWD 기준으로 절대경로로 변환
 function resolvePath(p: string): string {

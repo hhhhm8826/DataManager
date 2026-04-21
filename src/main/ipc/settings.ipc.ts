@@ -15,14 +15,17 @@ export function registerSettingsIpc(): void {
   })
 
   // 설정 저장
-  ipcMain.handle(IPC.SETTINGS_SET, async (_event, settings: Partial<AppSettings>): Promise<IpcResult> => {
-    try {
-      settingsService.set(settings)
-      return { success: true }
-    } catch (e) {
-      return { success: false, error: String(e) }
+  ipcMain.handle(
+    IPC.SETTINGS_SET,
+    async (_event, settings: Partial<AppSettings>): Promise<IpcResult> => {
+      try {
+        settingsService.set(settings)
+        return { success: true }
+      } catch (e) {
+        return { success: false, error: String(e) }
+      }
     }
-  })
+  )
 
   // 폴더 선택 다이얼로그
   ipcMain.handle(IPC.SETTINGS_SELECT_DIR, async (): Promise<IpcResult<string>> => {
@@ -52,14 +55,17 @@ export function registerSettingsIpc(): void {
   })
 
   // 파일 선택 다이얼로그 (protoc 등 실행파일 선택용)
-  ipcMain.handle(IPC.SETTINGS_SELECT_FILE, async (_event, options?: Electron.OpenDialogOptions): Promise<IpcResult<string>> => {
-    const result = await dialog.showOpenDialog({
-      properties: ['openFile'],
-      ...options
-    })
-    if (result.canceled || result.filePaths.length === 0) {
-      return { success: false, error: '취소됨' }
+  ipcMain.handle(
+    IPC.SETTINGS_SELECT_FILE,
+    async (_event, options?: Electron.OpenDialogOptions): Promise<IpcResult<string>> => {
+      const result = await dialog.showOpenDialog({
+        properties: ['openFile'],
+        ...options
+      })
+      if (result.canceled || result.filePaths.length === 0) {
+        return { success: false, error: '취소됨' }
+      }
+      return { success: true, data: result.filePaths[0] }
     }
-    return { success: true, data: result.filePaths[0] }
-  })
+  )
 }

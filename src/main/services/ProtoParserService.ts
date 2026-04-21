@@ -1,11 +1,29 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import type { ParsedProto, ProtoMessage, ProtoField, ProtoEnum, ProtoEnumValue } from '../../shared/types'
+import type {
+  ParsedProto,
+  ProtoMessage,
+  ProtoField,
+  ProtoEnum,
+  ProtoEnumValue
+} from '../../shared/types'
 
 const PRIMITIVE_TYPES = new Set([
-  'double', 'float', 'int32', 'int64', 'uint32', 'uint64',
-  'sint32', 'sint64', 'fixed32', 'fixed64', 'sfixed32', 'sfixed64',
-  'bool', 'string', 'bytes'
+  'double',
+  'float',
+  'int32',
+  'int64',
+  'uint32',
+  'uint64',
+  'sint32',
+  'sint64',
+  'fixed32',
+  'fixed64',
+  'sfixed32',
+  'sfixed64',
+  'bool',
+  'string',
+  'bytes'
 ])
 
 /**
@@ -174,7 +192,10 @@ export class ProtoParserService {
         if (ch === '{') depth++
         else if (ch === '}') {
           depth--
-          if (depth === 0) { endIdx = i; break }
+          if (depth === 0) {
+            endIdx = i
+            break
+          }
         }
       }
       if (endIdx !== -1) break
@@ -199,31 +220,43 @@ export class ProtoParserService {
 
   // ── Message 수정 (삭제 후 재추가) ─────────────────────────
 
-  updateMessage(filePath: string, oldName: string, message: ProtoMessage, allEnums: ProtoEnum[] = [], allMessages: ProtoMessage[] = []): void {
+  updateMessage(
+    filePath: string,
+    oldName: string,
+    message: ProtoMessage,
+    allEnums: ProtoEnum[] = [],
+    allMessages: ProtoMessage[] = []
+  ): void {
     this.deleteMessage(filePath, oldName)
     this.addMessageToFile(filePath, message, allEnums, allMessages)
   }
 
   // ── proto 파일에 Message 추가 ──────────────────────────────
 
-  addMessageToFile(filePath: string, message: ProtoMessage, allEnums: ProtoEnum[] = [], allMessages: ProtoMessage[] = []): void {
-    let content = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : this.createProtoHeader('DataTable.proto')
+  addMessageToFile(
+    filePath: string,
+    message: ProtoMessage,
+    allEnums: ProtoEnum[] = [],
+    allMessages: ProtoMessage[] = []
+  ): void {
+    let content = fs.existsSync(filePath)
+      ? fs.readFileSync(filePath, 'utf-8')
+      : this.createProtoHeader('DataTable.proto')
 
     // 사용된 Enum/Message 타입의 sourceFile 수집 → 아직 import되지 않은 것만 추가
     const usedFiles = new Set<string>()
     for (const field of message.fields) {
       const enumDef = allEnums.find((e) => e.name === field.type)
       if (enumDef?.sourceFile) usedFiles.add(enumDef.sourceFile)
-      const msgDef = allMessages.find((m) => m.name === field.type && m.sourceFile !== message.sourceFile)
+      const msgDef = allMessages.find(
+        (m) => m.name === field.type && m.sourceFile !== message.sourceFile
+      )
       if (msgDef?.sourceFile) usedFiles.add(msgDef.sourceFile)
     }
     for (const depFile of usedFiles) {
       const importLine = `import "${depFile}";`
       if (!content.includes(importLine)) {
-        content = content.replace(
-          /(option go_package[^;]+;)/,
-          `$1\n${importLine}`
-        )
+        content = content.replace(/(option go_package[^;]+;)/, `$1\n${importLine}`)
       }
     }
 

@@ -10,7 +10,7 @@ export const PROTOC_OUT_FLAGS: Record<string, string> = {
   golang: '--go_out',
   rust: '--rust_out',
   ruby: '--ruby_out',
-  php: '--php_out',
+  php: '--php_out'
 }
 
 export const SUPPORTED_LANGUAGES = Object.keys(PROTOC_OUT_FLAGS)
@@ -35,11 +35,11 @@ export class ProtocService {
 
     fs.mkdirSync(outputDir, { recursive: true })
 
-    execFileSync(protocPath, [
-      `--proto_path=${protoDir}`,
-      `${outFlag}=${outputDir}`,
-      ...protoFiles
-    ], { cwd: protoDir })
+    execFileSync(
+      protocPath,
+      [`--proto_path=${protoDir}`, `${outFlag}=${outputDir}`, ...protoFiles],
+      { cwd: protoDir }
+    )
   }
 }
 

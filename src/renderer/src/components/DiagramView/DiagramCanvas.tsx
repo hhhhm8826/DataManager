@@ -48,7 +48,9 @@ function buildLayout(
   // Kahn's BFS → depth(column) 할당
   const depth = new Array(messages.length).fill(0)
   const queue: number[] = []
-  inDegree.forEach((d, i) => { if (d === 0) queue.push(i) })
+  inDegree.forEach((d, i) => {
+    if (d === 0) queue.push(i)
+  })
 
   while (queue.length) {
     const cur = queue.shift()!
@@ -94,7 +96,12 @@ export function DiagramView(): React.JSX.Element {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
   const [searchQuery, setSearchQuery] = useState('')
-  const [hoveredPair, setHoveredPair] = useState<{ source: string; sourceField: string; target: string; targetField: string } | null>(null)
+  const [hoveredPair, setHoveredPair] = useState<{
+    source: string
+    sourceField: string
+    target: string
+    targetField: string
+  } | null>(null)
 
   // 파싱 에러 → 토스트
   useEffect(() => {
@@ -124,7 +131,8 @@ export function DiagramView(): React.JSX.Element {
             const targetMsg = messages.find((m) => m.name === field.type)
             const targetPk = targetMsg?.pkFields[0] ?? targetMsg?.fields[0]?.name
             if (targetPk) {
-              if (!referencedFieldsMap.has(field.type)) referencedFieldsMap.set(field.type, new Set())
+              if (!referencedFieldsMap.has(field.type))
+                referencedFieldsMap.set(field.type, new Set())
               referencedFieldsMap.get(field.type)!.add(targetPk)
             }
             newEdges.push({
@@ -167,15 +175,18 @@ export function DiagramView(): React.JSX.Element {
     [setEdges]
   )
 
-  const onEdgeMouseEnter = useCallback((_evt: React.MouseEvent, edge: Edge) => {
-    const match = edge.id.match(/^(.+)\.(.+)->(.+)$/)
-    if (match) {
-      const [, source, sourceField, target] = match
-      const targetMsg = parsed?.messages.find((m) => m.name === target)
-      const targetField = targetMsg?.pkFields[0] ?? targetMsg?.fields[0]?.name ?? ''
-      setHoveredPair({ source, sourceField, target, targetField })
-    }
-  }, [parsed])
+  const onEdgeMouseEnter = useCallback(
+    (_evt: React.MouseEvent, edge: Edge) => {
+      const match = edge.id.match(/^(.+)\.(.+)->(.+)$/)
+      if (match) {
+        const [, source, sourceField, target] = match
+        const targetMsg = parsed?.messages.find((m) => m.name === target)
+        const targetField = targetMsg?.pkFields[0] ?? targetMsg?.fields[0]?.name ?? ''
+        setHoveredPair({ source, sourceField, target, targetField })
+      }
+    },
+    [parsed]
+  )
 
   const onEdgeMouseLeave = useCallback(() => {
     setHoveredPair(null)
@@ -198,7 +209,9 @@ export function DiagramView(): React.JSX.Element {
       }
     }
   })
-  const matchCount = q ? displayNodes.filter((n) => (n.style?.opacity ?? 1) === 1).length : nodes.length
+  const matchCount = q
+    ? displayNodes.filter((n) => (n.style?.opacity ?? 1) === 1).length
+    : nodes.length
 
   // 엣지 강조: hover 중인 연결은 주황/굵게, 나머지는 흐리게
   const displayEdges: Edge[] = edges.map((edge) => {
@@ -217,8 +230,8 @@ export function DiagramView(): React.JSX.Element {
       label: isActive ? `${hoveredPair!.sourceField}  →  ${hoveredPair!.targetField}` : undefined,
       labelStyle: isActive ? { fontSize: 11, fill: '#ffaa44', fontWeight: 700 } : undefined,
       labelBgStyle: isActive ? { fill: '#1a1a2e', fillOpacity: 0.9 } : undefined,
-      labelBgPadding: isActive ? [6, 3] as [number, number] : undefined,
-      labelBgBorderRadius: isActive ? 4 : undefined,
+      labelBgPadding: isActive ? ([6, 3] as [number, number]) : undefined,
+      labelBgBorderRadius: isActive ? 4 : undefined
     }
   })
 
@@ -249,13 +262,31 @@ export function DiagramView(): React.JSX.Element {
               <button
                 onClick={() => setSearchQuery('')}
                 style={{
-                  position: 'absolute', right: 6,
-                  background: 'none', border: 'none', color: '#9ca3af',
-                  cursor: 'pointer', fontSize: 14, padding: 0, lineHeight: 1
+                  position: 'absolute',
+                  right: 6,
+                  background: 'none',
+                  border: 'none',
+                  color: '#9ca3af',
+                  cursor: 'pointer',
+                  fontSize: 14,
+                  padding: 0,
+                  lineHeight: 1
                 }}
-              >✕</button>
+              >
+                ✕
+              </button>
             ) : (
-              <span style={{ position: 'absolute', right: 8, color: '#4b5563', fontSize: 13, pointerEvents: 'none' }}>🔍</span>
+              <span
+                style={{
+                  position: 'absolute',
+                  right: 8,
+                  color: '#4b5563',
+                  fontSize: 13,
+                  pointerEvents: 'none'
+                }}
+              >
+                🔍
+              </span>
             )}
           </div>
           {q && (

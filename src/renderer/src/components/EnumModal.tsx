@@ -12,10 +12,14 @@ export function EnumModal({ protoEnum, fieldName, onClose }: Props): React.JSX.E
       <div className="modal-box" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <span className="modal-title">
-            <span className="badge badge-enum" style={{ marginRight: 8 }}>ENUM</span>
+            <span className="badge badge-enum" style={{ marginRight: 8 }}>
+              ENUM
+            </span>
             {fieldName} — {protoEnum.name}
           </span>
-          <button className="btn btn-ghost" style={{ padding: '4px 10px' }} onClick={onClose}>✕</button>
+          <button className="btn btn-ghost" style={{ padding: '4px 10px' }} onClick={onClose}>
+            ✕
+          </button>
         </div>
 
         <table className="data-table">

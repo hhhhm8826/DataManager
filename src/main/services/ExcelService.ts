@@ -119,12 +119,14 @@ export class ExcelService {
           const enumInfo = enumColMap.get(field.type)
           if (!enumInfo) return
 
-          const dataColLetter = colLetter(idx + 1)           // 데이터 시트의 열 문자
-          const dropColLetter = colLetter(enumInfo.col)       // _DropDown 시트의 열 문자
-          const lastRow = enumInfo.rowCount + 1               // 헤더(1행) + 값 행
+          const dataColLetter = colLetter(idx + 1) // 데이터 시트의 열 문자
+          const dropColLetter = colLetter(enumInfo.col) // _DropDown 시트의 열 문자
+          const lastRow = enumInfo.rowCount + 1 // 헤더(1행) + 값 행
 
           // ExcelJS 타입 정의에 dataValidations 가 없는 버전 대응
-          const dv = (sheet as unknown as { dataValidations: { add: (addr: string, rule: object) => void } }).dataValidations
+          const dv = (
+            sheet as unknown as { dataValidations: { add: (addr: string, rule: object) => void } }
+          ).dataValidations
           dv.add(`${dataColLetter}2:${dataColLetter}10000`, {
             type: 'list',
             allowBlank: true,
@@ -148,7 +150,9 @@ export class ExcelService {
             `OFFSET('${field.type}'!$${pkColL}$2,0,0,` +
             `MAX(1,COUNTA('${field.type}'!$${pkColL}$2:$${pkColL}$${MAX_DROPDOWN_ROWS + 1})),1)`
 
-          const dv = (sheet as unknown as { dataValidations: { add: (addr: string, rule: object) => void } }).dataValidations
+          const dv = (
+            sheet as unknown as { dataValidations: { add: (addr: string, rule: object) => void } }
+          ).dataValidations
           dv.add(`${dataColLetter}2:${dataColLetter}10000`, {
             type: 'list',
             allowBlank: true,

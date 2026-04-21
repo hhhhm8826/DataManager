@@ -8,16 +8,35 @@ interface TableNodeData {
   allEnums: ProtoEnum[]
   allMessages: ProtoMessage[]
   isHighlighted?: boolean
-  onMessageHover?: (pair: { source: string; sourceField: string; target: string; targetField: string } | null) => void
+  onMessageHover?: (
+    pair: { source: string; sourceField: string; target: string; targetField: string } | null
+  ) => void
   referencedFields?: Set<string>
-  hoveredConnection?: { source: string; sourceField: string; target: string; targetField: string } | null
+  hoveredConnection?: {
+    source: string
+    sourceField: string
+    target: string
+    targetField: string
+  } | null
   [key: string]: unknown
 }
 
 const PRIMITIVE_TYPES = new Set([
-  'double', 'float', 'int32', 'int64', 'uint32', 'uint64',
-  'sint32', 'sint64', 'fixed32', 'fixed64', 'sfixed32', 'sfixed64',
-  'bool', 'string', 'bytes'
+  'double',
+  'float',
+  'int32',
+  'int64',
+  'uint32',
+  'uint64',
+  'sint32',
+  'sint64',
+  'fixed32',
+  'fixed64',
+  'sfixed32',
+  'sfixed64',
+  'bool',
+  'string',
+  'bytes'
 ])
 
 // 헤더 높이 + 필드 영역 시작 오프셋 (px) — 레이아웃 상수와 동기화
@@ -26,7 +45,15 @@ const HANDLE_FIELD_TOP = 4
 const HANDLE_FIELD_H = 30
 
 export function TableNode({ data }: NodeProps): React.JSX.Element {
-  const { message, allEnums, allMessages, isHighlighted, onMessageHover, referencedFields, hoveredConnection } = data as TableNodeData
+  const {
+    message,
+    allEnums,
+    allMessages,
+    isHighlighted,
+    onMessageHover,
+    referencedFields,
+    hoveredConnection
+  } = data as TableNodeData
   const messageNames = new Set(allMessages?.map((m) => m.name) ?? [])
   const [enumModal, setEnumModal] = useState<{ field: string; protoEnum: ProtoEnum } | null>(null)
   const [hoveredFieldType, setHoveredFieldType] = useState<string | null>(null)
@@ -52,7 +79,13 @@ export function TableNode({ data }: NodeProps): React.JSX.Element {
             type="target"
             position={Position.Left}
             id={`tgt-${field.name}`}
-            style={{ top: fieldTop(idx), background: '#6fcf97', width: 8, height: 8, border: 'none' }}
+            style={{
+              top: fieldTop(idx),
+              background: '#6fcf97',
+              width: 8,
+              height: 8,
+              border: 'none'
+            }}
           />
         )
       })}
@@ -67,7 +100,13 @@ export function TableNode({ data }: NodeProps): React.JSX.Element {
             type="source"
             position={Position.Right}
             id={`src-${field.name}`}
-            style={{ top: fieldTop(idx), background: '#a0c4ff', width: 8, height: 8, border: 'none' }}
+            style={{
+              top: fieldTop(idx),
+              background: '#a0c4ff',
+              width: 8,
+              height: 8,
+              border: 'none'
+            }}
           />
         )
       })}
@@ -105,10 +144,15 @@ export function TableNode({ data }: NodeProps): React.JSX.Element {
           {message.fields.map((field) => {
             const isEnum = allEnums.some((e) => e.name === field.type)
             const isMessage = messageNames.has(field.type) && field.type !== message.name
-            const isKnown = isEnum || isMessage || messageNames.has(field.type) || PRIMITIVE_TYPES.has(field.type)
+            const isKnown =
+              isEnum || isMessage || messageNames.has(field.type) || PRIMITIVE_TYPES.has(field.type)
             const isFieldHovered = hoveredFieldType === field.type && isMessage
-            const isSourceField = hoveredConnection?.source === message.name && hoveredConnection?.sourceField === field.name
-            const isTargetField = hoveredConnection?.target === message.name && hoveredConnection?.targetField === field.name
+            const isSourceField =
+              hoveredConnection?.source === message.name &&
+              hoveredConnection?.sourceField === field.name
+            const isTargetField =
+              hoveredConnection?.target === message.name &&
+              hoveredConnection?.targetField === field.name
             return (
               <div
                 key={field.name}
@@ -120,9 +164,12 @@ export function TableNode({ data }: NodeProps): React.JSX.Element {
                   gap: 8,
                   cursor: isEnum ? 'pointer' : 'default',
                   borderBottom: '1px solid #0f3460',
-                  background: isSourceField || isTargetField
-                    ? 'rgba(255,170,68,0.18)'
-                    : isFieldHovered ? 'rgba(255,170,68,0.1)' : 'transparent',
+                  background:
+                    isSourceField || isTargetField
+                      ? 'rgba(255,170,68,0.18)'
+                      : isFieldHovered
+                        ? 'rgba(255,170,68,0.1)'
+                        : 'transparent',
                   transition: 'background 0.15s'
                 }}
                 onDoubleClick={() => handleFieldDoubleClick(field.name, field.type)}
@@ -132,7 +179,12 @@ export function TableNode({ data }: NodeProps): React.JSX.Element {
                     const targetMsg = allMessages.find((m) => m.name === field.type)
                     const targetField = targetMsg?.pkFields[0] ?? targetMsg?.fields[0]?.name ?? ''
                     setHoveredFieldType(field.type)
-                    onMessageHover?.({ source: message.name, sourceField: field.name, target: field.type, targetField })
+                    onMessageHover?.({
+                      source: message.name,
+                      sourceField: field.name,
+                      target: field.type,
+                      targetField
+                    })
                   }
                 }}
                 onMouseLeave={() => {
@@ -149,12 +201,21 @@ export function TableNode({ data }: NodeProps): React.JSX.Element {
                 </span>
                 <span
                   className={`badge ${
-                    isEnum ? 'badge-enum'
-                    : isMessage ? 'badge-ref'
-                    : !isKnown ? 'badge-invalid'
-                    : 'badge-type'
+                    isEnum
+                      ? 'badge-enum'
+                      : isMessage
+                        ? 'badge-ref'
+                        : !isKnown
+                          ? 'badge-invalid'
+                          : 'badge-type'
                   }`}
-                  title={!isKnown ? '존재하지 않는 타입입니다' : isMessage ? `→ ${field.type}` : undefined}
+                  title={
+                    !isKnown
+                      ? '존재하지 않는 타입입니다'
+                      : isMessage
+                        ? `→ ${field.type}`
+                        : undefined
+                  }
                 >
                   {field.isRepeated ? `[]${field.type}` : field.type}
                 </span>
@@ -163,8 +224,6 @@ export function TableNode({ data }: NodeProps): React.JSX.Element {
           })}
         </div>
       </div>
-
-
 
       {enumModal && (
         <EnumModal

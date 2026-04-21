@@ -6,7 +6,13 @@ import { excelService } from '../services/ExcelService'
 import { jsonService } from '../services/JsonService'
 import { settingsService } from '../services/SettingsService'
 import { protoParserService } from '../services/ProtoParserService'
-import type { IpcResult, ExcelReadResult, ExcelFileInfo, ExcelRowData, ProtoMessage } from '../../shared/types'
+import type {
+  IpcResult,
+  ExcelReadResult,
+  ExcelFileInfo,
+  ExcelRowData,
+  ProtoMessage
+} from '../../shared/types'
 
 // ── 인라인 임베드 헬퍼 ────────────────────────────────────────────────────────
 
@@ -26,7 +32,15 @@ function resolveInlineReferences(
 
   // ── 원본 PK/Key 인덱스 (임베드 전 원시값 기준) ──
   // key: msgName → { firstPk: string | null, firstKey: string | null, isKeyMode: boolean, entries: Array<{ rawKey: unknown, rowIdx: number }> }
-  const rawPkIndex = new Map<string, { firstPk: string | null; firstKey: string | null; isKeyMode: boolean; entries: { rawKey: unknown; rowIdx: number }[] }>()
+  const rawPkIndex = new Map<
+    string,
+    {
+      firstPk: string | null
+      firstKey: string | null
+      isKeyMode: boolean
+      entries: { rawKey: unknown; rowIdx: number }[]
+    }
+  >()
   for (const result of results) {
     const msgDef = allMessageDefs.find((m) => m.name === result.messageName)
     if (!msgDef) continue
@@ -42,7 +56,10 @@ function resolveInlineReferences(
   // ── 임베드 진행 중인 행 배열 (처리 후 갱신) ──
   const resolvedRows = new Map<string, ExcelRowData[]>()
   for (const result of results) {
-    resolvedRows.set(result.messageName, result.rows.map((r) => ({ ...r })))
+    resolvedRows.set(
+      result.messageName,
+      result.rows.map((r) => ({ ...r }))
+    )
   }
 
   const pkMatch = (rawKey: unknown, val: unknown): boolean => {
@@ -186,57 +203,68 @@ function validatePrimaryKeys(
 export function registerExcelIpc(): void {
   // proto 기반 Excel 파일 생성 (selectedProtoFiles 가 있으면 해당 파일만, 없으면 전체)
   // backup=true 이면 기존 파일을 {Name}_bak.xlsx 로 백업한 뒤 생성
-  ipcMain.handle(IPC.EXCEL_GENERATE, async (_event, selectedProtoFiles?: string[], backup?: boolean): Promise<IpcResult<{ created: string[]; backedUp: string[] }>> => {
-    try {
-      const settings = settingsService.get()
-      if (!settings.protoDir) return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
-      if (!settings.excelDir) return { success: false, error: 'Excel 디렉토리가 설정되지 않았습니다.' }
+  ipcMain.handle(
+    IPC.EXCEL_GENERATE,
+    async (
+      _event,
+      selectedProtoFiles?: string[],
+      backup?: boolean
+    ): Promise<IpcResult<{ created: string[]; backedUp: string[] }>> => {
+      try {
+        const settings = settingsService.get()
+        if (!settings.protoDir)
+          return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
+        if (!settings.excelDir)
+          return { success: false, error: 'Excel 디렉토리가 설정되지 않았습니다.' }
 
-      const parsed = protoParserService.parseDirectory(settings.protoDir)
-      if (parsed.messages.length === 0) return { success: false, error: '파싱된 테이블이 없습니다.' }
+        const parsed = protoParserService.parseDirectory(settings.protoDir)
+        if (parsed.messages.length === 0)
+          return { success: false, error: '파싱된 테이블이 없습니다.' }
 
-      const messages =
-        selectedProtoFiles && selectedProtoFiles.length > 0
-          ? parsed.messages.filter((m) => selectedProtoFiles.includes(m.sourceFile))
-          : parsed.messages
+        const messages =
+          selectedProtoFiles && selectedProtoFiles.length > 0
+            ? parsed.messages.filter((m) => selectedProtoFiles.includes(m.sourceFile))
+            : parsed.messages
 
-      if (messages.length === 0) return { success: false, error: '선택된 proto 파일에 테이블이 없습니다.' }
+        if (messages.length === 0)
+          return { success: false, error: '선택된 proto 파일에 테이블이 없습니다.' }
 
-      // 백업: 생성될 각 xlsx 파일이 이미 존재하면 backup/{Name}_{Date}.xlsx 로 이동
-      const backedUp: string[] = []
-      if (backup) {
-        const backupDir = path.join(settings.excelDir, 'backup')
-        if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true })
+        // 백업: 생성될 각 xlsx 파일이 이미 존재하면 backup/{Name}_{Date}.xlsx 로 이동
+        const backedUp: string[] = []
+        if (backup) {
+          const backupDir = path.join(settings.excelDir, 'backup')
+          if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true })
 
-        const now = new Date()
-        const dateStr = [
-          now.getFullYear(),
-          String(now.getMonth() + 1).padStart(2, '0'),
-          String(now.getDate()).padStart(2, '0'),
-          String(now.getHours()).padStart(2, '0'),
-          String(now.getMinutes()).padStart(2, '0'),
-          String(now.getSeconds()).padStart(2, '0')
-        ].join('')
+          const now = new Date()
+          const dateStr = [
+            now.getFullYear(),
+            String(now.getMonth() + 1).padStart(2, '0'),
+            String(now.getDate()).padStart(2, '0'),
+            String(now.getHours()).padStart(2, '0'),
+            String(now.getMinutes()).padStart(2, '0'),
+            String(now.getSeconds()).padStart(2, '0')
+          ].join('')
 
-        const sourceFiles = [...new Set(messages.map((m) => m.sourceFile))]
-        for (const sourceFile of sourceFiles) {
-          const baseName = sourceFile.replace(/\.proto$/, '')
-          const excelPath = path.join(settings.excelDir, baseName + '.xlsx')
-          if (fs.existsSync(excelPath)) {
-            const bakFileName = `${baseName}_${dateStr}.xlsx`
-            const bakPath = path.join(backupDir, bakFileName)
-            fs.copyFileSync(excelPath, bakPath)
-            backedUp.push(`backup/${bakFileName}`)
+          const sourceFiles = [...new Set(messages.map((m) => m.sourceFile))]
+          for (const sourceFile of sourceFiles) {
+            const baseName = sourceFile.replace(/\.proto$/, '')
+            const excelPath = path.join(settings.excelDir, baseName + '.xlsx')
+            if (fs.existsSync(excelPath)) {
+              const bakFileName = `${baseName}_${dateStr}.xlsx`
+              const bakPath = path.join(backupDir, bakFileName)
+              fs.copyFileSync(excelPath, bakPath)
+              backedUp.push(`backup/${bakFileName}`)
+            }
           }
         }
-      }
 
-      const created = await excelService.generateExcel(settings.excelDir, messages, parsed.enums)
-      return { success: true, data: { created, backedUp } }
-    } catch (e) {
-      return { success: false, error: String(e) }
+        const created = await excelService.generateExcel(settings.excelDir, messages, parsed.enums)
+        return { success: true, data: { created, backedUp } }
+      } catch (e) {
+        return { success: false, error: String(e) }
+      }
     }
-  })
+  )
 
   // proto 파일별 Excel 파일 목록 + 존재 여부 반환
   ipcMain.handle(IPC.EXCEL_LIST_EXISTING, async (): Promise<IpcResult<ExcelFileInfo[]>> => {
@@ -268,44 +296,56 @@ export function registerExcelIpc(): void {
 
   // Excel 파일 읽기 → JSON 저장
   // specificSheets 가 있으면 해당 시트만, 없으면 proto 파일명 기반으로 허용 시트를 도출합니다.
-  ipcMain.handle(IPC.EXCEL_READ, async (_event, excelFilePath: string, specificSheets?: string[]): Promise<IpcResult<ExcelReadResult[]>> => {
-    try {
-      const settings = settingsService.get()
-      if (!settings.jsonDir) return { success: false, error: 'JSON 디렉토리가 설정되지 않았습니다.' }
+  ipcMain.handle(
+    IPC.EXCEL_READ,
+    async (
+      _event,
+      excelFilePath: string,
+      specificSheets?: string[]
+    ): Promise<IpcResult<ExcelReadResult[]>> => {
+      try {
+        const settings = settingsService.get()
+        if (!settings.jsonDir)
+          return { success: false, error: 'JSON 디렉토리가 설정되지 않았습니다.' }
 
-      let allowedMessages: string[]
+        let allowedMessages: string[]
 
-      if (specificSheets && specificSheets.length > 0) {
-        allowedMessages = specificSheets
-      } else {
-        if (!settings.protoDir) return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
-        const parsed = protoParserService.parseDirectory(settings.protoDir)
-        const baseName = path.basename(excelFilePath, '.xlsx')
-        const protoFileName = baseName + '.proto'
-        allowedMessages = parsed.messages
-          .filter((m) => m.sourceFile === protoFileName)
-          .map((m) => m.name)
-        if (allowedMessages.length === 0) {
-          return { success: false, error: `${protoFileName} 에 정의된 테이블을 찾을 수 없습니다.` }
+        if (specificSheets && specificSheets.length > 0) {
+          allowedMessages = specificSheets
+        } else {
+          if (!settings.protoDir)
+            return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
+          const parsed = protoParserService.parseDirectory(settings.protoDir)
+          const baseName = path.basename(excelFilePath, '.xlsx')
+          const protoFileName = baseName + '.proto'
+          allowedMessages = parsed.messages
+            .filter((m) => m.sourceFile === protoFileName)
+            .map((m) => m.name)
+          if (allowedMessages.length === 0) {
+            return {
+              success: false,
+              error: `${protoFileName} 에 정의된 테이블을 찾을 수 없습니다.`
+            }
+          }
         }
+
+        const allMessageDefs = settings.protoDir
+          ? protoParserService.parseDirectory(settings.protoDir).messages
+          : []
+
+        const results = await excelService.readExcel(excelFilePath, allowedMessages)
+
+        const pkError = validatePrimaryKeys(results, allMessageDefs)
+        if (pkError) return { success: false, error: pkError }
+
+        jsonService.exportExcelToJson(settings.jsonDir, results)
+
+        return { success: true, data: results }
+      } catch (e) {
+        return { success: false, error: String(e) }
       }
-
-      const allMessageDefs = settings.protoDir
-        ? protoParserService.parseDirectory(settings.protoDir).messages
-        : []
-
-      const results = await excelService.readExcel(excelFilePath, allowedMessages)
-
-      const pkError = validatePrimaryKeys(results, allMessageDefs)
-      if (pkError) return { success: false, error: pkError }
-
-      jsonService.exportExcelToJson(settings.jsonDir, results)
-
-      return { success: true, data: results }
-    } catch (e) {
-      return { success: false, error: String(e) }
     }
-  })
+  )
 
   // 여러 Excel 파일을 한 번에 읽고 Message 참조를 인라인 임베드하여 JSON 저장
   // requests: Array<{ excelPath: string; sheets: string[] }>
@@ -317,8 +357,10 @@ export function registerExcelIpc(): void {
     ): Promise<IpcResult<{ exported: number; embedded: string[] }>> => {
       try {
         const settings = settingsService.get()
-        if (!settings.jsonDir) return { success: false, error: 'JSON 디렉토리가 설정되지 않았습니다.' }
-        if (!settings.protoDir) return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
+        if (!settings.jsonDir)
+          return { success: false, error: 'JSON 디렉토리가 설정되지 않았습니다.' }
+        if (!settings.protoDir)
+          return { success: false, error: 'proto 디렉토리가 설정되지 않았습니다.' }
 
         const parsed = protoParserService.parseDirectory(settings.protoDir)
         const allMessageDefs = parsed.messages

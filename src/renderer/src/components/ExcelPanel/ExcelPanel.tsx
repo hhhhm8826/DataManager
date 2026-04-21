@@ -25,7 +25,10 @@ export function ExcelPanel(): React.JSX.Element {
   const [confirmOverwrite, setConfirmOverwrite] = useState<ExcelFileInfo[]>([])
 
   const openDir = async (dirPath: string | undefined): Promise<void> => {
-    if (!dirPath?.trim()) { toast.error('경로를 먼저 설정하세요.'); return }
+    if (!dirPath?.trim()) {
+      toast.error('경로를 먼저 설정하세요.')
+      return
+    }
     await ipcInvoke(IPC.SETTINGS_OPEN_DIR, dirPath)
   }
 
@@ -49,7 +52,9 @@ export function ExcelPanel(): React.JSX.Element {
   // 존재하는 Excel 파일 → 시트 단위 평탄화 (JSON 내보내기 대상)
   const sheetsForJson = fileInfos
     .filter((f) => f.exists)
-    .flatMap((f) => f.msgNames.map((msgName) => ({ ...f, msgName, key: `${f.protoFile}::${msgName}` })))
+    .flatMap((f) =>
+      f.msgNames.map((msgName) => ({ ...f, msgName, key: `${f.protoFile}::${msgName}` }))
+    )
 
   // ── 생성 섹션 헬퍼 ──
 
@@ -68,7 +73,10 @@ export function ExcelPanel(): React.JSX.Element {
   }
 
   const handleGenerate = async (backup = false, skipConflictCheck = false): Promise<void> => {
-    if (selectedGen.size === 0) { toast.error('생성할 파일을 선택하세요.'); return }
+    if (selectedGen.size === 0) {
+      toast.error('생성할 파일을 선택하세요.')
+      return
+    }
 
     // 덮어쓰기 충돌 검사 (첫 호출 시, 모달에서 확인하지 않은 경우)
     if (!backup && !skipConflictCheck) {
@@ -89,9 +97,10 @@ export function ExcelPanel(): React.JSX.Element {
     setGenerating(false)
     if (r.success && r.data) {
       const { created, backedUp } = r.data
-      const msg = backedUp.length > 0
-        ? `${created.length}개 Excel 파일이 생성되었습니다. (백업: ${backedUp.join(', ')})`
-        : `${created.length}개 Excel 파일이 생성되었습니다.`
+      const msg =
+        backedUp.length > 0
+          ? `${created.length}개 Excel 파일이 생성되었습니다. (백업: ${backedUp.join(', ')})`
+          : `${created.length}개 Excel 파일이 생성되었습니다.`
       toast.success(msg)
       await loadFileInfos()
     } else {
@@ -117,7 +126,10 @@ export function ExcelPanel(): React.JSX.Element {
 
   const handleExportJson = async (): Promise<void> => {
     const selected = sheetsForJson.filter((s) => selectedJson.has(s.key))
-    if (selected.length === 0) { toast.error('내보낼 시트를 선택하세요.'); return }
+    if (selected.length === 0) {
+      toast.error('내보낼 시트를 선택하세요.')
+      return
+    }
 
     // ── 연결된 테이블 재귀 수집 ──
     // parsed.messages 에서 각 메시지의 필드 타입이 다른 메시지 이름이면 의존성으로 추가
@@ -127,13 +139,15 @@ export function ExcelPanel(): React.JSX.Element {
     // msgName → excelPath 맵 (존재하는 파일만)
     const msgToSheet = new Map<string, { excelPath: string; msgName: string }>()
     for (const s of sheetsForJson) {
-      if (!msgToSheet.has(s.msgName)) msgToSheet.set(s.msgName, { excelPath: s.excelPath, msgName: s.msgName })
+      if (!msgToSheet.has(s.msgName))
+        msgToSheet.set(s.msgName, { excelPath: s.excelPath, msgName: s.msgName })
     }
 
     // BFS로 의존 메시지 수집
     const toExport = new Map<string, { excelPath: string; msgName: string }>()
     const queue: string[] = selected.map((s) => s.msgName)
-    for (const s of selected) toExport.set(s.msgName, { excelPath: s.excelPath, msgName: s.msgName })
+    for (const s of selected)
+      toExport.set(s.msgName, { excelPath: s.excelPath, msgName: s.msgName })
 
     while (queue.length > 0) {
       const msgName = queue.shift()!
@@ -161,7 +175,10 @@ export function ExcelPanel(): React.JSX.Element {
 
     setJsonExporting(true)
     const requests = [...byExcel.values()]
-    const r = await ipcInvoke<{ exported: number; embedded: string[] }>(IPC.EXCEL_EXPORT_JSON, requests)
+    const r = await ipcInvoke<{ exported: number; embedded: string[] }>(
+      IPC.EXCEL_EXPORT_JSON,
+      requests
+    )
     setJsonExporting(false)
     if (r.success && r.data) {
       const { exported, embedded } = r.data
@@ -174,29 +191,40 @@ export function ExcelPanel(): React.JSX.Element {
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-
       {/* ── 덮어쓰기 확인 모달 ── */}
       {confirmOverwrite.length > 0 && (
         <div className="modal-overlay" onClick={() => setConfirmOverwrite([])}>
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <span className="modal-title">⚠️ 파일 덮어쓰기 확인</span>
-              <button className="btn btn-ghost" style={{ padding: '2px 8px' }} onClick={() => setConfirmOverwrite([])}>✕</button>
+              <button
+                className="btn btn-ghost"
+                style={{ padding: '2px 8px' }}
+                onClick={() => setConfirmOverwrite([])}
+              >
+                ✕
+              </button>
             </div>
             <p style={{ color: '#9ca3af', fontSize: 13, marginBottom: 12 }}>
               다음 파일이 이미 존재합니다. 어떻게 처리할까요?
             </p>
-            <ul style={{ margin: '0 0 20px 20px', color: '#9ca3af', fontSize: 13, lineHeight: 1.8 }}>
+            <ul
+              style={{ margin: '0 0 20px 20px', color: '#9ca3af', fontSize: 13, lineHeight: 1.8 }}
+            >
               {confirmOverwrite.map((f) => (
                 <li key={f.protoFile}>
                   <span style={{ color: '#f87171' }}>{f.excelFile}</span>
                   {' → 백업: '}
-                  <span style={{ color: '#a0c4ff' }}>backup/{f.excelFile.replace('.xlsx', '_YYYYMMDDHHmmss.xlsx')}</span>
+                  <span style={{ color: '#a0c4ff' }}>
+                    backup/{f.excelFile.replace('.xlsx', '_YYYYMMDDHHmmss.xlsx')}
+                  </span>
                 </li>
               ))}
             </ul>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button className="btn btn-ghost" onClick={() => setConfirmOverwrite([])}>취소</button>
+              <button className="btn btn-ghost" onClick={() => setConfirmOverwrite([])}>
+                취소
+              </button>
               <button
                 className="btn btn-danger"
                 onClick={() => handleGenerate(false, true)}
@@ -220,7 +248,6 @@ export function ExcelPanel(): React.JSX.Element {
         <span className="page-title">Excel 관리</span>
       </div>
       <div className="page-body" style={{ display: 'flex', flexDirection: 'column' }}>
-
         {/* ── 상단 탭 ── */}
         <div className="sub-tabs">
           <button
@@ -240,24 +267,41 @@ export function ExcelPanel(): React.JSX.Element {
         {/* ── Excel 파일 생성 탭 ── */}
         {activeTab === 'generate' && (
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 14
+              }}
+            >
+              <button
+                className="btn btn-success"
+                onClick={() => handleGenerate()}
+                disabled={generating || selectedGen.size === 0}
+              >
+                {generating ? '생성 중...' : `📄 선택된 ${selectedGen.size}개 생성`}
+              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 13, color: '#9ca3af' }}>
+                  출력 경로:{' '}
+                  <strong style={{ color: '#a0c4ff' }}>{settings?.excelDir || '(미설정)'}</strong>
+                </span>
                 <button
-                    className="btn btn-success"
-                    onClick={() => handleGenerate()}
-                    disabled={generating || selectedGen.size === 0}
+                  className="btn btn-ghost"
+                  style={{ padding: '2px 8px', fontSize: 13 }}
+                  title="탐색기에서 열기"
+                  onClick={() => openDir(settings?.excelDir)}
                 >
-                    {generating ? '생성 중...' : `📄 선택된 ${selectedGen.size}개 생성`}
+                  ↗
                 </button>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 13, color: '#9ca3af' }}>
-                        출력 경로: <strong style={{ color: '#a0c4ff' }}>{settings?.excelDir || '(미설정)'}</strong>
-                    </span>
-                    <button className="btn btn-ghost" style={{ padding: '2px 8px', fontSize: 13 }} title="탐색기에서 열기" onClick={() => openDir(settings?.excelDir)}>↗</button>
-                </div>
+              </div>
             </div>
 
             {loadingInfos ? (
-              <p className="empty-state" style={{ padding: '16px 0' }}>로딩 중...</p>
+              <p className="empty-state" style={{ padding: '16px 0' }}>
+                로딩 중...
+              </p>
             ) : fileInfos.length > 0 ? (
               <>
                 <table className="data-table" style={{ marginBottom: 12 }}>
@@ -289,12 +333,13 @@ export function ExcelPanel(): React.JSX.Element {
                         <td style={{ color: '#a0c4ff' }}>{f.protoFile}</td>
                         <td style={{ color: '#6fcf97' }}>{f.excelFile}</td>
                         <td style={{ color: '#9ca3af', fontSize: 12 }}>{f.msgNames.join(', ')}</td>
-                        <td style={{ textAlign: 'center', fontSize: 14 }}>{f.exists ? '✅' : '—'}</td>
+                        <td style={{ textAlign: 'center', fontSize: 14 }}>
+                          {f.exists ? '✅' : '—'}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-
               </>
             ) : (
               <p className="empty-state" style={{ padding: '16px 0' }}>
@@ -307,20 +352,37 @@ export function ExcelPanel(): React.JSX.Element {
         {/* ── JSON 내보내기 탭 ── */}
         {activeTab === 'json' && (
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 14
+              }}
+            >
+              <button
+                className="btn btn-primary"
+                onClick={handleExportJson}
+                disabled={jsonExporting || selectedJson.size === 0}
+              >
+                {jsonExporting
+                  ? '내보내는 중...'
+                  : `📥 선택된 ${selectedJson.size}개 시트 JSON 내보내기`}
+              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 13, color: '#9ca3af' }}>
+                  출력 경로:{' '}
+                  <strong style={{ color: '#a0c4ff' }}>{settings?.jsonDir || '(미설정)'}</strong>
+                </span>
                 <button
-                  className="btn btn-primary"
-                  onClick={handleExportJson}
-                  disabled={jsonExporting || selectedJson.size === 0}
+                  className="btn btn-ghost"
+                  style={{ padding: '2px 8px', fontSize: 13 }}
+                  title="탐색기에서 열기"
+                  onClick={() => openDir(settings?.jsonDir)}
                 >
-                  {jsonExporting ? '내보내는 중...' : `📥 선택된 ${selectedJson.size}개 시트 JSON 내보내기`}
+                  ↗
                 </button>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 13, color: '#9ca3af' }}>
-                        출력 경로: <strong style={{ color: '#a0c4ff' }}>{settings?.jsonDir || '(미설정)'}</strong>
-                    </span>
-                    <button className="btn btn-ghost" style={{ padding: '2px 8px', fontSize: 13 }} title="탐색기에서 열기" onClick={() => openDir(settings?.jsonDir)}>↗</button>
-                </div>
+              </div>
             </div>
             <p style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>
               Excel 파일이 존재하는 시트만 표시됩니다. 시트 단위로 선택하여 JSON으로 내보냅니다.
@@ -330,7 +392,9 @@ export function ExcelPanel(): React.JSX.Element {
             </p>
 
             {loadingInfos ? (
-              <p className="empty-state" style={{ padding: '16px 0' }}>로딩 중...</p>
+              <p className="empty-state" style={{ padding: '16px 0' }}>
+                로딩 중...
+              </p>
             ) : sheetsForJson.length > 0 ? (
               <>
                 <table className="data-table" style={{ marginBottom: 12 }}>
@@ -339,7 +403,9 @@ export function ExcelPanel(): React.JSX.Element {
                       <th style={{ width: 36, textAlign: 'center' }}>
                         <input
                           type="checkbox"
-                          checked={selectedJson.size === sheetsForJson.length && sheetsForJson.length > 0}
+                          checked={
+                            selectedJson.size === sheetsForJson.length && sheetsForJson.length > 0
+                          }
                           onChange={toggleAllJson}
                         />
                       </th>
@@ -372,7 +438,7 @@ export function ExcelPanel(): React.JSX.Element {
                               fontSize: 12,
                               cursor: 'pointer',
                               userSelect: 'none',
-                              transition: 'background 0.15s',
+                              transition: 'background 0.15s'
                             }}
                             title={`더블클릭: ${s.excelFile} 열기`}
                             onDoubleClick={() => ipcInvoke(IPC.SETTINGS_OPEN_DIR, s.excelPath)}
@@ -394,7 +460,6 @@ export function ExcelPanel(): React.JSX.Element {
             )}
           </div>
         )}
-
       </div>
     </div>
   )

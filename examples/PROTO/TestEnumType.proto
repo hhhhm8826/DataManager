@@ -3,16 +3,17 @@ syntax = "proto3";
 package DATA_MANAGER_TABLE;
 option go_package = "./DATA_MANAGER_TABLE";
 
-enum TestType {
-  TestType_NONE = 0;
-  TestType_Test1 = 1;
-  TestType_Test2 = 2;
-  TestType_MAX = 3;
-}
-
 enum BigTestType {
   BigTestType_NONE = 0;
   BigTestType_Unreal32bit1 = 1000;
   BigTestType_Unreal32bit2 = 1001;
   BigTestType_MAX = 1002;
+}
+
+enum TestType {
+  TestType_NONE = 0;
+  TestType_Test1 = 1;
+  TestType_Test2 = 2;
+  TestType_Test3 = 3;
+  TestType_MAX = 4;
 }

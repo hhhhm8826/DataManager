@@ -1,24 +1,24 @@
 {
-	"protoDir": "./examples/PROTO",
-	"excelDir": "./examples/EXCEL",
-	"jsonDir": "./examples/JSON",
-	"outputDirs": [
-		{
-			"language": "cpp",
-			"dir": "./examples/CODE/C++"
-		},
-		{
-			"language": "csharp",
-			"dir": "./examples/CODE/C#"
-		},
-		{
-			"language": "golang",
-			"dir": "./examples/CODE/Go"
-		},
-		{
-			"language": "unreal",
-			"dir": "./examples/CODE/Unreal C++"
-		}
-	],
-	"protocPath": "./examples/PROTOC/protoc.exe"
+  "protoDir": "./examples/PROTO",
+  "excelDir": "./examples/EXCEL",
+  "jsonDir": "./examples/JSON",
+  "outputDirs": [
+    {
+      "language": "cpp",
+      "dir": "./examples/CODE/C++"
+    },
+    {
+      "language": "csharp",
+      "dir": "./examples/CODE/C#"
+    },
+    {
+      "language": "golang",
+      "dir": "./examples/CODE/Go"
+    },
+    {
+      "language": "unreal",
+      "dir": "./examples/CODE/Unreal C++"
+    }
+  ],
+  "protocPath": "./examples/PROTOC/protoc.exe"
 }

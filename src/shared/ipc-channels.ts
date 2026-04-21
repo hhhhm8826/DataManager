@@ -31,7 +31,7 @@ export const IPC = {
   CODEGEN_GENERATE: 'codegen:generate',
   CODEGEN_GENERATE_ALL: 'codegen:generate-all',
   CODEGEN_LIST_LANGUAGES: 'codegen:list-languages',
-  CODEGEN_GENERATE_UNREAL: 'codegen:generate-unreal',
+  CODEGEN_GENERATE_UNREAL: 'codegen:generate-unreal'
 } as const
 
 export type IpcChannel = (typeof IPC)[keyof typeof IPC]
