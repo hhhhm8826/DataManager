@@ -7,6 +7,8 @@ import type { ProtoMessage, ProtoField, ProtoEnum } from '../../../../shared/typ
 
 const PRIMITIVE_TYPES = ['string', 'int32', 'int64', 'uint32', 'uint64', 'float', 'double', 'bool', 'bytes']
 
+const stripProto = (f: string): string => f.replace(/\.proto$/i, '')
+
 interface FieldDraft {
   name: string
   type: string
@@ -69,6 +71,7 @@ export function TableCreator(): React.JSX.Element {
   const [newProtoFileName, setNewProtoFileName] = useState('')
   const [fields, setFields] = useState<FieldDraft[]>([makeField(0)])
   const [saving, setSaving] = useState(false)
+  const [showGuide, setShowGuide] = useState(false)
 
   const allMessages = parsed?.messages ?? []
   const allEnums = parsed?.enums ?? []
@@ -252,11 +255,77 @@ export function TableCreator(): React.JSX.Element {
       </div>
       <div className="page-body">
 
+        {/* ── 가이드 모달 ── */}
+        {showGuide && (
+          <div className="modal-overlay" onClick={() => setShowGuide(false)}>
+            <div className="modal-box" style={{ maxWidth: 560, maxHeight: '80vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <span className="modal-title">📖 타입 가이드</span>
+                <button className="btn btn-ghost" style={{ padding: '2px 8px' }} onClick={() => setShowGuide(false)}>✕</button>
+              </div>
+
+              <div style={{ fontSize: 13, color: '#9ca3af', lineHeight: 1.8 }}>
+                <p style={{ color: '#a0c4ff', fontWeight: 600, marginBottom: 6 }}>기본 타입</p>
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 16, border: '1px solid #1f2937', borderRadius: 6, overflow: 'hidden' }}>
+                  <thead>
+                    <tr style={{ background: '#1f2937' }}>
+                      <th style={{ textAlign: 'left', padding: '7px 12px', color: '#a0c4ff', fontWeight: 600, fontSize: 12 }}>타입</th>
+                      <th style={{ textAlign: 'left', padding: '7px 12px', color: '#a0c4ff', fontWeight: 600, fontSize: 12 }}>설명</th>
+                      <th style={{ textAlign: 'left', padding: '7px 12px', color: '#a0c4ff', fontWeight: 600, fontSize: 12 }}>범위</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {([
+                      ['string', '문자열', '—'],
+                      ['int32', '32비트 정수', '-2,147,483,648 ~ 2,147,483,647'],
+                      ['int64', '64비트 정수', '-9,223,372,036,854,775,808 ~ 9,223,372,036,854,775,807'],
+                      ['uint32', '32비트 부호없는 정수', '0 ~ 4,294,967,295'],
+                      ['uint64', '64비트 부호없는 정수', '0 ~ 18,446,744,073,709,551,615'],
+                      ['float', '32비트 부동소수점', '약 ±3.4 × 10³⁸ (소수점 7자리)'],
+                      ['double', '64비트 부동소수점', '약 ±1.8 × 10³⁰⁸ (소수점 15자리)'],
+                      ['bool', '참/거짓', 'true / false'],
+                      ['bytes', '바이트 배열', '—'],
+                    ] as [string, string, string][]).map(([t, desc, range], idx) => (
+                      <tr key={t} style={{ background: idx % 2 === 0 ? '#111827' : '#0d1520', borderBottom: '1px solid #1f2937' }}>
+                        <td style={{ padding: '6px 12px', color: '#6fcf97', fontFamily: 'monospace', fontWeight: 600 }}>{t}</td>
+                        <td style={{ padding: '6px 12px', color: '#e0e0e0' }}>{desc}</td>
+                        <td style={{ padding: '6px 12px', fontSize: 12, color: '#9ca3af' }}>{range}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <br />
+                <p style={{ color: '#a0c4ff', fontWeight: 600, marginBottom: 6 }}>테이블 참조</p>
+                <p style={{ marginBottom: 8 }}>
+                  다른 테이블의 메시지를 필드 타입으로 사용할 수 있습니다.\n
+                  타입 선택 시 <strong style={{ color: '#e0e0e0' }}>기본 타입</strong> 대신 참조할 proto 파일을 선택하면, 해당 파일에 정의된 테이블/Enum 목록이 표시됩니다.
+                </p>
+                <div style={{ background: '#111827', borderRadius: 6, padding: '10px 14px', fontSize: 12, color: '#9ca3af', marginBottom: 8 }}>
+                  <div style={{ marginBottom: 4 }}>예시: <span style={{ color: '#a0c4ff' }}>ItemTable.proto</span> 에 정의된 <span style={{ color: '#e0e0e0' }}>ItemTable</span> 을 참조</div>
+                  <div>① 카테고리 선택 → <span style={{ color: '#6fcf97' }}>ItemTable.proto</span></div>
+                  <div>② 타입 선택 → <span style={{ color: '#6fcf97' }}>ItemTable</span></div>
+                </div>
+                <p style={{ fontSize: 12 }}>
+                  참조된 필드는 Excel에서 해당 테이블의 PK/Key 값을 드롭다운으로 선택할 수 있게 연결됩니다.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ── PK / Key 설명 ── */}
-        <div style={{ display: 'flex', gap: 16, marginBottom: 12, fontSize: 12, color: '#6b7280' }}>
-          <span><span style={{ color: '#f0c040', fontWeight: 600 }}>PK</span> — Primary Key. 행을 고유하게 식별하는 기준 필드. 2개 이상이면 Composite Key로 동작합니다.</span>
-          <span style={{ color: '#4b5563' }}>|</span>
-          <span><span style={{ color: '#4dbb88', fontWeight: 600 }}>Key</span> — 같은 Key 값을 가진 행들을 배열로 묶어 그룹으로 사용합니다.</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+          <button
+            className="btn btn-ghost"
+            style={{ padding: '2px 8px', fontSize: 15, flexShrink: 0 }}
+            onClick={() => setShowGuide(true)}
+            title="타입 가이드 보기"
+          >❓ 가이드</button>
+          <div style={{ display: 'flex', gap: 16, fontSize: 12, color: '#9ca3af' }}>
+            <span><span style={{ color: '#f0c040', fontWeight: 600 }}>PK</span> — Primary Key. 행을 고유하게 식별하는 컬럼. 2개 이상이면 Composite Key로 동작합니다.</span>
+            <span style={{ color: '#4b5563' }}>|</span>
+            <span><span style={{ color: '#4dbb88', fontWeight: 600 }}>Key</span> — 같은 Key 값을 가진 행들을 배열로 묶어 그룹으로 사용합니다.</span>
+          </div>
         </div>
 
         {/* ── 목록 뷰 ── */}
@@ -265,7 +334,7 @@ export function TableCreator(): React.JSX.Element {
             ? <div className="card"><p className="empty-state">{q ? `'${searchQuery}' 에 해당하는 테이블이 없습니다.` : '등록된 테이블이 없습니다. proto 디렉토리를 설정하거나 테이블을 추가하세요.'}</p></div>
             : protoGroups.map(([protoFile, msgs]) => (
               <div className="card" key={protoFile}>
-                <div className="card-title" style={{ color: '#a0c4ff', fontSize: 13 }}>{protoFile}</div>
+                <div className="card-title" style={{ color: '#a0c4ff', fontSize: 13 }}>{stripProto(protoFile)}</div>
                 <table className="data-table">
                   <thead>
                     <tr>
@@ -403,14 +472,14 @@ export function TableCreator(): React.JSX.Element {
                       {tableSourceFiles.length > 0 && (
                         <optgroup label="── 테이블">
                           {tableSourceFiles.map((f) => (
-                            <option key={f} value={f}>{f}</option>
+                            <option key={f} value={f}>{stripProto(f)}</option>
                           ))}
                         </optgroup>
                       )}
                       {enumSourceFiles.length > 0 && (
                         <optgroup label="── Enum">
                           {enumSourceFiles.map((f) => (
-                            <option key={f} value={f}>{f}</option>
+                            <option key={f} value={f}>{stripProto(f)}</option>
                           ))}
                         </optgroup>
                       )}
@@ -454,7 +523,7 @@ export function TableCreator(): React.JSX.Element {
                       }} />
                     Key
                   </label>
-                  <label className="checkbox-group" title="repeated">
+                  <label className="checkbox-group" title="repeated" style={{ display: 'none' }}>
                     <input type="checkbox" checked={field.isRepeated} onChange={(e) => updateField(i, { isRepeated: e.target.checked })} />
                     List
                   </label>

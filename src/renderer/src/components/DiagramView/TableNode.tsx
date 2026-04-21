@@ -8,8 +8,9 @@ interface TableNodeData {
   allEnums: ProtoEnum[]
   allMessages: ProtoMessage[]
   isHighlighted?: boolean
-  onMessageHover?: (pair: { source: string; target: string } | null) => void
+  onMessageHover?: (pair: { source: string; sourceField: string; target: string; targetField: string } | null) => void
   referencedFields?: Set<string>
+  hoveredConnection?: { source: string; sourceField: string; target: string; targetField: string } | null
   [key: string]: unknown
 }
 
@@ -25,7 +26,7 @@ const HANDLE_FIELD_TOP = 4
 const HANDLE_FIELD_H = 30
 
 export function TableNode({ data }: NodeProps): React.JSX.Element {
-  const { message, allEnums, allMessages, isHighlighted, onMessageHover, referencedFields } = data as TableNodeData
+  const { message, allEnums, allMessages, isHighlighted, onMessageHover, referencedFields, hoveredConnection } = data as TableNodeData
   const messageNames = new Set(allMessages?.map((m) => m.name) ?? [])
   const [enumModal, setEnumModal] = useState<{ field: string; protoEnum: ProtoEnum } | null>(null)
   const [hoveredFieldType, setHoveredFieldType] = useState<string | null>(null)
@@ -106,6 +107,8 @@ export function TableNode({ data }: NodeProps): React.JSX.Element {
             const isMessage = messageNames.has(field.type) && field.type !== message.name
             const isKnown = isEnum || isMessage || messageNames.has(field.type) || PRIMITIVE_TYPES.has(field.type)
             const isFieldHovered = hoveredFieldType === field.type && isMessage
+            const isSourceField = hoveredConnection?.source === message.name && hoveredConnection?.sourceField === field.name
+            const isTargetField = hoveredConnection?.target === message.name && hoveredConnection?.targetField === field.name
             return (
               <div
                 key={field.name}
@@ -117,15 +120,19 @@ export function TableNode({ data }: NodeProps): React.JSX.Element {
                   gap: 8,
                   cursor: isEnum ? 'pointer' : 'default',
                   borderBottom: '1px solid #0f3460',
-                  background: isFieldHovered ? 'rgba(255,170,68,0.1)' : 'transparent',
+                  background: isSourceField || isTargetField
+                    ? 'rgba(255,170,68,0.18)'
+                    : isFieldHovered ? 'rgba(255,170,68,0.1)' : 'transparent',
                   transition: 'background 0.15s'
                 }}
                 onDoubleClick={() => handleFieldDoubleClick(field.name, field.type)}
                 title={isEnum ? '더블클릭으로 Enum 보기' : undefined}
                 onMouseEnter={() => {
                   if (isMessage) {
+                    const targetMsg = allMessages.find((m) => m.name === field.type)
+                    const targetField = targetMsg?.pkFields[0] ?? targetMsg?.fields[0]?.name ?? ''
                     setHoveredFieldType(field.type)
-                    onMessageHover?.({ source: message.name, target: field.type })
+                    onMessageHover?.({ source: message.name, sourceField: field.name, target: field.type, targetField })
                   }
                 }}
                 onMouseLeave={() => {

@@ -94,7 +94,7 @@ export function DiagramView(): React.JSX.Element {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
   const [searchQuery, setSearchQuery] = useState('')
-  const [hoveredPair, setHoveredPair] = useState<{ source: string; target: string } | null>(null)
+  const [hoveredPair, setHoveredPair] = useState<{ source: string; sourceField: string; target: string; targetField: string } | null>(null)
 
   // 파싱 에러 → 토스트
   useEffect(() => {
@@ -167,6 +167,20 @@ export function DiagramView(): React.JSX.Element {
     [setEdges]
   )
 
+  const onEdgeMouseEnter = useCallback((_evt: React.MouseEvent, edge: Edge) => {
+    const match = edge.id.match(/^(.+)\.(.+)->(.+)$/)
+    if (match) {
+      const [, source, sourceField, target] = match
+      const targetMsg = parsed?.messages.find((m) => m.name === target)
+      const targetField = targetMsg?.pkFields[0] ?? targetMsg?.fields[0]?.name ?? ''
+      setHoveredPair({ source, sourceField, target, targetField })
+    }
+  }, [parsed])
+
+  const onEdgeMouseLeave = useCallback(() => {
+    setHoveredPair(null)
+  }, [])
+
   // 검색 쿼리에 따라 노드 opacity 조정
   const q = searchQuery.trim().toLowerCase()
   const displayNodes: Node[] = nodes.map((node) => {
@@ -176,7 +190,7 @@ export function DiagramView(): React.JSX.Element {
       : false
     return {
       ...node,
-      data: { ...node.data, isHighlighted },
+      data: { ...node.data, isHighlighted, hoveredConnection: hoveredPair },
       style: {
         ...node.style,
         opacity: matched ? 1 : 0.15,
@@ -185,6 +199,28 @@ export function DiagramView(): React.JSX.Element {
     }
   })
   const matchCount = q ? displayNodes.filter((n) => (n.style?.opacity ?? 1) === 1).length : nodes.length
+
+  // 엣지 강조: hover 중인 연결은 주황/굵게, 나머지는 흐리게
+  const displayEdges: Edge[] = edges.map((edge) => {
+    const isActive = hoveredPair
+      ? edge.source === hoveredPair.source &&
+        edge.target === hoveredPair.target &&
+        edge.sourceHandle === `src-${hoveredPair.sourceField}`
+      : false
+    return {
+      ...edge,
+      animated: isActive,
+      zIndex: isActive ? 1000 : 10,
+      style: isActive
+        ? { stroke: '#ffaa44', strokeWidth: 3 }
+        : { stroke: '#a0c4ff', strokeWidth: 1.5, opacity: hoveredPair ? 0.2 : 1 },
+      label: isActive ? `${hoveredPair!.sourceField}  →  ${hoveredPair!.targetField}` : undefined,
+      labelStyle: isActive ? { fontSize: 11, fill: '#ffaa44', fontWeight: 700 } : undefined,
+      labelBgStyle: isActive ? { fill: '#1a1a2e', fillOpacity: 0.9 } : undefined,
+      labelBgPadding: isActive ? [6, 3] as [number, number] : undefined,
+      labelBgBorderRadius: isActive ? 4 : undefined,
+    }
+  })
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -241,10 +277,12 @@ export function DiagramView(): React.JSX.Element {
         ) : (
           <ReactFlow
             nodes={displayNodes}
-            edges={edges}
+            edges={displayEdges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
+            onEdgeMouseEnter={onEdgeMouseEnter}
+            onEdgeMouseLeave={onEdgeMouseLeave}
             nodeTypes={NODE_TYPES}
             fitView
             elevateEdgesOnSelect={false}

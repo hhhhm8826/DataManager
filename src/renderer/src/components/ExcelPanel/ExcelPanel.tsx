@@ -322,10 +322,10 @@ export function ExcelPanel(): React.JSX.Element {
                     <button className="btn btn-ghost" style={{ padding: '2px 8px', fontSize: 13 }} title="탐색기에서 열기" onClick={() => openDir(settings?.jsonDir)}>↗</button>
                 </div>
             </div>
-            <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 12 }}>
+            <p style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>
               Excel 파일이 존재하는 시트만 표시됩니다. 시트 단위로 선택하여 JSON으로 내보냅니다.
             </p>
-            <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 12 }}>
+            <p style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>
               Excel 파일 이름을 더블클릭하면 해당 파일이 열립니다.
             </p>
 

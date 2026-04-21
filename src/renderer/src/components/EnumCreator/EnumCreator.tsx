@@ -5,6 +5,8 @@ import { IPC } from '../../../../shared/ipc-channels'
 import { ipcInvoke } from '../../hooks/useIpc'
 import type { ProtoEnum, ProtoEnumValue } from '../../../../shared/types'
 
+const stripProto = (f: string): string => f.replace(/\.proto$/i, '')
+
 interface ValueDraft {
   name: string
   number: number
@@ -178,7 +180,7 @@ export function EnumCreator(): React.JSX.Element {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div className="page-header">
-        <span className="page-title">Enum</span>
+        <span className="page-title">Enum - 열거형, 상태값</span>
         {mode === 'list'
           ? <button className="btn btn-success" style={{ marginLeft: 'auto' }} onClick={openAdd}>+ Enum 추가</button>
           : <button className="btn btn-ghost" style={{ marginLeft: 'auto' }} onClick={() => { resetForm(); setMode('list') }}>← 목록으로</button>
@@ -214,7 +216,10 @@ export function EnumCreator(): React.JSX.Element {
                             <span style={{ fontSize: 10, color: isSelected ? '#7ab3f0' : '#6b7280' }}>
                               {isSelected ? '▼' : '▶'}
                             </span>
-                            <span style={{ color: isSelected ? '#a0c4ff' : '#9ca3af', fontSize: 13 }}>{sourceFile}</span>
+                            <span style={{ color: isSelected ? '#a0c4ff' : '#9ca3af', fontSize: 13 }}>{stripProto(sourceFile)}</span>
+                            <span style={{ fontSize: 11, color: isSelected ? '#7ab3f0' : '#4b5563' }}>
+                              ({enums.map((e) => e.name).join(', ')})
+                            </span>
                           </span>
                           <span style={{ fontSize: 11, color: '#6b7280' }}>{enums.length}개</span>
                         </div>
@@ -228,7 +233,7 @@ export function EnumCreator(): React.JSX.Element {
                   const enums = enumGroups.find(([f]) => f === selectedFile)?.[1] ?? []
                   return (
                     <div className="card" key={selectedFile}>
-                      <div className="card-title" style={{ color: '#a0c4ff', fontSize: 13 }}>{selectedFile}</div>
+                      <div className="card-title" style={{ color: '#a0c4ff', fontSize: 13 }}>{stripProto(selectedFile)}</div>
                       <table className="data-table">
                         <thead>
                           <tr>
