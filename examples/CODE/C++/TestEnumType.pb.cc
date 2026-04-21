@@ -38,19 +38,19 @@ static constexpr ::_pb::Message* PROTOBUF_NONNULL const* PROTOBUF_NULLABLE
 const char descriptor_table_protodef_TestEnumType_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\022TestEnumType.proto\022\022DATA_MANAGER_TABLE"
-    "*W\n\010TestType\022\021\n\rTestType_NONE\020\000\022\022\n\016TestT"
-    "ype_Test1\020\001\022\022\n\016TestType_Test2\020\002\022\020\n\014TestT"
-    "ype_MAX\020\003*w\n\013BigTestType\022\024\n\020BigTestType_"
-    "NONE\020\000\022\035\n\030BigTestType_Unreal32bit1\020\350\007\022\035\n"
-    "\030BigTestType_Unreal32bit2\020\351\007\022\024\n\017BigTestT"
-    "ype_MAX\020\352\007B\026Z\024./DATA_MANAGER_TABLEb\006prot"
-    "o3"
+    "*w\n\013BigTestType\022\024\n\020BigTestType_NONE\020\000\022\035\n"
+    "\030BigTestType_Unreal32bit1\020\350\007\022\035\n\030BigTestT"
+    "ype_Unreal32bit2\020\351\007\022\024\n\017BigTestType_MAX\020\352"
+    "\007*k\n\010TestType\022\021\n\rTestType_NONE\020\000\022\022\n\016Test"
+    "Type_Test1\020\001\022\022\n\016TestType_Test2\020\002\022\022\n\016Test"
+    "Type_Test3\020\003\022\020\n\014TestType_MAX\020\004B\026Z\024./DATA"
+    "_MANAGER_TABLEb\006proto3"
 };
 static ::absl::once_flag descriptor_table_TestEnumType_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_TestEnumType_2eproto = {
     false,
     false,
-    282,
+    302,
     descriptor_table_protodef_TestEnumType_2eproto,
     "TestEnumType.proto",
     &descriptor_table_TestEnumType_2eproto_once,
@@ -65,19 +65,19 @@ PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_TestEnumType_2
 };
 namespace DATA_MANAGER_TABLE {
 [[nodiscard]] const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL
-TestType_descriptor() {
+BigTestType_descriptor() {
   ::google::protobuf::internal::AssignDescriptors(&descriptor_table_TestEnumType_2eproto);
   return file_level_enum_descriptors_TestEnumType_2eproto[0];
 }
-PROTOBUF_CONSTINIT const uint32_t TestType_internal_data_[] = {
-    262144u, 0u, };
+PROTOBUF_CONSTINIT const uint32_t BigTestType_internal_data_[] = {
+    65536u, 196608u, 1001u, 1000u, 1002u, };
 [[nodiscard]] const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL
-BigTestType_descriptor() {
+TestType_descriptor() {
   ::google::protobuf::internal::AssignDescriptors(&descriptor_table_TestEnumType_2eproto);
   return file_level_enum_descriptors_TestEnumType_2eproto[1];
 }
-PROTOBUF_CONSTINIT const uint32_t BigTestType_internal_data_[] = {
-    65536u, 196608u, 1001u, 1000u, 1002u, };
+PROTOBUF_CONSTINIT const uint32_t TestType_internal_data_[] = {
+    327680u, 0u, };
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace DATA_MANAGER_TABLE
 namespace google {

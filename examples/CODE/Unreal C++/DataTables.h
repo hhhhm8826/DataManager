@@ -24,6 +24,8 @@ struct FGameItemTypeDef : public FTableRowBase
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FString iconPath = TEXT("");
+
+    void ParseFromJson(const TSharedPtr<FJsonObject>& Obj);
 };
 
 USTRUCT(BlueprintType)
@@ -51,6 +53,8 @@ struct FGameItem : public FTableRowBase
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FString descriptions = TEXT("");
+
+    void ParseFromJson(const TSharedPtr<FJsonObject>& Obj);
 };
 
 USTRUCT(BlueprintType)
@@ -66,6 +70,8 @@ struct FMonsterRace : public FTableRowBase
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     int32 Memo = 0;
+
+    void ParseFromJson(const TSharedPtr<FJsonObject>& Obj);
 };
 
 USTRUCT(BlueprintType)
@@ -93,6 +99,8 @@ struct FMonster : public FTableRowBase
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FRewardItemGroup RewardGroupId;
+
+    void ParseFromJson(const TSharedPtr<FJsonObject>& Obj);
 };
 
 USTRUCT(BlueprintType)
@@ -111,6 +119,8 @@ struct FRewardItemGroup : public FTableRowBase
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float RewardItemRate01 = 0.0f;
+
+    void ParseFromJson(const TSharedPtr<FJsonObject>& Obj);
 };
 
 USTRUCT(BlueprintType)
@@ -126,6 +136,8 @@ struct FStringData : public FTableRowBase
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     int32 en = 0;
+
+    void ParseFromJson(const TSharedPtr<FJsonObject>& Obj);
 };
 
 USTRUCT(BlueprintType)
@@ -141,4 +153,6 @@ struct FGoTest : public FTableRowBase
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     int32 Test23 = 0;
+
+    void ParseFromJson(const TSharedPtr<FJsonObject>& Obj);
 };

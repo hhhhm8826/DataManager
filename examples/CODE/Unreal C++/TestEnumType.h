@@ -5,19 +5,20 @@
 #include "TestEnumType.generated.h"
 
 UENUM(BlueprintType)
-enum class ETestType : uint8
-{
-    TestType_TestType_NONE = 0 UMETA(DisplayName = "TestType_NONE"),
-    TestType_TestType_Test1 = 1 UMETA(DisplayName = "TestType_Test1"),
-    TestType_TestType_Test2 = 2 UMETA(DisplayName = "TestType_Test2"),
-    TestType_TestType_MAX = 3 UMETA(DisplayName = "TestType_MAX"),
-};
-
-UENUM(BlueprintType)
 enum class EBigTestType : uint32
 {
     BigTestType_BigTestType_NONE = 0 UMETA(DisplayName = "BigTestType_NONE"),
     BigTestType_BigTestType_Unreal32bit1 = 1000 UMETA(DisplayName = "BigTestType_Unreal32bit1"),
     BigTestType_BigTestType_Unreal32bit2 = 1001 UMETA(DisplayName = "BigTestType_Unreal32bit2"),
     BigTestType_BigTestType_MAX = 1002 UMETA(DisplayName = "BigTestType_MAX"),
+};
+
+UENUM(BlueprintType)
+enum class ETestType : uint8
+{
+    TestType_TestType_NONE = 0 UMETA(DisplayName = "TestType_NONE"),
+    TestType_TestType_Test1 = 1 UMETA(DisplayName = "TestType_Test1"),
+    TestType_TestType_Test2 = 2 UMETA(DisplayName = "TestType_Test2"),
+    TestType_TestType_Test3 = 3 UMETA(DisplayName = "TestType_Test3"),
+    TestType_TestType_MAX = 4 UMETA(DisplayName = "TestType_MAX"),
 };

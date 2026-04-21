@@ -26,10 +26,14 @@ export function CodeGenPanel(): React.JSX.Element {
   const { settings, saveSettings } = useAppStore()
 
   const [availableLanguages, setAvailableLanguages] = useState<string[]>([])
-  const [outputDirs, setOutputDirs] = useState<OutputDirConfig[]>([])
-  const [protocPath, setProtocPath] = useState('')
+  const [pendingDirs, setPendingDirs] = useState<OutputDirConfig[] | null>(null)
+  const [pendingProtocPath, setPendingProtocPath] = useState<string | null>(null)
   const [generating, setGenerating] = useState<string | 'all' | null>(null)
-  const [dirty, setDirty] = useState(false)
+
+  // settings 에서 파생 — pending 값이 있을 때만 로컬 override
+  const outputDirs = pendingDirs ?? settings?.outputDirs ?? []
+  const protocPath = pendingProtocPath ?? settings?.protocPath ?? ''
+  const dirty = pendingDirs !== null || pendingProtocPath !== null
 
   useEffect(() => {
     ipcInvoke<string[]>(IPC.CODEGEN_LIST_LANGUAGES).then((r) => {
@@ -37,24 +41,16 @@ export function CodeGenPanel(): React.JSX.Element {
     })
   }, [])
 
-  useEffect(() => {
-    if (settings) {
-      setOutputDirs(settings.outputDirs ?? [])
-      setProtocPath(settings.protocPath ?? '')
-      setDirty(false)
-    }
-  }, [settings])
-
   const getDirForLang = (lang: string): string =>
     outputDirs.find((o) => o.language === lang)?.dir ?? ''
 
   const setDirForLang = (lang: string, dir: string): void => {
-    setOutputDirs((prev) => {
-      const exists = prev.find((o) => o.language === lang)
-      if (exists) return prev.map((o) => (o.language === lang ? { ...o, dir } : o))
-      return [...prev, { language: lang, dir }]
+    setPendingDirs((prev) => {
+      const base = prev ?? settings?.outputDirs ?? []
+      const exists = base.find((o) => o.language === lang)
+      if (exists) return base.map((o) => (o.language === lang ? { ...o, dir } : o))
+      return [...base, { language: lang, dir }]
     })
-    setDirty(true)
   }
 
   const pickDir = async (lang: string): Promise<void> => {
@@ -78,16 +74,14 @@ export function CodeGenPanel(): React.JSX.Element {
         { name: '모든 파일', extensions: ['*'] }
       ]
     })
-    if (result.success && result.data) {
-      setProtocPath(result.data)
-      setDirty(true)
-    }
+    if (result.success && result.data) setPendingProtocPath(result.data)
   }
 
   const handleSavePaths = async (): Promise<void> => {
     const filtered = outputDirs.filter((o) => o.dir.trim())
     await saveSettings({ outputDirs: filtered, protocPath })
-    setDirty(false)
+    setPendingDirs(null)
+    setPendingProtocPath(null)
     toast.success('설정이 저장되었습니다.')
   }
 
@@ -173,10 +167,11 @@ export function CodeGenPanel(): React.JSX.Element {
       <div className="page-body">
         {/* 생성 실행 */}
         <div className="card">
-          <div className="card-title">생성 실행</div>
+          <div className="card-title">
+            생성되는 언어 : <strong style={{ color: '#6fcf97' }}> {totalConfiguredCount}개</strong>
+          </div>
           <p style={{ fontSize: 13, color: '#9ca3af', marginBottom: 16 }}>
-            경로가 설정된 언어:{' '}
-            <strong style={{ color: '#6fcf97' }}>{totalConfiguredCount}개</strong>
+            현재 Json 로더는 Unreal C++만 샘플로 구현됩니다.
           </p>
 
           <div style={{ marginBottom: 16 }}>
@@ -348,10 +343,7 @@ export function CodeGenPanel(): React.JSX.Element {
                 className="form-input path-input"
                 placeholder="protoc.exe 경로 (예: C:\tools\protoc\bin\protoc.exe)"
                 value={protocPath}
-                onChange={(e) => {
-                  setProtocPath(e.target.value)
-                  setDirty(true)
-                }}
+                onChange={(e) => setPendingProtocPath(e.target.value)}
               />
               <button className="btn btn-ghost" onClick={pickProtoc}>
                 📂

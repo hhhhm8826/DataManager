@@ -24,33 +24,34 @@ namespace DATAMANAGERTABLE {
     static TestEnumTypeReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "ChJUZXN0RW51bVR5cGUucHJvdG8SEkRBVEFfTUFOQUdFUl9UQUJMRSpXCghU",
-            "ZXN0VHlwZRIRCg1UZXN0VHlwZV9OT05FEAASEgoOVGVzdFR5cGVfVGVzdDEQ",
-            "ARISCg5UZXN0VHlwZV9UZXN0MhACEhAKDFRlc3RUeXBlX01BWBADKncKC0Jp",
-            "Z1Rlc3RUeXBlEhQKEEJpZ1Rlc3RUeXBlX05PTkUQABIdChhCaWdUZXN0VHlw",
-            "ZV9VbnJlYWwzMmJpdDEQ6AcSHQoYQmlnVGVzdFR5cGVfVW5yZWFsMzJiaXQy",
-            "EOkHEhQKD0JpZ1Rlc3RUeXBlX01BWBDqB0IWWhQuL0RBVEFfTUFOQUdFUl9U",
-            "QUJMRWIGcHJvdG8z"));
+            "ChJUZXN0RW51bVR5cGUucHJvdG8SEkRBVEFfTUFOQUdFUl9UQUJMRSp3CgtC",
+            "aWdUZXN0VHlwZRIUChBCaWdUZXN0VHlwZV9OT05FEAASHQoYQmlnVGVzdFR5",
+            "cGVfVW5yZWFsMzJiaXQxEOgHEh0KGEJpZ1Rlc3RUeXBlX1VucmVhbDMyYml0",
+            "MhDpBxIUCg9CaWdUZXN0VHlwZV9NQVgQ6gcqawoIVGVzdFR5cGUSEQoNVGVz",
+            "dFR5cGVfTk9ORRAAEhIKDlRlc3RUeXBlX1Rlc3QxEAESEgoOVGVzdFR5cGVf",
+            "VGVzdDIQAhISCg5UZXN0VHlwZV9UZXN0MxADEhAKDFRlc3RUeXBlX01BWBAE",
+            "QhZaFC4vREFUQV9NQU5BR0VSX1RBQkxFYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::DATAMANAGERTABLE.TestType), typeof(global::DATAMANAGERTABLE.BigTestType), }, null, null));
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::DATAMANAGERTABLE.BigTestType), typeof(global::DATAMANAGERTABLE.TestType), }, null, null));
     }
     #endregion
 
   }
   #region Enums
-  public enum TestType {
-    [pbr::OriginalName("TestType_NONE")] None = 0,
-    [pbr::OriginalName("TestType_Test1")] Test1 = 1,
-    [pbr::OriginalName("TestType_Test2")] Test2 = 2,
-    [pbr::OriginalName("TestType_MAX")] Max = 3,
-  }
-
   public enum BigTestType {
     [pbr::OriginalName("BigTestType_NONE")] None = 0,
     [pbr::OriginalName("BigTestType_Unreal32bit1")] Unreal32Bit1 = 1000,
     [pbr::OriginalName("BigTestType_Unreal32bit2")] Unreal32Bit2 = 1001,
     [pbr::OriginalName("BigTestType_MAX")] Max = 1002,
+  }
+
+  public enum TestType {
+    [pbr::OriginalName("TestType_NONE")] None = 0,
+    [pbr::OriginalName("TestType_Test1")] Test1 = 1,
+    [pbr::OriginalName("TestType_Test2")] Test2 = 2,
+    [pbr::OriginalName("TestType_Test3")] Test3 = 3,
+    [pbr::OriginalName("TestType_MAX")] Max = 4,
   }
 
   #endregion

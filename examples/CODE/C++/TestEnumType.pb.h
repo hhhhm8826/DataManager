@@ -69,48 +69,6 @@ internal::EnumTraitsT<::DATA_MANAGER_TABLE::TestType_internal_data_>
 }  // namespace google
 
 namespace DATA_MANAGER_TABLE {
-enum TestType : int {
-  TestType_NONE = 0,
-  TestType_Test1 = 1,
-  TestType_Test2 = 2,
-  TestType_MAX = 3,
-  TestType_INT_MIN_SENTINEL_DO_NOT_USE_ =
-      ::std::numeric_limits<::int32_t>::min(),
-  TestType_INT_MAX_SENTINEL_DO_NOT_USE_ =
-      ::std::numeric_limits<::int32_t>::max(),
-};
-
-extern const uint32_t TestType_internal_data_[];
-inline constexpr TestType TestType_MIN =
-    static_cast<TestType>(0);
-inline constexpr TestType TestType_MAX =
-    static_cast<TestType>(3);
-[[nodiscard]] inline bool TestType_IsValid(int value) {
-  return 0 <= value && value <= 3;
-}
-inline constexpr int TestType_ARRAYSIZE = 3 + 1;
-[[nodiscard]] const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL
-TestType_descriptor();
-[[nodiscard]] inline auto ProtobufInternalGetEnumDescriptor(TestType) {
-  return TestType_descriptor();
-}
-template <typename T>
-[[nodiscard]] const ::std::string& TestType_Name(T value) {
-  static_assert(::std::is_same<T, TestType>::value ||
-                    ::std::is_integral<T>::value,
-                "Incorrect type passed to TestType_Name().");
-  return TestType_Name(static_cast<TestType>(value));
-}
-template <>
-[[nodiscard]] inline const ::std::string& TestType_Name(TestType value) {
-  return ::google::protobuf::internal::NameOfDenseEnum<TestType_descriptor, 0, 3>(
-      static_cast<int>(value));
-}
-[[nodiscard]] inline bool TestType_Parse(
-    ::absl::string_view name, TestType* PROTOBUF_NONNULL value) {
-  return ::google::protobuf::internal::ParseNamedEnum<TestType>(TestType_descriptor(), name,
-                                           value);
-}
 enum BigTestType : int {
   BigTestType_NONE = 0,
   BigTestType_Unreal32bit1 = 1000,
@@ -148,6 +106,49 @@ template <typename T>
   return ::google::protobuf::internal::ParseNamedEnum<BigTestType>(BigTestType_descriptor(), name,
                                            value);
 }
+enum TestType : int {
+  TestType_NONE = 0,
+  TestType_Test1 = 1,
+  TestType_Test2 = 2,
+  TestType_Test3 = 3,
+  TestType_MAX = 4,
+  TestType_INT_MIN_SENTINEL_DO_NOT_USE_ =
+      ::std::numeric_limits<::int32_t>::min(),
+  TestType_INT_MAX_SENTINEL_DO_NOT_USE_ =
+      ::std::numeric_limits<::int32_t>::max(),
+};
+
+extern const uint32_t TestType_internal_data_[];
+inline constexpr TestType TestType_MIN =
+    static_cast<TestType>(0);
+inline constexpr TestType TestType_MAX =
+    static_cast<TestType>(4);
+[[nodiscard]] inline bool TestType_IsValid(int value) {
+  return 0 <= value && value <= 4;
+}
+inline constexpr int TestType_ARRAYSIZE = 4 + 1;
+[[nodiscard]] const ::google::protobuf::EnumDescriptor* PROTOBUF_NONNULL
+TestType_descriptor();
+[[nodiscard]] inline auto ProtobufInternalGetEnumDescriptor(TestType) {
+  return TestType_descriptor();
+}
+template <typename T>
+[[nodiscard]] const ::std::string& TestType_Name(T value) {
+  static_assert(::std::is_same<T, TestType>::value ||
+                    ::std::is_integral<T>::value,
+                "Incorrect type passed to TestType_Name().");
+  return TestType_Name(static_cast<TestType>(value));
+}
+template <>
+[[nodiscard]] inline const ::std::string& TestType_Name(TestType value) {
+  return ::google::protobuf::internal::NameOfDenseEnum<TestType_descriptor, 0, 4>(
+      static_cast<int>(value));
+}
+[[nodiscard]] inline bool TestType_Parse(
+    ::absl::string_view name, TestType* PROTOBUF_NONNULL value) {
+  return ::google::protobuf::internal::ParseNamedEnum<TestType>(TestType_descriptor(), name,
+                                           value);
+}
 
 // ===================================================================
 
@@ -177,16 +178,16 @@ namespace google {
 namespace protobuf {
 
 template <>
-struct is_proto_enum<::DATA_MANAGER_TABLE::TestType> : std::true_type {};
-template <>
-inline const EnumDescriptor* PROTOBUF_NONNULL GetEnumDescriptor<::DATA_MANAGER_TABLE::TestType>() {
-  return ::DATA_MANAGER_TABLE::TestType_descriptor();
-}
-template <>
 struct is_proto_enum<::DATA_MANAGER_TABLE::BigTestType> : std::true_type {};
 template <>
 inline const EnumDescriptor* PROTOBUF_NONNULL GetEnumDescriptor<::DATA_MANAGER_TABLE::BigTestType>() {
   return ::DATA_MANAGER_TABLE::BigTestType_descriptor();
+}
+template <>
+struct is_proto_enum<::DATA_MANAGER_TABLE::TestType> : std::true_type {};
+template <>
+inline const EnumDescriptor* PROTOBUF_NONNULL GetEnumDescriptor<::DATA_MANAGER_TABLE::TestType>() {
+  return ::DATA_MANAGER_TABLE::TestType_descriptor();
 }
 
 }  // namespace protobuf
