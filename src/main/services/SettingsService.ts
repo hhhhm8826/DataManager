@@ -18,7 +18,8 @@ const DEFAULT_SETTINGS: AppSettings = {
   excelDir: '',
   jsonDir: '',
   outputDirs: [],
-  protocPath: ''
+  protocPath: '',
+  fileColors: {}
 }
 
 const store = new Store<AppSettings>({
@@ -33,7 +34,8 @@ export class SettingsService {
       excelDir: resolvePath(store.get('excelDir')),
       jsonDir: resolvePath(store.get('jsonDir')),
       outputDirs: store.get('outputDirs').map((o) => ({ ...o, dir: resolvePath(o.dir) })),
-      protocPath: resolvePath(store.get('protocPath'))
+      protocPath: resolvePath(store.get('protocPath')),
+      fileColors: (store.get('fileColors') as Record<string, string>) ?? {}
     }
   }
 
@@ -43,6 +45,7 @@ export class SettingsService {
     if (settings.jsonDir !== undefined) store.set('jsonDir', settings.jsonDir)
     if (settings.outputDirs !== undefined) store.set('outputDirs', settings.outputDirs)
     if (settings.protocPath !== undefined) store.set('protocPath', settings.protocPath)
+    if (settings.fileColors !== undefined) store.set('fileColors', settings.fileColors)
   }
 }
 

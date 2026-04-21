@@ -74,25 +74,44 @@ function buildLayout(
   const positions = new Array(messages.length).fill(null).map(() => ({ x: 0, y: 0 }))
   const sortedDepths = [...cols.keys()].sort((a, b) => a - b)
 
+  // 열당 최대 노드 수 — 초과 시 서브 열로 분할
+  const MAX_PER_COL = 8
+  const SUB_COL_GAP = 40
+
+  // 각 depth 가 몇 개의 서브 열을 차지하는지 계산 → 누적 x 결정
+  let cumulativeX = 0
+  const depthStartX = new Map<number, number>()
+  sortedDepths.forEach((d) => {
+    depthStartX.set(d, cumulativeX)
+    const subCols = Math.ceil(cols.get(d)!.length / MAX_PER_COL)
+    cumulativeX += subCols * (NODE_WIDTH + SUB_COL_GAP) + (COLUMN_GAP - SUB_COL_GAP)
+  })
+
   sortedDepths.forEach((d) => {
     const group = cols.get(d)!
-    const x = d * (NODE_WIDTH + COLUMN_GAP)
+    const baseX = depthStartX.get(d)!
+    const totalSubCols = Math.ceil(group.length / MAX_PER_COL)
 
-    // 해당 열의 총 높이 계산 후 수직 중앙 정렬
-    const totalH = group.reduce((sum, i) => sum + heights[i] + ROW_GAP, -ROW_GAP)
-    let y = -totalH / 2
+    for (let chunk = 0; chunk < totalSubCols; chunk++) {
+      const slice = group.slice(chunk * MAX_PER_COL, (chunk + 1) * MAX_PER_COL)
+      const x = baseX + chunk * (NODE_WIDTH + SUB_COL_GAP)
 
-    group.forEach((i) => {
-      positions[i] = { x, y }
-      y += heights[i] + ROW_GAP
-    })
+      // 서브 열 수직 중앙 정렬
+      const totalH = slice.reduce((sum, i) => sum + heights[i] + ROW_GAP, -ROW_GAP)
+      let y = -totalH / 2
+
+      slice.forEach((i) => {
+        positions[i] = { x, y }
+        y += heights[i] + ROW_GAP
+      })
+    }
   })
 
   return positions
 }
 
 export function DiagramView(): React.JSX.Element {
-  const { parsed, parseErrors, isLoadingProto, loadProto } = useAppStore()
+  const { parsed, parseErrors, isLoadingProto, loadProto, settings } = useAppStore()
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
   const [searchQuery, setSearchQuery] = useState('')
@@ -195,13 +214,15 @@ export function DiagramView(): React.JSX.Element {
   // 검색 쿼리에 따라 노드 opacity 조정
   const q = searchQuery.trim().toLowerCase()
   const displayNodes: Node[] = nodes.map((node) => {
+    const nodeMsg = (node.data as { message?: ProtoMessage }).message
+    const fileColor = nodeMsg ? settings?.fileColors?.[nodeMsg.sourceFile] : undefined
     const matched = !q || node.id.toLowerCase().includes(q)
     const isHighlighted = hoveredPair
       ? node.id === hoveredPair.source || node.id === hoveredPair.target
       : false
     return {
       ...node,
-      data: { ...node.data, isHighlighted, hoveredConnection: hoveredPair },
+      data: { ...node.data, isHighlighted, hoveredConnection: hoveredPair, fileColor },
       style: {
         ...node.style,
         opacity: matched ? 1 : 0.15,

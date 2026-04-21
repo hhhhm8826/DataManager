@@ -18,6 +18,7 @@ interface TableNodeData {
     target: string
     targetField: string
   } | null
+  fileColor?: string
   [key: string]: unknown
 }
 
@@ -52,7 +53,8 @@ export function TableNode({ data }: NodeProps): React.JSX.Element {
     isHighlighted,
     onMessageHover,
     referencedFields,
-    hoveredConnection
+    hoveredConnection,
+    fileColor
   } = data as TableNodeData
   const messageNames = new Set(allMessages?.map((m) => m.name) ?? [])
   const [enumModal, setEnumModal] = useState<{ field: string; protoEnum: ProtoEnum } | null>(null)
@@ -114,7 +116,9 @@ export function TableNode({ data }: NodeProps): React.JSX.Element {
       <div
         style={{
           background: '#16213e',
-          border: isHighlighted ? '2px solid #ffaa44' : '1px solid #0f3460',
+          border: isHighlighted
+            ? '2px solid #ffaa44'
+            : `1px solid ${fileColor ?? '#3a3a3a'}`,
           borderRadius: 8,
           minWidth: 220,
           fontSize: 12,
@@ -127,13 +131,13 @@ export function TableNode({ data }: NodeProps): React.JSX.Element {
         {/* 테이블 헤더 */}
         <div
           style={{
-            background: '#0f3460',
+            background: fileColor ?? '#3a3a3a',
             borderRadius: '8px 8px 0 0',
             padding: '8px 12px',
             fontWeight: 700,
-            color: '#a0c4ff',
+            color: '#e0e0e0',
             fontSize: 13,
-            borderBottom: '1px solid #1a4a80'
+            borderBottom: `1px solid ${fileColor ? 'rgba(0,0,0,0.25)' : '#555555'}`
           }}
         >
           {message.name}
@@ -163,13 +167,13 @@ export function TableNode({ data }: NodeProps): React.JSX.Element {
                   alignItems: 'center',
                   gap: 8,
                   cursor: isEnum ? 'pointer' : 'default',
-                  borderBottom: '1px solid #0f3460',
+                  borderBottom: '1px solid #c0c0c0',
                   background:
                     isSourceField || isTargetField
-                      ? 'rgba(255,170,68,0.18)'
+                      ? 'rgba(255,160,0,0.35)'
                       : isFieldHovered
-                        ? 'rgba(255,170,68,0.1)'
-                        : 'transparent',
+                        ? 'rgba(255,160,0,0.2)'
+                        : '#d8d8d8',
                   transition: 'background 0.15s'
                 }}
                 onDoubleClick={() => handleFieldDoubleClick(field.name, field.type)}
@@ -197,7 +201,7 @@ export function TableNode({ data }: NodeProps): React.JSX.Element {
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   {field.isPk && <span className="badge badge-pk">PK</span>}
                   {field.isKey && <span className="badge badge-key">Key</span>}
-                  <span style={{ color: '#e0e0e0' }}>{field.name}</span>
+                  <span style={{ color: '#1a1a2e' }}>{field.name}</span>
                 </span>
                 <span
                   className={`badge ${

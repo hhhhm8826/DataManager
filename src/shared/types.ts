@@ -43,6 +43,7 @@ export interface AppSettings {
   jsonDir: string
   outputDirs: OutputDirConfig[]
   protocPath: string
+  fileColors: Record<string, string>
 }
 
 export interface OutputDirConfig {

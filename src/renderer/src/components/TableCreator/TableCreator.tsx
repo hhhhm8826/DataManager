@@ -69,7 +69,7 @@ function messageToDrafts(
 type Mode = 'list' | 'add' | 'edit'
 
 export function TableCreator(): React.JSX.Element {
-  const { parsed, loadProto } = useAppStore()
+  const { parsed, loadProto, settings, saveSettings } = useAppStore()
   const [mode, setMode] = useState<Mode>('list')
   const [editTarget, setEditTarget] = useState<ProtoMessage | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -161,6 +161,17 @@ export function TableCreator(): React.JSX.Element {
 
   const addField = (): void => setFields((prev) => [...prev, makeField(prev.length)])
   const removeField = (i: number): void => setFields((prev) => prev.filter((_, idx) => idx !== i))
+
+  const handleColorChange = (protoFile: string, color: string): void => {
+    const current = settings?.fileColors ?? {}
+    saveSettings({ fileColors: { ...current, [protoFile]: color } })
+  }
+
+  const handleColorReset = (protoFile: string): void => {
+    const current = { ...(settings?.fileColors ?? {}) }
+    delete current[protoFile]
+    saveSettings({ fileColors: current })
+  }
   const updateField = (i: number, patch: Partial<FieldDraft>): void =>
     setFields((prev) => prev.map((f, idx) => (idx === i ? { ...f, ...patch } : f)))
   const moveField = (i: number, dir: -1 | 1): void =>
@@ -196,7 +207,7 @@ export function TableCreator(): React.JSX.Element {
     }
     if (!IDENT_RE.test(tableName.trim())) {
       toast.error(
-        `테이블 이름 '​${tableName.trim()}'은 유효하지 않습니다. (\uc601문자/언더스코어로 시작, 영문자/숫자/언더스코어만 허용)`
+        `테이블 이름 '${tableName.trim()}'은 유효하지 않습니다. (영문자/언더스코어로 시작, 영문자/숫자/언더스코어만 허용)`
       )
       return
     }
@@ -211,7 +222,7 @@ export function TableCreator(): React.JSX.Element {
     const invalidFields = fields.filter((f) => f.name.trim() && !IDENT_RE.test(f.name.trim()))
     if (invalidFields.length > 0) {
       toast.error(
-        `유효하지 않은 필드 이름: ${invalidFields.map((f) => `'​${f.name}'`).join(', ')}\n(영문자/언더스코어로 시작, 영문자/숫자/언더스코어만 허용)`
+        `유효하지 않은 필드 이름: ${invalidFields.map((f) => `'${f.name}'`).join(', ')}\n(영문자/언더스코어로 시작, 영문자/숫자/언더스코어만 허용)`
       )
       return
     }
@@ -512,8 +523,67 @@ export function TableCreator(): React.JSX.Element {
           ) : (
             protoGroups.map(([protoFile, msgs]) => (
               <div className="card" key={protoFile}>
-                <div className="card-title" style={{ color: '#a0c4ff', fontSize: 13 }}>
-                  {stripProto(protoFile)}
+                <div
+                  className="card-title"
+                  style={{
+                    color: '#a0c4ff',
+                    fontSize: 13,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <span>{stripProto(protoFile)}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {settings?.fileColors?.[protoFile] && (
+                      <button
+                        title="색상 초기화"
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#6b7280',
+                          cursor: 'pointer',
+                          fontSize: 11,
+                          padding: 0,
+                          lineHeight: 1,
+                          flexShrink: 0
+                        }}
+                        onClick={() => handleColorReset(protoFile)}
+                      >
+                        ❌
+                      </button>
+                    )}
+                    <label
+                      title="이 파일의 색상 변경"
+                      style={{
+                        width: 16,
+                        height: 16,
+                        borderRadius: '50%',
+                        cursor: 'pointer',
+                        border: '2px solid rgba(255,255,255,0.2)',
+                        flexShrink: 0,
+                        background: settings?.fileColors?.[protoFile] ?? '#3a3a3a',
+                        display: 'inline-block',
+                        position: 'relative',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <input
+                        type="color"
+                        value={settings?.fileColors?.[protoFile] ?? '#3a3a3a'}
+                        onChange={(e) => handleColorChange(protoFile, e.target.value)}
+                        style={{
+                          position: 'absolute',
+                          opacity: 0,
+                          width: '200%',
+                          height: '200%',
+                          top: '-50%',
+                          left: '-50%',
+                          cursor: 'pointer'
+                        }}
+                      />
+                    </label>
+                  </span>
                 </div>
                 <table className="data-table">
                   <thead>
@@ -588,7 +658,7 @@ export function TableCreator(): React.JSX.Element {
                                     }}
                                   >
                                     <span style={{ color: '#fca5a5' }}>
-                                      '​{msg.name}'을 정말 삭제하시겠습니까?
+                                      &apos;{msg.name}&apos;을 정말 삭제하시겠습니까?
                                     </span>
                                     <button
                                       className="btn btn-danger"
