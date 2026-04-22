@@ -76,10 +76,14 @@ const EDGE_TYPES = { offsetEdge: OffsetEdge }
 const NODE_WIDTH = 260
 const NODE_HEIGHT_BASE = 60
 const NODE_FIELD_HEIGHT = 30
-const COLUMN_GAP = 260
-const ROW_GAP = 80
+const COLUMN_GAP = 400
+const ROW_GAP = 400
 
-/** 위상 정렬(Kahn) 기반 DAG 레이아웃: 참조하는 쪽 왼쪽, 참조받는 쪽 오른쪽 */
+/** DAG 레이아웃
+ *  - 연결 없는 고립 노드 → 하단 별도 행
+ *  - 허브(총 연결 수 최다) 열 → 수평 중앙(x=0), 좌우로 양방향 확장
+ *  - 열 내 정렬: 연결 많은 노드 → 수직 중앙
+ */
 function buildLayout(
   messages: ProtoMessage[],
   edges: { source: string; target: string }[],
@@ -88,80 +92,155 @@ function buildLayout(
   if (messages.length === 0) return []
 
   const nameToIdx = new Map(messages.map((m, i) => [m.name, i]))
+  const n = messages.length
+  const heights = messages.map((msg) => NODE_HEIGHT_BASE + msg.fields.length * NODE_FIELD_HEIGHT)
+  const MAX_PER_COL = maxPerCol
+  const SUB_COL_GAP = 40
 
-  // in-degree & adjacency
-  const inDegree = new Array(messages.length).fill(0)
-  const adj = new Array(messages.length).fill(null).map(() => [] as number[])
+  // 차수 및 인접 리스트
+  const inDeg = new Array(n).fill(0)
+  const outDeg = new Array(n).fill(0)
+  const adj = new Array(n).fill(null).map(() => [] as number[])
   for (const e of edges) {
     const s = nameToIdx.get(e.source)
     const t = nameToIdx.get(e.target)
     if (s !== undefined && t !== undefined && s !== t) {
       adj[s].push(t)
-      inDegree[t]++
+      inDeg[t]++
+      outDeg[s]++
     }
   }
 
-  // Kahn's BFS → depth(column) 할당
-  const depth = new Array(messages.length).fill(0)
-  const queue: number[] = []
-  inDegree.forEach((d, i) => {
-    if (d === 0) queue.push(i)
-  })
+  // 고립 노드 분리 (in=0, out=0)
+  const isolated: number[] = []
+  const connected: number[] = []
+  for (let i = 0; i < n; i++) {
+    if (inDeg[i] === 0 && outDeg[i] === 0) isolated.push(i)
+    else connected.push(i)
+  }
 
-  while (queue.length) {
-    const cur = queue.shift()!
-    for (const nxt of adj[cur]) {
-      depth[nxt] = Math.max(depth[nxt], depth[cur] + 1)
-      inDegree[nxt]--
-      if (inDegree[nxt] === 0) queue.push(nxt)
+  const positions = new Array(n).fill(null).map(() => ({ x: 0, y: 0 }))
+
+  // ── 연결 노드: Kahn BFS 깊이 할당 ──
+  if (connected.length > 0) {
+    const inDegreeCopy = [...inDeg]
+    const depth = new Array(n).fill(0)
+    const queue: number[] = []
+    for (const i of connected) {
+      if (inDegreeCopy[i] === 0) queue.push(i)
+    }
+    while (queue.length) {
+      const cur = queue.shift()!
+      for (const nxt of adj[cur]) {
+        depth[nxt] = Math.max(depth[nxt], depth[cur] + 1)
+        inDegreeCopy[nxt]--
+        if (inDegreeCopy[nxt] === 0) queue.push(nxt)
+      }
+    }
+
+    // 깊이별 그룹화
+    const cols = new Map<number, number[]>()
+    for (const i of connected) {
+      const d = depth[i]
+      if (!cols.has(d)) cols.set(d, [])
+      cols.get(d)!.push(i)
+    }
+    const sortedDepths = [...cols.keys()].sort((a, b) => a - b)
+
+    // 허브 깊이: 총 차수 합이 가장 많은 열
+    let maxDegSum = -1
+    let hubDepth = sortedDepths[Math.floor(sortedDepths.length / 2)]
+    for (const d of sortedDepths) {
+      const s = cols.get(d)!.reduce((acc, i) => acc + inDeg[i] + outDeg[i], 0)
+      if (s > maxDegSum) {
+        maxDegSum = s
+        hubDepth = d
+      }
+    }
+
+    // 열 내 정렬: 연결 많은 노드 → 수직 중앙 (인터리브 배치)
+    for (const [, group] of cols) {
+      group.sort((a, b) => inDeg[b] + outDeg[b] - (inDeg[a] + outDeg[a]))
+      const reordered: number[] = new Array(group.length)
+      let lo = Math.floor((group.length - 1) / 2)
+      let hi = lo + 1
+      for (let k = 0; k < group.length; k++) {
+        if (k % 2 === 0) {
+          reordered[lo >= 0 ? lo-- : hi++] = group[k]
+        } else {
+          reordered[hi < group.length ? hi++ : lo--] = group[k]
+        }
+      }
+      group.splice(0, group.length, ...reordered)
+    }
+
+    // 열 너비 (서브 열 포함)
+    const colWidth = (d: number): number => {
+      const cnt = cols.get(d)?.length ?? 0
+      return Math.ceil(cnt / MAX_PER_COL) * (NODE_WIDTH + SUB_COL_GAP) - SUB_COL_GAP
+    }
+
+    // 허브 열 → x=0, 우측/좌측으로 양방향 확장
+    const depthStartX = new Map<number, number>()
+    depthStartX.set(hubDepth, 0)
+    let rx = colWidth(hubDepth) + COLUMN_GAP
+    for (const d of sortedDepths.filter((d) => d > hubDepth)) {
+      depthStartX.set(d, rx)
+      rx += colWidth(d) + COLUMN_GAP
+    }
+    let lx = -COLUMN_GAP
+    for (const d of sortedDepths.filter((d) => d < hubDepth).reverse()) {
+      const w = colWidth(d)
+      depthStartX.set(d, lx - w)
+      lx -= w + COLUMN_GAP
+    }
+
+    // 위치 할당 (열마다 약간의 X 편차 부여)
+    const COL_X_JITTER = 40 // 최대 편차 px
+    for (let di = 0; di < sortedDepths.length; di++) {
+      const d = sortedDepths[di]
+      const group = cols.get(d)!
+      const baseX = depthStartX.get(d)!
+      const totalSubCols = Math.ceil(group.length / MAX_PER_COL)
+      // 깊이 인덱스 기반 삼각함수 오프셋 → 인접 열이 서로 다른 방향으로 편차
+      const depthJitter =
+        Math.sin((di / Math.max(sortedDepths.length - 1, 1)) * Math.PI * 2.5) * COL_X_JITTER
+      for (let chunk = 0; chunk < totalSubCols; chunk++) {
+        const slice = group.slice(chunk * MAX_PER_COL, (chunk + 1) * MAX_PER_COL)
+        // 서브 열마다 추가 편차 (짝/홀 반전)
+        const chunkJitter = chunk % 2 === 0 ? depthJitter : -depthJitter * 0.5
+        const x = baseX + chunk * (NODE_WIDTH + SUB_COL_GAP) + chunkJitter
+        const totalH = slice.reduce((sum, i) => sum + heights[i] + ROW_GAP, -ROW_GAP)
+        let y = -totalH / 2
+        slice.forEach((i) => {
+          positions[i] = { x, y }
+          y += heights[i] + ROW_GAP
+        })
+      }
     }
   }
 
-  // 깊이별 노드 그룹
-  const cols = new Map<number, number[]>()
-  depth.forEach((d, i) => {
-    if (!cols.has(d)) cols.set(d, [])
-    cols.get(d)!.push(i)
-  })
-
-  // 각 노드 높이
-  const heights = messages.map((msg) => NODE_HEIGHT_BASE + msg.fields.length * NODE_FIELD_HEIGHT)
-
-  const positions = new Array(messages.length).fill(null).map(() => ({ x: 0, y: 0 }))
-  const sortedDepths = [...cols.keys()].sort((a, b) => a - b)
-
-  // 열당 최대 노드 수 — 초과 시 서브 열로 분할
-  const MAX_PER_COL = maxPerCol
-  const SUB_COL_GAP = 40
-
-  // 각 depth 가 몇 개의 서브 열을 차지하는지 계산 → 누적 x 결정
-  let cumulativeX = 0
-  const depthStartX = new Map<number, number>()
-  sortedDepths.forEach((d) => {
-    depthStartX.set(d, cumulativeX)
-    const subCols = Math.ceil(cols.get(d)!.length / MAX_PER_COL)
-    cumulativeX += subCols * (NODE_WIDTH + SUB_COL_GAP) + (COLUMN_GAP - SUB_COL_GAP)
-  })
-
-  sortedDepths.forEach((d) => {
-    const group = cols.get(d)!
-    const baseX = depthStartX.get(d)!
-    const totalSubCols = Math.ceil(group.length / MAX_PER_COL)
-
-    for (let chunk = 0; chunk < totalSubCols; chunk++) {
-      const slice = group.slice(chunk * MAX_PER_COL, (chunk + 1) * MAX_PER_COL)
-      const x = baseX + chunk * (NODE_WIDTH + SUB_COL_GAP)
-
-      // 서브 열 수직 중앙 정렬
-      const totalH = slice.reduce((sum, i) => sum + heights[i] + ROW_GAP, -ROW_GAP)
-      let y = -totalH / 2
-
-      slice.forEach((i) => {
-        positions[i] = { x, y }
-        y += heights[i] + ROW_GAP
-      })
+  // ── 고립 노드: 연결 노드 하단 별도 행 ──
+  if (isolated.length > 0) {
+    let maxBottom = 0
+    for (const i of connected) {
+      const b = positions[i].y + heights[i]
+      if (b > maxBottom) maxBottom = b
     }
-  })
+    const ISOLATED_GAP = 220
+    const startY = connected.length > 0 ? maxBottom + ISOLATED_GAP : 0
+    const rowCols = Math.min(isolated.length, MAX_PER_COL)
+    const rowWidth = rowCols * (NODE_WIDTH + COLUMN_GAP) - COLUMN_GAP
+
+    isolated.forEach((nodeIdx, k) => {
+      const col = k % MAX_PER_COL
+      const row = Math.floor(k / MAX_PER_COL)
+      positions[nodeIdx] = {
+        x: -rowWidth / 2 + col * (NODE_WIDTH + COLUMN_GAP),
+        y: startY + row * (heights[nodeIdx] + ROW_GAP)
+      }
+    })
+  }
 
   return positions
 }

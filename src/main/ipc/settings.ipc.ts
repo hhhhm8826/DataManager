@@ -1,6 +1,6 @@
 import { ipcMain, dialog, shell } from 'electron'
 import { IPC } from '../../shared/ipc-channels'
-import { settingsService } from '../services/SettingsService'
+import { settingsService, resolvePath } from '../services/SettingsService'
 import type { IpcResult, AppSettings } from '../../shared/types'
 
 export function registerSettingsIpc(): void {
@@ -46,7 +46,8 @@ export function registerSettingsIpc(): void {
   // 폴더를 파일 탐색기로 열기
   ipcMain.handle(IPC.SETTINGS_OPEN_DIR, async (_event, dirPath: string): Promise<IpcResult> => {
     try {
-      const err = await shell.openPath(dirPath)
+      const resolved = resolvePath(dirPath)
+      const err = await shell.openPath(resolved)
       if (err) return { success: false, error: err }
       return { success: true }
     } catch (e) {

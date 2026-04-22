@@ -7,7 +7,7 @@ import type { AppSettings } from '../../shared/types'
 const STORE_CWD = app.isPackaged ? path.dirname(app.getPath('exe')) : app.getAppPath()
 
 // 상대경로는 STORE_CWD 기준으로 절대경로로 변환
-function resolvePath(p: string): string {
+export function resolvePath(p: string): string {
   if (!p) return p
   if (path.isAbsolute(p)) return p
   return path.resolve(STORE_CWD, p)
