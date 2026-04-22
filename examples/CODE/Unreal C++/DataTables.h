@@ -159,3 +159,17 @@ struct FGoTest : public FTableRowBase
 
     void ParseFromJson(const TSharedPtr<FJsonObject>& Obj);
 };
+
+USTRUCT(BlueprintType)
+struct FNameTest : public FTableRowBase
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    int32 ID = 0;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FStringData Name;
+
+    void ParseFromJson(const TSharedPtr<FJsonObject>& Obj);
+};

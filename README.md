@@ -22,7 +22,15 @@
 | ⚙️ **코드 생성**                 | Protobuf, Unreal 데이터 컨테이너 자동 생성         |
 | 🔄 **JSON 변환**                 | 엑셀 데이터를 JSON으로 변환                        |
 
+
+
+### ✨ TODO 
+
+* 새로운 엑셀 파일을 생성 하지않고 Enum 수정을 DropDown에 반영할 수 있는 기능
+* VCS 관련
+
 ---
+
 
 ## 🛠️ Project Setup
 

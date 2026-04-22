@@ -79,3 +79,9 @@ void FGoTest::ParseFromJson(const TSharedPtr<FJsonObject>& Obj)
     { double _N; if (Obj->TryGetNumberField(TEXT("Test23"), _N)) Test23 = static_cast<int32>(_N); }
     { double _N; if (Obj->TryGetNumberField(TEXT("Test45"), _N)) Test45 = static_cast<int32>(_N); }
 }
+
+void FNameTest::ParseFromJson(const TSharedPtr<FJsonObject>& Obj)
+{
+    { double _N; if (Obj->TryGetNumberField(TEXT("ID"), _N)) ID = static_cast<int32>(_N); }
+    { const TSharedPtr<FJsonObject>* _O; if (Obj->TryGetObjectField(TEXT("Name"), _O)) Name.ParseFromJson(*_O); }
+}
