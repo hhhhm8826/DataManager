@@ -465,10 +465,15 @@ export function DiagramView(): React.JSX.Element {
               {matchCount}개 일치
             </span>
           )}
-          <button className="btn btn-primary" onClick={loadProto} disabled={isLoadingProto}>
-            {isLoadingProto ? '로딩 중...' : '🔄 다시 불러오기'}
-          </button>
         </div>
+        <button
+          className="btn btn-primary"
+          onClick={loadProto}
+          disabled={isLoadingProto}
+          style={{ marginLeft: 'auto' }}
+        >
+          {isLoadingProto ? '로딩 중...' : '🔄 다시 불러오기'}
+        </button>
       </div>
 
       <div style={{ flex: 1, position: 'relative' }}>
