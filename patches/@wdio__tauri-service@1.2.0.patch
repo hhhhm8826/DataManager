@@ -1,7 +1,15 @@
 diff --git a/dist/cjs/index.js b/dist/cjs/index.js
-index 199d9ee179defe66f659ca67246db54a34e175ca..5bd6bb5d11bd72db36e546cd937483bfef6683a0 100644
+index 199d9ee179defe66f659ca67246db54a34e175ca..9c10248400f565ad83e891704de17d70eafcb63e 100644
 --- a/dist/cjs/index.js
 +++ b/dist/cjs/index.js
+@@ -1354,6 +1354,6 @@ async function findMsEdgeDriver() {
+             encoding: 'utf8',
+         });
+-        const driverPath = pathResult.trim().split('\n')[0];
++        const driverPath = pathResult.trim().split(/\r?\n/)[0]?.trim();
+         if (driverPath && node_fs.existsSync(driverPath)) {
+             // Get version
+             try {
 @@ -1361,7 +1361,7 @@ async function findMsEdgeDriver() {
                      encoding: 'utf8',
                      timeout: 5000,
@@ -12,9 +20,17 @@ index 199d9ee179defe66f659ca67246db54a34e175ca..5bd6bb5d11bd72db36e546cd937483bf
                      log$8.debug(`Found msedgedriver ${match[1]} at ${driverPath}`);
                      return { path: driverPath, version: match[1] };
 diff --git a/dist/esm/index.js b/dist/esm/index.js
-index 96bcb93875968ed51ed17cc9ceeca59eacc20bf1..afb8adb7bbc72126ab72db5ca82aa36f4a3b6a80 100644
+index 96bcb93875968ed51ed17cc9ceeca59eacc20bf1..08d4df63dcfeff4ab6c1735ea8862772d3cd99fe 100644
 --- a/dist/esm/index.js
 +++ b/dist/esm/index.js
+@@ -1350,6 +1350,6 @@ async function findMsEdgeDriver() {
+             encoding: 'utf8',
+         });
+-        const driverPath = pathResult.trim().split('\n')[0];
++        const driverPath = pathResult.trim().split(/\r?\n/)[0]?.trim();
+         if (driverPath && existsSync(driverPath)) {
+             // Get version
+             try {
 @@ -1357,7 +1357,7 @@ async function findMsEdgeDriver() {
                      encoding: 'utf8',
                      timeout: 5000,

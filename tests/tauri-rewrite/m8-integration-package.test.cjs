@@ -53,6 +53,7 @@ test('M8: native E2E uses an isolated workspace and covers the core flow', () =>
   assert.match(frontendEntry, /@wdio\/tauri-plugin/)
   assert.match(edgeSetup, /\.e2e-runtime/)
   assert.match(edgePatch, /Microsoft Edge WebDriver/)
+  assert.ok(edgePatch.includes('split(/\\r?\\n/)[0]?.trim()'))
   for (const marker of [
     "openArea('설정'",
     "openArea('테이블'",
