@@ -79,6 +79,14 @@ electron-vite/electron-builder configuration, npm lockfile, and legacy build
 scripts were removed from the active branch. M0 observations remain as immutable
 goldens and Git history retains the complete Electron implementation.
 
+The final cutover commit
+`e2bd9537774b1c1cbf844ad4dab976c1011d4914` was exported with `git archive` and
+verified independently of the working tree. Locked install, TypeScript/Rust
+gates, four native WebView E2E specs, normal NSIS build, install, five-second
+launch, uninstall, and cleanup all passed. The user chose to skip a
+post-cutover GitHub Actions run; run `29089116827` remains the hosted-runner
+workflow evidence from immediately before the source removal.
+
 ## Rollback
 
 The pre-rewrite Electron reference is commit

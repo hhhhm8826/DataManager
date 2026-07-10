@@ -247,7 +247,7 @@ test('M8: final active build is Tauri-only with baseline and rollback evidence',
   assert.doesNotMatch(workspace, /^\s+electron(?:-winstaller)?:/m)
   assert.equal(fs.existsSync(path.join(repositoryRoot, 'tests/baseline/m0-golden.test.cjs')), true)
   assert.match(rootPackage.scripts.test, /test:baseline/)
-  assert.match(readme, /active branch contains no Electron runtime/)
+  assert.match(readme, /활성 브랜치에는 Electron 런타임이나 빌드 경로가 없습니다/)
   assert.match(migration, /git worktree add/)
   assert.match(migration, /3a4ba6ec652d750d88c88dcc9af8ada13b6eb169/)
 })

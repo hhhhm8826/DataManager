@@ -405,10 +405,11 @@ Local package evidence:
 | Evidence                     | Result                                                             |
 | ---------------------------- | ------------------------------------------------------------------ |
 | Installer                    | `target/release/bundle/nsis/DataManager_0.1.0_x64-setup.exe`       |
-| Installer size               | 2,465,650 bytes                                                    |
-| Installer SHA-256            | `9CEC601B8BB98F937B9B1DDB40C266B883019CC015142D11CE417CE8AAC906B2` |
+| Verified source              | Clean archive of commit `e2bd9537774b1c1cbf844ad4dab976c1011d4914` |
+| Installer size               | 2,466,248 bytes                                                    |
+| Installer SHA-256            | `6F0389EFBE4FE27CB02602571193C24FF25CABB57CFA26F3335CA84565689639` |
 | Signature                    | Not signed; signing is explicitly outside the goal boundary        |
-| Release executable           | 9,840,640 bytes, product version 0.1.0                             |
+| Release executable           | 9,840,640 bytes, SHA-256 `9D201851...4554EF8`, version 0.1.0       |
 | Installer creation           | Pass with NSIS 3.11 local tools cache                              |
 | Silent install and uninstall | Pass; no install directory or new temporary profile remains        |
 | Installed app launch         | Pass: installed process remained running for the five-second gate  |
@@ -442,6 +443,46 @@ CI artifact evidence:
 | Interactive artifact digest | `132D2EF60D05D55FFCB4E951BC02558A479881C0D6DBBD17602EB9B68C107FD6` |
 | Interactive reports         | Two reports, all six checks pass                                   |
 
-Remaining gate: run the Windows workflow from a clean checkout after the final
-Electron-removal commit is pushed. All final-cutover checks pass locally; the
-user retains commit ownership.
+Final-cutover commit verification:
+
+- Commit `e2bd9537774b1c1cbf844ad4dab976c1011d4914` was exported with
+  `git archive`; the verification directory contained no working-tree files.
+- `pnpm install --offline --frozen-lockfile` reconstructed all 704 packages
+  from the 769-entry lockfile with no downloads.
+- Format, lint, strict TypeScript, baseline/core/desktop/M1-M8 tests, fixture
+  regeneration, Cargo test, and warning-denying Clippy all passed there.
+- All four native WebView E2E specs passed against the clean archive. The normal
+  feature build then produced the NSIS installer above, with no WDIO markers;
+  silent install, five-second launch, uninstall, and cleanup passed.
+- The user explicitly chose to skip a post-cutover GitHub Actions run. The
+  earlier successful run `29089116827` remains evidence for the workflow and
+  hosted-runner path; the final commit itself is covered by the clean local run.
+
+Remaining gates: none.
+
+## Final Report
+
+1. **Outcome:** achieved. M0-M8 and every completion checklist item pass.
+2. **Baseline/final:** Electron reference
+   `3a4ba6ec652d750d88c88dcc9af8ada13b6eb169`; verified Tauri cutover
+   `e2bd9537774b1c1cbf844ad4dab976c1011d4914`.
+3. **Milestones:** M0 baseline, M1 skeleton/spikes, M2 settings/file boundary,
+   M3 Proto CRUD, M4 diagram, M5 Excel, M6 JSON, M7 code generation, and M8
+   integration/package are complete.
+4. **Parity:** all required rows in `docs/parity-matrix.md` pass; intentional
+   changes are limited to the documented legacy defect corrections.
+5. **Verification:** locked install, format, lint, typecheck, baseline/core/UI
+   and M1-M8 tests, fixture reproduction, Cargo test/Clippy, four native E2E
+   specs, NSIS build, and install/launch/uninstall all pass from clean source.
+6. **Windows artifact:** unsigned x64 NSIS, 2,466,248 bytes, SHA-256
+   `6F0389EFBE4FE27CB02602571193C24FF25CABB57CFA26F3335CA84565689639`.
+7. **Migration:** legacy `config.json` imports once to versioned AppData settings
+   while preserving resolved paths and leaving source configuration/data intact.
+8. **Intentional fixes:** field numbers and unrelated Proto bytes are preserved;
+   validation ranges are no longer capped at 20 rows; diagnostics, atomic
+   replacement, root boundaries, and Unreal output correctness are enforced.
+9. **Limitations:** the installer is unsigned by scope. The user skipped the
+   post-cutover hosted workflow; clean local Windows verification is complete.
+10. **Rollback:** create a separate worktree at the Electron reference commit,
+    then run `npm ci` and `npm run build:win` as documented in `README.md` and
+    `docs/migration.md`.

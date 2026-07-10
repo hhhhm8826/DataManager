@@ -123,3 +123,8 @@ final active branch.
 - Electron packages, source processes, IPC, build configuration, npm lockfile,
   and legacy scripts are absent from the final active build. Rollback uses a
   separate worktree at the baseline commit.
+- Final cutover commit
+  `e2bd9537774b1c1cbf844ad4dab976c1011d4914` passes locked install, all
+  TypeScript/Rust gates, four native E2E specs, normal NSIS packaging, and
+  install/launch/uninstall from a `git archive` clean source tree. The user
+  explicitly skipped a post-cutover hosted workflow run.
