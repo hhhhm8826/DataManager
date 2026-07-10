@@ -23,7 +23,7 @@ import type {
  * - 합성 PK 테이블 참조: 첫 번째 PK가 일치하는 모든 행을 배열로 임베드 (32-1 fix)
  * - 다단계 참조: 위상 정렬 후 순서대로 처리하여 이미 임베드된 행을 재사용 (32-2 fix)
  */
-function resolveInlineReferences(
+export function resolveInlineReferences(
   results: ExcelReadResult[],
   allMessageDefs: ReturnType<typeof protoParserService.parseMessages>
 ): ExcelReadResult[] {
@@ -163,7 +163,7 @@ function resolveInlineReferences(
 
 // ── PK 유효성 검사 ────────────────────────────────────────────────────────────
 
-function validatePrimaryKeys(
+export function validatePrimaryKeys(
   results: ExcelReadResult[],
   allMessageDefs: ProtoMessage[]
 ): string | null {

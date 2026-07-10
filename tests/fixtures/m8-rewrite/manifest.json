@@ -1,0 +1,404 @@
+{
+  "formatVersion": 1,
+  "sourceFixture": "tests/fixtures/m0-legacy/proto",
+  "generatedExamples": "examples/TAURI_REWRITE",
+  "tools": {
+    "protoc": "libprotoc 34.1",
+    "protocSha256": "9d704a5c1741ea78aab2e0d922d33ad8b13d2db2ef69ff464e61103f1657e0d6",
+    "goPluginSha256": "3ac4a9bacee42dc6d9274c630005c495bdec23c08c3a22fbb9133af281f9b500",
+    "rust": "bundled experimental upb codegen"
+  },
+  "protocLanguages": ["cpp", "csharp", "java", "python", "go", "rust", "ruby", "php"],
+  "unrealDiagnostics": [
+    {
+      "code": "UNREAL_MESSAGE_CYCLE_POINTER",
+      "sourceFile": "ReferenceTable.proto",
+      "declarationName": "CycleA"
+    },
+    {
+      "code": "UNREAL_MESSAGE_CYCLE_POINTER",
+      "sourceFile": "ReferenceTable.proto",
+      "declarationName": "CycleB"
+    }
+  ],
+  "textFiles": {
+    "CODE/cpp/FixtureEnumType.pb.cc": {
+      "bytes": 3395,
+      "sha256": "d0035403122854f396570df53842a58c96bb92ab8274ce28896f741ec3183ab0"
+    },
+    "CODE/cpp/FixtureEnumType.pb.h": {
+      "bytes": 4894,
+      "sha256": "0b84da33f38ef9303894b6e88ddbdbb9a2ad4b9546f235de7b4fd58373197674"
+    },
+    "CODE/cpp/KeyTable.pb.cc": {
+      "bytes": 62145,
+      "sha256": "be454e4e96e3ffdcdca30414a13f93a5b3d05604f39c446edb4122af065329dd"
+    },
+    "CODE/cpp/KeyTable.pb.h": {
+      "bytes": 54442,
+      "sha256": "491d377b61fa9c9f4bab02de5951bab09932d076c34f66afe7116b15ca5ca0db"
+    },
+    "CODE/cpp/ReferenceTable.pb.cc": {
+      "bytes": 69235,
+      "sha256": "089d088b279333359c5f936321e21b943534fb1e59b5a540b81661f97e8e4f11"
+    },
+    "CODE/cpp/ReferenceTable.pb.h": {
+      "bytes": 81057,
+      "sha256": "a41cb430ef4c3f3ec849a4d26ac37e9802523b4c129d65638de50377098dcae4"
+    },
+    "CODE/csharp/FixtureEnumType.cs": {
+      "bytes": 1769,
+      "sha256": "9730c20a3921c55a67eadacefde528cf84fe20c6f8f3c35848d73e00496f14db"
+    },
+    "CODE/csharp/KeyTable.cs": {
+      "bytes": 35282,
+      "sha256": "7c66066a288bc8ac2d2df82968b1319e544c4f5516ed125224afd1fbcdcd8722"
+    },
+    "CODE/csharp/ReferenceTable.cs": {
+      "bytes": 43151,
+      "sha256": "4e29db5d3a33a0ada4ae286338dad80a9e260c722f3edb6939f5d03b8d5b0799"
+    },
+    "CODE/go/DATA_MANAGER_FIXTURE/FixtureEnumType.pb.go": {
+      "bytes": 4566,
+      "sha256": "760598705d604030445393656a7b59f95e4135c5eef365c5006c98a2430d305b"
+    },
+    "CODE/go/DATA_MANAGER_FIXTURE/KeyTable.pb.go": {
+      "bytes": 11570,
+      "sha256": "d09232f2aa18ca373d2cefcde9c907d2a04a0f91d7f9346896cd4bdb19a2c22d"
+    },
+    "CODE/go/DATA_MANAGER_FIXTURE/ReferenceTable.pb.go": {
+      "bytes": 15579,
+      "sha256": "25db607452bccb56978fde3e22922276b14dedffa702b5713647d9b5ba00de94"
+    },
+    "CODE/java/DATA_MANAGER_FIXTURE/FixtureEnumType.java": {
+      "bytes": 5529,
+      "sha256": "e4a3066591bdc0c16be5835f97c62ba6b6917a796e34417be7d4370a172866aa"
+    },
+    "CODE/java/DATA_MANAGER_FIXTURE/KeyTable.java": {
+      "bytes": 90067,
+      "sha256": "5b41a52783dbc548ce6b589426c7b68561b7d94817ec599041ad8f6349f83194"
+    },
+    "CODE/java/DATA_MANAGER_FIXTURE/ReferenceTable.java": {
+      "bytes": 130731,
+      "sha256": "d3baa09d02d2554e71e53d31744c394ff43fbaf3e8d3357d298025acdb5f96b0"
+    },
+    "CODE/php/DATA_MANAGER_FIXTURE/CompositeTarget.php": {
+      "bytes": 2611,
+      "sha256": "8a106d0733cc3d94bea7cdba60e27cedb4371ed0fd8a848d4816880342a6ab99"
+    },
+    "CODE/php/DATA_MANAGER_FIXTURE/CycleA.php": {
+      "bytes": 2166,
+      "sha256": "d6e4eea7169a7dac7bdec1e9038f54a9f97f0ccc0b5dbd13aa87cc60f7aa728e"
+    },
+    "CODE/php/DATA_MANAGER_FIXTURE/CycleB.php": {
+      "bytes": 2166,
+      "sha256": "6a08afd605218be2437c6681e9b71b5aafbf2db67b501a4389ea2cb3c35580af"
+    },
+    "CODE/php/DATA_MANAGER_FIXTURE/FixtureState.php": {
+      "bytes": 1491,
+      "sha256": "565a337c9e96137efc3bca30672dffa0fe3458a41a65a777fd5fb45af9615f54"
+    },
+    "CODE/php/DATA_MANAGER_FIXTURE/GroupTarget.php": {
+      "bytes": 1986,
+      "sha256": "fe80a3753d6a1e00c9d1d7f4f266166342d6ed0309499c2807ae009c2bcfeb69"
+    },
+    "CODE/php/DATA_MANAGER_FIXTURE/MiddleTarget.php": {
+      "bytes": 2285,
+      "sha256": "fc2e9b4e1cbc808bd69101de4447110c3d9110ad466017f6deef8d8fa064cd4e"
+    },
+    "CODE/php/DATA_MANAGER_FIXTURE/NoKeyTarget.php": {
+      "bytes": 1307,
+      "sha256": "2706e55677d4a4b36b4e1509c19779eda2efe88c55831ea0e5837ce0d3f61da6"
+    },
+    "CODE/php/DATA_MANAGER_FIXTURE/RootTarget.php": {
+      "bytes": 6874,
+      "sha256": "1df379e4f0410607019c3ba295e95f8a4968c5b031b1bb9b3783c13c902175b6"
+    },
+    "CODE/php/DATA_MANAGER_FIXTURE/SingleTarget.php": {
+      "bytes": 2772,
+      "sha256": "bf144aaec3a884cda75a4181e1614dd546a2e9a902b5b794451a2dceac2510ad"
+    },
+    "CODE/php/GPBMetadata/FixtureEnumType.php": {
+      "bytes": 798,
+      "sha256": "44e963dcd944801c30daf1456f9de8bcaa015429ee7db51261f3ee9989dadd44"
+    },
+    "CODE/php/GPBMetadata/KeyTable.php": {
+      "bytes": 1160,
+      "sha256": "f48a22d270f2005f48fc72c60c211d33335f444874274f7ea9545c8ceea6c748"
+    },
+    "CODE/php/GPBMetadata/ReferenceTable.php": {
+      "bytes": 1639,
+      "sha256": "06471f5a48c0c26ebda2001e6193dd47c5f70ff73d75c5e4d0d7a718261cdf3f"
+    },
+    "CODE/python/FixtureEnumType_pb2.py": {
+      "bytes": 1541,
+      "sha256": "771dbf8989eee6e333fc2f49d660d92016e6140bbc86a2f918f1e7e9833b2aa0"
+    },
+    "CODE/python/KeyTable_pb2.py": {
+      "bytes": 2178,
+      "sha256": "19240c9c12b721a6034859bda32dd773877dcd8b81a0eb88caaa0658b10aa217"
+    },
+    "CODE/python/ReferenceTable_pb2.py": {
+      "bytes": 2680,
+      "sha256": "d1d37a8b2772a8d0b92c92a4bf93ac9af0a8aa760ad676817a6250ce606fd0c5"
+    },
+    "CODE/ruby/FixtureEnumType_pb.rb": {
+      "bytes": 684,
+      "sha256": "5192ac468b42fc93fb54953a16ded82077f993d0ec454f6b70d12c018b2c7916"
+    },
+    "CODE/ruby/KeyTable_pb.rb": {
+      "bytes": 1378,
+      "sha256": "ff6d1884529ef2b17616d2c7877c12115eeb9994a98c0765c8ef50ffa7ade74b"
+    },
+    "CODE/ruby/ReferenceTable_pb.rb": {
+      "bytes": 1853,
+      "sha256": "abe8c4a2e961f1259d9a3a75acfa0e5a5926cbaf1e017041f0f56bed04af9ec8"
+    },
+    "CODE/rust/FixtureEnumType.u.pb.rs": {
+      "bytes": 2205,
+      "sha256": "3014ce729d451b39aab039c4652d6f0c05b4d37b9f4aeb56e091422908ba476f"
+    },
+    "CODE/rust/generated.rs": {
+      "bytes": 3252,
+      "sha256": "6d3aa8d2b61b3d58dd44a5626587a4e2c9c39cd41a435b0950c0e36a188b61a2"
+    },
+    "CODE/rust/KeyTable.u.pb.rs": {
+      "bytes": 59237,
+      "sha256": "b6278b81371421359358b07035f19a4e7f66b841d8fb37f2c8996b8a29ec31aa"
+    },
+    "CODE/rust/ReferenceTable.u.pb.rs": {
+      "bytes": 78913,
+      "sha256": "5cf6157f8ab7a3f28b2bfa08598c2b1dac90960da8386c09d481f132571d4962"
+    },
+    "CODE/unreal/DataTableLoader.cpp": {
+      "bytes": 3400,
+      "sha256": "ca654efe21b399e57771fbf547dc408ec21ab315b6dd0094db99e2f12cdbbbe7"
+    },
+    "CODE/unreal/DataTableLoader.h": {
+      "bytes": 1075,
+      "sha256": "6ef1061b6c5fa389ca15c1c7078ef66bcb365b4eac00ef13f18ef70bbb505a67"
+    },
+    "CODE/unreal/DataTables.h": {
+      "bytes": 3299,
+      "sha256": "e50bdb46363d7ad99b8c24bac222b05840a878e08c87d53c01af2766cd602f81"
+    },
+    "CODE/unreal/FixtureEnumType.h": {
+      "bytes": 391,
+      "sha256": "b2234600615f10651739f4d94d0d0343352bf38969c0527459e2c4e0c951165b"
+    },
+    "JSON/CompositeTarget.json": {
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    "JSON/GroupTarget.json": {
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    "JSON/MiddleTarget.json": {
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    "JSON/NoKeyTarget.json": {
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    "JSON/RootTarget.json": {
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    "JSON/SingleTarget.json": {
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    "PROTO/FixtureEnumType.proto": {
+      "bytes": 195,
+      "sha256": "907f7b93fc68720f8a728e371b548655b7216b090f0912f29976a8f939c5c26a"
+    },
+    "PROTO/KeyTable.proto": {
+      "bytes": 449,
+      "sha256": "a802e2cc7c7f25af3e9c27c0eb0525e82ea3d608ea56162194b66b915c297026"
+    },
+    "PROTO/ReferenceTable.proto": {
+      "bytes": 565,
+      "sha256": "e6ce813d6a85b750d98704a05a894ada033adcb26deec522b3799e0ef1e40596"
+    },
+    "README.md": {
+      "bytes": 597,
+      "sha256": "74ce50e7410260a7eb27d22b9d7c5f52de0af9863c680b52203575a1e6196e54"
+    }
+  },
+  "excelFiles": {
+    "EXCEL/KeyTable.xlsx": {
+      "creator": "DataManager",
+      "created": "1970-01-01T00:00:00.000Z",
+      "sheets": [
+        {
+          "name": "SingleTarget",
+          "state": "visible",
+          "headers": ["id", "label", "state"],
+          "validations": {
+            "count": 10000,
+            "sha256": "f99e1f6ba244333c000cf77df5ee17329b83e16ec4e0b701b6dc1363fd657bc8",
+            "samples": [
+              ["C10", { "type": "list", "formulae": ["'_DropDown'!$A$2:$A$3"] }],
+              ["C5499", { "type": "list", "formulae": ["'_DropDown'!$A$2:$A$3"] }],
+              ["C9999", { "type": "list", "formulae": ["'_DropDown'!$A$2:$A$3"] }]
+            ]
+          }
+        },
+        {
+          "name": "CompositeTarget",
+          "state": "visible",
+          "headers": ["region", "id", "label"],
+          "validations": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "samples": []
+          }
+        },
+        {
+          "name": "GroupTarget",
+          "state": "visible",
+          "headers": ["groupId", "label"],
+          "validations": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "samples": []
+          }
+        },
+        {
+          "name": "NoKeyTarget",
+          "state": "visible",
+          "headers": ["label"],
+          "validations": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "samples": []
+          }
+        },
+        {
+          "name": "_DropDown",
+          "state": "veryHidden",
+          "headers": ["FixtureState"],
+          "validations": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "samples": []
+          }
+        }
+      ]
+    },
+    "EXCEL/ReferenceTable.xlsx": {
+      "creator": "DataManager",
+      "created": "1970-01-01T00:00:00.000Z",
+      "sheets": [
+        {
+          "name": "MiddleTarget",
+          "state": "visible",
+          "headers": ["id", "single"],
+          "validations": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "samples": []
+          }
+        },
+        {
+          "name": "RootTarget",
+          "state": "visible",
+          "headers": ["id", "single", "composite", "group", "middle", "noKey", "state"],
+          "validations": {
+            "count": 20000,
+            "sha256": "32d6dc18a3f97d39e7484a65c4083454334d6d72435550319a846049fc01cfc1",
+            "samples": [
+              [
+                "E10",
+                {
+                  "type": "list",
+                  "formulae": [
+                    "OFFSET('MiddleTarget'!$A$2,0,0,MAX(1,COUNTA('MiddleTarget'!$A$2:$A$10001)),1)"
+                  ]
+                }
+              ],
+              ["G10", { "type": "list", "formulae": ["'_DropDown'!$A$2:$A$3"] }],
+              ["G9999", { "type": "list", "formulae": ["'_DropDown'!$A$2:$A$3"] }]
+            ]
+          }
+        },
+        {
+          "name": "CycleA",
+          "state": "visible",
+          "headers": ["id", "b"],
+          "validations": {
+            "count": 10000,
+            "sha256": "f38430cabeb8cf85b0b738353defff15772ddffc11a4c35bb7468c27be3f90ae",
+            "samples": [
+              [
+                "B10",
+                {
+                  "type": "list",
+                  "formulae": ["OFFSET('CycleB'!$A$2,0,0,MAX(1,COUNTA('CycleB'!$A$2:$A$10001)),1)"]
+                }
+              ],
+              [
+                "B5499",
+                {
+                  "type": "list",
+                  "formulae": ["OFFSET('CycleB'!$A$2,0,0,MAX(1,COUNTA('CycleB'!$A$2:$A$10001)),1)"]
+                }
+              ],
+              [
+                "B9999",
+                {
+                  "type": "list",
+                  "formulae": ["OFFSET('CycleB'!$A$2,0,0,MAX(1,COUNTA('CycleB'!$A$2:$A$10001)),1)"]
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "name": "CycleB",
+          "state": "visible",
+          "headers": ["id", "a"],
+          "validations": {
+            "count": 10000,
+            "sha256": "a0b022f4be08b19d2e9b11599fe7b9a87516aadb4d70a9dd400149a32eba721f",
+            "samples": [
+              [
+                "B10",
+                {
+                  "type": "list",
+                  "formulae": ["OFFSET('CycleA'!$A$2,0,0,MAX(1,COUNTA('CycleA'!$A$2:$A$10001)),1)"]
+                }
+              ],
+              [
+                "B5499",
+                {
+                  "type": "list",
+                  "formulae": ["OFFSET('CycleA'!$A$2,0,0,MAX(1,COUNTA('CycleA'!$A$2:$A$10001)),1)"]
+                }
+              ],
+              [
+                "B9999",
+                {
+                  "type": "list",
+                  "formulae": ["OFFSET('CycleA'!$A$2,0,0,MAX(1,COUNTA('CycleA'!$A$2:$A$10001)),1)"]
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "name": "_DropDown",
+          "state": "veryHidden",
+          "headers": ["FixtureState"],
+          "validations": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "samples": []
+          }
+        }
+      ]
+    }
+  }
+}

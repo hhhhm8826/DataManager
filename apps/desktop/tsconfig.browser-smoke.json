@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@datamanager/core": ["../../packages/core/src/index.ts"],
+      "@tauri-apps/api/core": ["src/adapters/native/TauriCoreStub.ts"],
+      "@tauri-apps/plugin-dialog": ["src/adapters/native/TauriDialogStub.ts"]
+    }
+  },
+  "include": ["src", "../../packages/core/src"]
+}

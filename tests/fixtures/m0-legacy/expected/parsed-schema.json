@@ -1,0 +1,280 @@
+{
+  "messages": [
+    {
+      "name": "CompositeTarget",
+      "sourceFile": "KeyTable.proto",
+      "pkFields": [
+        "region",
+        "id"
+      ],
+      "keyFields": [],
+      "fields": [
+        {
+          "name": "region",
+          "type": "int32",
+          "fieldNumber": 1,
+          "isPk": true,
+          "isKey": false,
+          "isRepeated": false
+        },
+        {
+          "name": "id",
+          "type": "int32",
+          "fieldNumber": 2,
+          "isPk": true,
+          "isKey": false,
+          "isRepeated": false
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "fieldNumber": 3,
+          "isPk": false,
+          "isKey": false,
+          "isRepeated": false
+        }
+      ]
+    },
+    {
+      "name": "CycleA",
+      "sourceFile": "ReferenceTable.proto",
+      "pkFields": [
+        "id"
+      ],
+      "keyFields": [],
+      "fields": [
+        {
+          "name": "id",
+          "type": "int32",
+          "fieldNumber": 1,
+          "isPk": true,
+          "isKey": false,
+          "isRepeated": false
+        },
+        {
+          "name": "b",
+          "type": "CycleB",
+          "fieldNumber": 2,
+          "isPk": false,
+          "isKey": false,
+          "isRepeated": false
+        }
+      ]
+    },
+    {
+      "name": "CycleB",
+      "sourceFile": "ReferenceTable.proto",
+      "pkFields": [
+        "id"
+      ],
+      "keyFields": [],
+      "fields": [
+        {
+          "name": "id",
+          "type": "int32",
+          "fieldNumber": 1,
+          "isPk": true,
+          "isKey": false,
+          "isRepeated": false
+        },
+        {
+          "name": "a",
+          "type": "CycleA",
+          "fieldNumber": 2,
+          "isPk": false,
+          "isKey": false,
+          "isRepeated": false
+        }
+      ]
+    },
+    {
+      "name": "GroupTarget",
+      "sourceFile": "KeyTable.proto",
+      "pkFields": [],
+      "keyFields": [
+        "groupId"
+      ],
+      "fields": [
+        {
+          "name": "groupId",
+          "type": "int32",
+          "fieldNumber": 1,
+          "isPk": false,
+          "isKey": true,
+          "isRepeated": false
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "fieldNumber": 2,
+          "isPk": false,
+          "isKey": false,
+          "isRepeated": false
+        }
+      ]
+    },
+    {
+      "name": "MiddleTarget",
+      "sourceFile": "ReferenceTable.proto",
+      "pkFields": [
+        "id"
+      ],
+      "keyFields": [],
+      "fields": [
+        {
+          "name": "id",
+          "type": "int32",
+          "fieldNumber": 1,
+          "isPk": true,
+          "isKey": false,
+          "isRepeated": false
+        },
+        {
+          "name": "single",
+          "type": "SingleTarget",
+          "fieldNumber": 2,
+          "isPk": false,
+          "isKey": false,
+          "isRepeated": false
+        }
+      ]
+    },
+    {
+      "name": "NoKeyTarget",
+      "sourceFile": "KeyTable.proto",
+      "pkFields": [],
+      "keyFields": [],
+      "fields": [
+        {
+          "name": "label",
+          "type": "string",
+          "fieldNumber": 1,
+          "isPk": false,
+          "isKey": false,
+          "isRepeated": false
+        }
+      ]
+    },
+    {
+      "name": "RootTarget",
+      "sourceFile": "ReferenceTable.proto",
+      "pkFields": [
+        "id"
+      ],
+      "keyFields": [],
+      "fields": [
+        {
+          "name": "id",
+          "type": "int32",
+          "fieldNumber": 1,
+          "isPk": true,
+          "isKey": false,
+          "isRepeated": false
+        },
+        {
+          "name": "single",
+          "type": "SingleTarget",
+          "fieldNumber": 2,
+          "isPk": false,
+          "isKey": false,
+          "isRepeated": false
+        },
+        {
+          "name": "composite",
+          "type": "CompositeTarget",
+          "fieldNumber": 3,
+          "isPk": false,
+          "isKey": false,
+          "isRepeated": false
+        },
+        {
+          "name": "group",
+          "type": "GroupTarget",
+          "fieldNumber": 4,
+          "isPk": false,
+          "isKey": false,
+          "isRepeated": false
+        },
+        {
+          "name": "middle",
+          "type": "MiddleTarget",
+          "fieldNumber": 5,
+          "isPk": false,
+          "isKey": false,
+          "isRepeated": false
+        },
+        {
+          "name": "noKey",
+          "type": "NoKeyTarget",
+          "fieldNumber": 6,
+          "isPk": false,
+          "isKey": false,
+          "isRepeated": false
+        },
+        {
+          "name": "state",
+          "type": "FixtureState",
+          "fieldNumber": 7,
+          "isPk": false,
+          "isKey": false,
+          "isRepeated": false
+        }
+      ]
+    },
+    {
+      "name": "SingleTarget",
+      "sourceFile": "KeyTable.proto",
+      "pkFields": [
+        "id"
+      ],
+      "keyFields": [],
+      "fields": [
+        {
+          "name": "id",
+          "type": "int32",
+          "fieldNumber": 1,
+          "isPk": true,
+          "isKey": false,
+          "isRepeated": false
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "fieldNumber": 2,
+          "isPk": false,
+          "isKey": false,
+          "isRepeated": false
+        },
+        {
+          "name": "state",
+          "type": "FixtureState",
+          "fieldNumber": 3,
+          "isPk": false,
+          "isKey": false,
+          "isRepeated": false
+        }
+      ]
+    }
+  ],
+  "enums": [
+    {
+      "name": "FixtureState",
+      "sourceFile": "FixtureEnumType.proto",
+      "values": [
+        {
+          "name": "FixtureState_NONE",
+          "number": 0
+        },
+        {
+          "name": "FixtureState_ACTIVE",
+          "number": 1
+        },
+        {
+          "name": "FixtureState_MAX",
+          "number": 2
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

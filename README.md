@@ -2,7 +2,7 @@
 
 # 📊 Data Manager
 
-**An Electron application with React and TypeScript**
+**Legacy Electron application with an in-progress Tauri 2 rewrite**
 
 ![Electron](https://img.shields.io/badge/Electron-2B2E3A?style=for-the-badge&logo=electron&logoColor=white) ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 
@@ -22,17 +22,65 @@
 | ⚙️ **코드 생성**                 | Protobuf, Unreal 데이터 컨테이너 자동 생성         |
 | 🔄 **JSON 변환**                 | 엑셀 데이터를 JSON으로 변환                        |
 
+### ✨ TODO
 
-
-### ✨ TODO 
-
-* 새로운 엑셀 파일을 생성 하지않고 Enum 수정을 DropDown에 반영할 수 있는 기능
-* VCS 관련
+- 새로운 엑셀 파일을 생성 하지않고 Enum 수정을 DropDown에 반영할 수 있는 기능
+- VCS 관련
 
 ---
 
+## Tauri Rewrite (M8 integration in progress)
 
-## 🛠️ Project Setup
+The new desktop application lives in `apps/desktop`, with pure domain contracts
+in `packages/core`. It now includes versioned settings, a canonical native file
+boundary, source-preserving Proto table/Enum CRUD, an interactive schema
+relationship graph, worker-backed Excel generation/validation, and deterministic
+JSON dependency/reference export. It also provides transactional protoc output
+for eight languages and a pure TypeScript Unreal generator with per-language
+and all-configured execution UI. The Electron application remains available
+under `legacy:*` scripts until M8 completes the migration.
+
+The Windows x64 NSIS build is emitted at
+`target/release/bundle/nsis/DataManager_0.1.0_x64-setup.exe`. The installer is
+currently unsigned by design; signing and release upload are outside this goal.
+
+The Tauri workspace requires pnpm 11.10.0 and Rust stable 1.97.0 or newer.
+Once those tools are available, use the root commands below:
+
+```bash
+pnpm install
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm test:e2e
+pnpm tauri:dev
+pnpm tauri:build
+```
+
+The native E2E command builds a release binary with the test-only `e2e` Cargo
+feature, Rust/frontend WDIO plugins, and Tauri capability, then uses the
+embedded WebDriver provider. Windows E2E applies a test-process-only WebView2
+sandbox override; none of those test surfaces are present in the normal binary.
+It does not require `tauri-driver` or a globally installed MSEdgeDriver; the
+setup downloads the matching driver to `.e2e-runtime`. See
+`docs/rewrite-progress.md` for current gate evidence.
+
+Configuration and final desktop verification are documented in
+`docs/settings.md` and `docs/interactive-smoke.md`.
+
+Rewrite-generated examples are kept under `examples/TAURI_REWRITE`, separate
+from stale legacy example outputs. Recreate and verify them with:
+
+```bash
+pnpm fixtures:rewrite
+pnpm fixtures:rewrite:check
+```
+
+All eight protoc outputs use the committed `libprotoc 34.1`. Go additionally
+uses the committed `protoc-gen-go`; Rust uses protoc's bundled experimental upb
+generator and does not require an external plugin.
+
+## Legacy Electron Setup
 
 ### Recommended IDE Setup
 
@@ -47,18 +95,17 @@ $ npm install
 ### Development
 
 ```bash
-$ npm run dev
-$ npm start
+$ npm run legacy:dev
 ```
 
 ### Build
 
 ```bash
 # For windows
-$ npm run build:win
+$ npm run legacy:build:win
 
 # For macOS (Currently not supported)
-$ npm run build:mac
+$ npm run legacy:build:mac
 ```
 
 ### Start

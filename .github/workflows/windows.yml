@@ -1,0 +1,78 @@
+name: Windows Tauri
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-tauri-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-and-package:
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.10.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Configure Rust
+        shell: pwsh
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustup component add rustfmt clippy
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript and contract gates
+        shell: pwsh
+        run: |
+          pnpm format:check
+          pnpm lint
+          pnpm typecheck
+          pnpm test
+
+      - name: Rust gates
+        shell: pwsh
+        run: |
+          cargo test --all-features
+          cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Native core-flow E2E
+        run: pnpm test:e2e
+
+      - name: Build release NSIS installer
+        run: pnpm tauri:build
+
+      - name: Install, launch, and uninstall smoke
+        shell: pwsh
+        run: ./scripts/windows-installer-smoke.ps1 -InstallerPath (Get-ChildItem target/release/bundle/nsis/*-setup.exe -File | Select-Object -First 1 -ExpandProperty FullName)
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: DataManager-windows-x64-nsis
+          path: target/release/bundle/nsis/*.exe
+          if-no-files-found: error
+
+      - name: Upload interactive smoke evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: DataManager-interactive-smoke
+          path: artifacts/interactive-smoke-*.json
+          if-no-files-found: error

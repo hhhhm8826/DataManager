@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package DATA_MANAGER_FIXTURE;
+option go_package = "./DATA_MANAGER_FIXTURE";
+import "FixtureEnumType.proto";
+import "KeyTable.proto";
+
+message MiddleTarget {
+  // @PK
+  int32 id = 1;
+  SingleTarget single = 2;
+}
+
+message RootTarget {
+  // @PK
+  int32 id = 1;
+  SingleTarget single = 2;
+  CompositeTarget composite = 3;
+  GroupTarget group = 4;
+  MiddleTarget middle = 5;
+  NoKeyTarget noKey = 6;
+  FixtureState state = 7;
+}
+
+message CycleA {
+  // @PK
+  int32 id = 1;
+  CycleB b = 2;
+}
+
+message CycleB {
+  // @PK
+  int32 id = 1;
+  CycleA a = 2;
+}

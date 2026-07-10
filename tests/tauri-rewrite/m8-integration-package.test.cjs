@@ -1,0 +1,202 @@
+const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const path = require('node:path')
+const test = require('node:test')
+
+const repositoryRoot = path.resolve(__dirname, '..', '..')
+
+function read(relativePath) {
+  return fs.readFileSync(path.join(repositoryRoot, relativePath), 'utf8')
+}
+
+test('M8: native E2E uses an isolated workspace and covers the core flow', () => {
+  const config = read('apps/desktop/wdio.conf.mjs')
+  const appDataConfig = read('apps/desktop/wdio.appdata.conf.mjs')
+  const flow = read('tests/e2e/m8-core-flow.e2e.mjs')
+  const appDataSave = read('tests/e2e/appdata/01-save-settings.e2e.mjs')
+  const appDataReload = read('tests/e2e/appdata/02-reload-settings.e2e.mjs')
+  const settings = read('apps/desktop/src-tauri/src/commands/settings.rs')
+  const e2eTauri = JSON.parse(read('apps/desktop/src-tauri/tauri.e2e.conf.json'))
+  const cargo = read('apps/desktop/src-tauri/Cargo.toml')
+  const rustEntry = read('apps/desktop/src-tauri/src/lib.rs')
+  const frontendEntry = read('apps/desktop/src/main.tsx')
+  const edgeSetup = read('apps/desktop/scripts/prepare-edgedriver.mjs')
+  const appDataCleanup = read('apps/desktop/scripts/cleanup-appdata-e2e.mjs')
+  const edgePatch = read('patches/@wdio__tauri-service@1.2.0.patch')
+
+  assert.match(config, /\.e2e-workspace/)
+  assert.match(config, /DATAMANAGER_E2E_SETTINGS_PATH/)
+  assert.match(config, /'cpp', 'csharp', 'java', 'python', 'go', 'rust', 'ruby', 'php'/)
+  assert.match(config, /WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS \?\?= '--no-sandbox'/)
+  assert.match(config, /driverProvider: 'embedded'/)
+  assert.match(appDataConfig, /delete env\.DATAMANAGER_E2E_SETTINGS_PATH/)
+  assert.match(appDataConfig, /\.e2e-appdata-profile/)
+  assert.match(appDataConfig, /resetOwnedDirectory/)
+  assert.match(appDataSave, /settings\.v2\.json/)
+  assert.match(appDataReload, /fresh native application session/)
+  assert.match(appDataCleanup, /Refusing to remove unexpected E2E path/)
+  assert.match(appDataCleanup, /removeWithRetry/)
+  assert.match(settings, /#\[cfg\(feature = "e2e"\)\]/)
+  assert.equal(e2eTauri.app.withGlobalTauri, true)
+  assert.match(e2eTauri.build.beforeBuildCommand, /--mode e2e/)
+  assert.deepEqual(e2eTauri.app.security.capabilities[0].permissions, [
+    'core:default',
+    'core:window:default',
+    'core:window:allow-set-size',
+    'dialog:allow-open',
+    'wdio:default',
+    'wdio-webdriver:default'
+  ])
+  assert.match(cargo, /dep:tauri-plugin-wdio/)
+  assert.match(rustEntry, /tauri_plugin_wdio::init/)
+  assert.match(frontendEntry, /VITE_WDIO/)
+  assert.match(frontendEntry, /@wdio\/tauri-plugin/)
+  assert.match(edgeSetup, /\.e2e-runtime/)
+  assert.match(edgePatch, /Microsoft Edge WebDriver/)
+  for (const marker of [
+    "openArea('설정'",
+    "openArea('테이블'",
+    "openArea('관계도'",
+    "openArea('Excel'",
+    "openArea('코드 생성'",
+    'exerciseSchemaCrud',
+    'E2eTempTable.proto',
+    'E2eStatusEnumType.proto',
+    'Cancelling a referenced Message deletion',
+    'Cancelling a referenced Enum deletion',
+    'exerciseDiagramInteractions',
+    'exerciseResponsiveDiagramLayout',
+    'bodyOverflow',
+    'toolbarDoesNotOverlap',
+    'setNativeWindowSize',
+    'populateWorkbooks',
+    '백업 없이 덮어쓰기',
+    '백업 후 생성',
+    'assertResolvedRootJson',
+    'exerciseExcelCancellationAndDiagnostics',
+    '9_998',
+    'Excel operation was cancelled.',
+    'EXCEL_CELL_TYPE_MISMATCH',
+    "'9개 성공'",
+    'createCancellationFixtures',
+    'PROTOC_EXECUTION_FAILED',
+    '가져오기 검토',
+    '이 설정 가져오기',
+    'originalLegacyConfig',
+    'RootTarget.json',
+    'DataTables.h'
+  ]) {
+    assert.match(flow, new RegExp(marker.replace(/[()]/g, '\\$&')))
+  }
+  assert.match(flow, /plugin:window\|set_size/)
+})
+
+test('M8: Windows CI verifies, runs E2E, packages NSIS, and uploads the installer', () => {
+  const rootPackage = JSON.parse(read('package.json'))
+  const workflow = read('.github/workflows/windows.yml')
+  const installerSmoke = read('scripts/windows-installer-smoke.ps1')
+  const interactiveSmoke = read('scripts/windows-interactive-smoke.ps1')
+  const tauri = JSON.parse(read('apps/desktop/src-tauri/tauri.conf.json'))
+  const capability = JSON.parse(read('apps/desktop/src-tauri/capabilities/main.json'))
+
+  for (const marker of [
+    'windows-latest',
+    'pnpm install --frozen-lockfile',
+    'pnpm format:check',
+    'cargo test --all-features',
+    'pnpm test:e2e',
+    'pnpm tauri:build',
+    'windows-installer-smoke.ps1',
+    'target/release/bundle/nsis/*.exe',
+    'DataManager-interactive-smoke',
+    'artifacts/interactive-smoke-*.json'
+  ]) {
+    assert.match(workflow, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+  }
+  assert.deepEqual(tauri.bundle.targets, ['nsis'])
+  assert.equal(tauri.bundle.useLocalToolsDir, true)
+  assert.equal(tauri.app.windows[0].minWidth, 520)
+  assert.deepEqual(capability.permissions, ['dialog:allow-open'])
+  assert.match(installerSmoke, /Start-Process -FilePath \$installer/)
+  assert.match(installerSmoke, /datamanager-desktop\.exe/)
+  assert.match(installerSmoke, /DataManager-installer-profile-/)
+  assert.match(installerSmoke, /LOCALAPPDATA/)
+  assert.match(installerSmoke, /Restore-ProfileEnvironment/)
+  assert.match(installerSmoke, /Remove-TemporaryProfile/)
+  assert.match(installerSmoke, /Refusing to remove profile outside the temporary root/)
+  assert.match(installerSmoke, /Start-Process -FilePath \$uninstaller/)
+  assert.equal(
+    rootPackage.scripts['interactive:smoke'],
+    'pwsh -NoProfile -File ./scripts/windows-interactive-smoke.ps1'
+  )
+  assert.match(interactiveSmoke, /Assert-NormalInteractiveSession/)
+  assert.match(interactiveSmoke, /ValidateOnly/)
+  assert.match(interactiveSmoke, /DataManager-interactive-profile-/)
+  assert.match(interactiveSmoke, /DataManager-interactive-workspace-/)
+  assert.match(interactiveSmoke, /Refusing to remove unexpected interactive-smoke path/)
+  assert.match(interactiveSmoke, /excel-com-structure/)
+  assert.match(interactiveSmoke, /desktop prompts were not started/)
+  assert.match(interactiveSmoke, /native-dialogs/)
+  assert.match(interactiveSmoke, /diagram-drag-pan/)
+  assert.match(interactiveSmoke, /excel-dropdowns/)
+  assert.match(interactiveSmoke, /excel-file-open/)
+  assert.match(interactiveSmoke, /code-output-open/)
+  assert.match(interactiveSmoke, /ConvertTo-Json -Depth 6/)
+  assert.match(interactiveSmoke, /Interactive Excel and desktop smoke passed/)
+  assert.match(read('docs/settings.md'), /experimental-codegen=enabled,kernel=upb/)
+  assert.match(read('docs/interactive-smoke.md'), /pnpm test:e2e/)
+  assert.match(read('docs/interactive-smoke.md'), /pnpm interactive:smoke/)
+  assert.match(read('scripts/windows-excel-smoke.ps1'), /C10001/)
+  assert.match(read('scripts/windows-excel-smoke.ps1'), /E10001/)
+  assert.match(read('scripts/windows-excel-smoke.ps1'), /normal signed-in Windows PowerShell/)
+})
+
+test('M8: normal-session interactive reports close every manual gate', () => {
+  const reportDirectory = path.join(repositoryRoot, 'artifacts')
+  const reports = fs
+    .readdirSync(reportDirectory)
+    .filter((fileName) => /^interactive-smoke-\d{8}-\d{6}\.json$/.test(fileName))
+  assert.ok(reports.length > 0, 'At least one interactive smoke report is required.')
+
+  const expectedChecks = [
+    'excel-com-structure',
+    'native-dialogs',
+    'diagram-drag-pan',
+    'excel-dropdowns',
+    'excel-file-open',
+    'code-output-open'
+  ]
+  for (const fileName of reports) {
+    const report = JSON.parse(read(path.join('artifacts', fileName)))
+    assert.equal(report.schemaVersion, 1)
+    assert.equal(report.passed, true)
+    assert.equal(report.error, null)
+    assert.match(report.generatedAt, /^\d{4}-\d{2}-\d{2}T/)
+    assert.match(report.environment.os, /^Microsoft Windows /)
+    assert.match(report.environment.powershell, /^\d+\.\d+\.\d+$/)
+    assert.match(report.environment.webView2, /^\d+(\.\d+){3}$/)
+    assert.match(report.environment.excel, /^\d+(\.\d+){3}$/)
+    assert.match(report.application.sha256, /^[A-F0-9]{64}$/)
+    assert.deepEqual(
+      report.checks.map((check) => check.id),
+      expectedChecks
+    )
+    assert.ok(report.checks.every((check) => check.passed === true))
+  }
+})
+
+test('M8: rewrite examples regenerate separately from the legacy baseline', () => {
+  const rootPackage = JSON.parse(read('package.json'))
+  const generator = read('scripts/regenerate-rewrite-fixtures.ts')
+  const fixture = read('tests/fixtures/m8-rewrite/README.md')
+
+  assert.match(rootPackage.scripts.test, /fixtures:rewrite:check/)
+  assert.match(rootPackage.scripts['fixtures:rewrite'], /--write/)
+  assert.match(generator, /examplesRoot, 'TAURI_REWRITE'/)
+  assert.match(
+    generator,
+    /protocLanguages = \['cpp', 'csharp', 'java', 'python', 'go', 'rust', 'ruby', 'php'\]/
+  )
+  assert.match(generator, /Refusing to reset unexpected examples path/)
+  assert.match(fixture, /legacy baseline and stale repository examples remain separate/)
+})

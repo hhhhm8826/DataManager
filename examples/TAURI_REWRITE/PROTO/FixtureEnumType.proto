@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package DATA_MANAGER_FIXTURE;
+option go_package = "./DATA_MANAGER_FIXTURE";
+
+enum FixtureState {
+  FixtureState_NONE = 0;
+  FixtureState_ACTIVE = 1;
+  FixtureState_MAX = 2;
+}

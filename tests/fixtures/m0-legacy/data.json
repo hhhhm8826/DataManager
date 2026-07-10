@@ -1,0 +1,88 @@
+{
+  "SingleTarget": [
+    {
+      "id": 1,
+      "label": "Alpha",
+      "state": "FixtureState_ACTIVE"
+    },
+    {
+      "id": 2,
+      "label": "Beta",
+      "state": "FixtureState_NONE"
+    }
+  ],
+  "CompositeTarget": [
+    {
+      "region": 1,
+      "id": 1,
+      "label": "North A"
+    },
+    {
+      "region": 1,
+      "id": 2,
+      "label": "North B"
+    },
+    {
+      "region": 2,
+      "id": 1,
+      "label": "South A"
+    }
+  ],
+  "GroupTarget": [
+    {
+      "groupId": 10,
+      "label": "Reward A"
+    },
+    {
+      "groupId": 10,
+      "label": "Reward B"
+    },
+    {
+      "groupId": 20,
+      "label": "Reward C"
+    }
+  ],
+  "NoKeyTarget": [
+    {
+      "label": "No key"
+    }
+  ],
+  "MiddleTarget": [
+    {
+      "id": 100,
+      "single": 1
+    }
+  ],
+  "RootTarget": [
+    {
+      "id": 500,
+      "single": 1,
+      "composite": 1,
+      "group": 10,
+      "middle": 100,
+      "noKey": "not-resolved",
+      "state": "FixtureState_ACTIVE"
+    },
+    {
+      "id": 501,
+      "single": 999,
+      "composite": 2,
+      "group": 999,
+      "middle": 999,
+      "noKey": "still-raw",
+      "state": "FixtureState_NONE"
+    }
+  ],
+  "CycleA": [
+    {
+      "id": 1,
+      "b": 1
+    }
+  ],
+  "CycleB": [
+    {
+      "id": 1,
+      "a": 1
+    }
+  ]
+}
