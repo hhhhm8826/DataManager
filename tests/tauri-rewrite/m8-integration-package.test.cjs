@@ -208,3 +208,46 @@ test('M8: rewrite examples regenerate separately from the legacy baseline', () =
   }
   assert.match(editorConfig, /^end_of_line = lf$/m)
 })
+
+test('M8: final active build is Tauri-only with baseline and rollback evidence', () => {
+  const rootPackage = JSON.parse(read('package.json'))
+  const workspace = read('pnpm-workspace.yaml')
+  const readme = read('README.md')
+  const migration = read('docs/migration.md')
+  const dependencies = {
+    ...(rootPackage.dependencies ?? {}),
+    ...(rootPackage.devDependencies ?? {})
+  }
+
+  assert.equal(rootPackage.main, undefined)
+  assert.equal(
+    Object.keys(rootPackage.scripts).some((name) => name.startsWith('legacy:')),
+    false
+  )
+  for (const packageName of [
+    'electron',
+    'electron-builder',
+    'electron-store',
+    'electron-vite',
+    '@electron-toolkit/preload',
+    '@electron-toolkit/utils'
+  ]) {
+    assert.equal(dependencies[packageName], undefined)
+  }
+  for (const relativePath of [
+    'electron-builder.yml',
+    'electron.vite.config.ts',
+    'package-lock.json',
+    'src/main/index.ts',
+    'src/preload/index.ts',
+    'src/renderer/index.html'
+  ]) {
+    assert.equal(fs.existsSync(path.join(repositoryRoot, relativePath)), false)
+  }
+  assert.doesNotMatch(workspace, /^\s+electron(?:-winstaller)?:/m)
+  assert.equal(fs.existsSync(path.join(repositoryRoot, 'tests/baseline/m0-golden.test.cjs')), true)
+  assert.match(rootPackage.scripts.test, /test:baseline/)
+  assert.match(readme, /active branch contains no Electron runtime/)
+  assert.match(migration, /git worktree add/)
+  assert.match(migration, /3a4ba6ec652d750d88c88dcc9af8ada13b6eb169/)
+})

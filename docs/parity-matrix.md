@@ -8,19 +8,23 @@
 - Legacy runtime: Electron, React, TypeScript, ExcelJS
 - Rewrite target: Tauri 2, React, TypeScript, Rust only at native boundaries
 
-The legacy repository had no discovered test or spec files before M0. The
-legacy characterization suite added in M0 is intentionally isolated from the
-Electron product and executes the existing TypeScript services directly.
+The legacy repository had no discovered test or spec files before M0. Before
+cutover, the M0 characterization suite executed the Electron-era TypeScript
+services directly and produced the preserved goldens below. The final active
+branch contains no Electron runtime; `pnpm test:baseline` verifies the immutable
+observations while the new core, adapter, fixture, and native E2E suites verify
+the replacement behavior.
 
 ## Fixture Contract
 
 Fixture root: tests/fixtures/m0-legacy
 
 The fixture is deliberately separate from examples because examples contain
-stale outputs from different schema revisions. The M0 test creates temporary
-XLSX files from the fixture Proto definitions, inserts data.json rows, reads
-them through the legacy Excel service, resolves references through the legacy
-JSON export logic, and compares RootTarget.json byte-for-byte.
+stale outputs from different schema revisions. The pre-cutover M0
+characterization created temporary XLSX files, inserted `data.json`, read them
+through the legacy service, resolved references, and recorded JSON and Unreal
+snapshots. The resulting schema, JSON, and normalized Unreal observations remain
+under source control and are checked without retaining Electron code.
 
 It contains all required reference cases:
 
@@ -69,30 +73,30 @@ Status meanings:
 - Planned: not implemented in the new Tauri application yet.
 - Pass: implemented and verified in the new application.
 
-| Area                 | Legacy user flow and source                                              | Baseline status | New app status                                                         | Current evidence                                                                                                              |
-| -------------------- | ------------------------------------------------------------------------ | --------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Startup and settings | App.tsx, SettingsPanel.tsx, SettingsService.ts                           | Baseline fixed  | Pass                                                                   | Settings v2/native/UI and legacy import tests, two fresh AppData sessions, and passing native directory/file dialogs.              |
-| Table schema         | TableCreator.tsx, ProtoParserService.ts                                  | Baseline fixed  | Native CRUD and impact-confirmation pass                               | Parse/patch/reparse tests plus native field edit, temporary Table create/delete, and referenced rename/delete cancel E2E.     |
-| Enum schema          | EnumCreator.tsx, ProtoParserService.ts                                   | Baseline fixed  | Native CRUD and impact-confirmation pass                               | NONE/MAX and source-preservation tests plus native Enum create/update/delete and referenced delete-cancel E2E.                |
-| Diagram              | DiagramCanvas.tsx, TableNode.tsx                                         | Baseline fixed  | Pass                                                                   | Native 9-node/10-edge, MiniMap, search/hover/zoom, 600 x 800 non-overlap E2E, and passing interactive node drag/canvas pan.         |
-| Excel and JSON       | ExcelPanel.tsx, ExcelService.ts, excel.ipc.ts, JsonService.ts            | Baseline fixed  | Pass                                                                   | Native collision/read/cancel/diagnostic/resolved JSON E2E plus passing Excel COM, dropdown, and workbook-open checks.               |
-| Code generation      | CodeGenPanel.tsx, CodeGeneratorService.ts, UnrealCodeGeneratorService.ts | Baseline fixed  | Pass                                                                   | Passing nine-output, cancellation, real failure/stderr E2E, bundled Rust/Unreal snapshots, and interactive output-folder opening.  |
-| Windows deployment   | electron-builder                                                         | Baseline fixed  | NSIS and installed process smoke pass                                  | 2,466,673-byte installer; install, five-second launch, uninstall, and profile cleanup pass.                                   |
+| Area                 | Legacy user flow and source                                              | Baseline status | New app status | Current evidence                                                                                                 |
+| -------------------- | ------------------------------------------------------------------------ | --------------- | -------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Startup and settings | App.tsx, SettingsPanel.tsx, SettingsService.ts                           | Baseline fixed  | Pass           | Settings v2/native/UI and legacy import tests, two fresh AppData sessions, and native directory/file dialogs.    |
+| Table schema         | TableCreator.tsx, ProtoParserService.ts                                  | Baseline fixed  | Pass           | Parse/patch/reparse tests plus native field edit, Table CRUD, and referenced rename/delete cancellation.         |
+| Enum schema          | EnumCreator.tsx, ProtoParserService.ts                                   | Baseline fixed  | Pass           | NONE/MAX and source-preservation tests plus native Enum CRUD and referenced deletion cancellation.               |
+| Diagram              | DiagramCanvas.tsx, TableNode.tsx                                         | Baseline fixed  | Pass           | Native 9-node/10-edge, MiniMap, search/hover/zoom, compact non-overlap, and interactive drag/pan evidence.       |
+| Excel and JSON       | ExcelPanel.tsx, ExcelService.ts, excel.ipc.ts, JsonService.ts            | Baseline fixed  | Pass           | Native collision/read/cancel/diagnostic/resolved JSON E2E plus Excel COM, dropdown, and workbook-open evidence.  |
+| Code generation      | CodeGenPanel.tsx, CodeGeneratorService.ts, UnrealCodeGeneratorService.ts | Baseline fixed  | Pass           | Nine-output, cancellation, real failure/stderr E2E, generated snapshots, and interactive output-folder evidence. |
+| Windows deployment   | electron-builder                                                         | Baseline fixed  | Pass           | CI NSIS artifact, installed five-second launch, uninstall, profile cleanup, and artifact digest verification.    |
 
-## Legacy Quality Evidence
+## Historical Legacy Quality Evidence
 
-| Command                                                                | Result        | Notes                                                                                                                                                                                                                                     |
-| ---------------------------------------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| node --test tests/legacy-characterization/m0.characterization.test.cjs | Pass, 2 tests | Parser, Excel, JSON, protoc, Unreal fixture contracts.                                                                                                                                                                                    |
-| npm run legacy:typecheck                                               | Pass          | Existing Electron TypeScript projects type-check.                                                                                                                                                                                         |
-| npm run legacy:lint                                                    | Fail          | Existing baseline errors include the unused ProtoParserService filename parameter and React set-state-in-effect rules in ExcelPanel and SettingsPanel. These are baseline debt, not Tauri gates.                                          |
-| Legacy packaged app smoke                                              | Fail          | dist/win-unpacked/data-manager.exe exited during a hidden five-second launch attempt with exit code -36861. This does not prevent source-service characterization; M8 needs a clean Tauri installer smoke on a clean Windows environment. |
+| Command                                                                | Result                       | Notes                                                                                                                                                                                                                                     |
+| ---------------------------------------------------------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| node --test tests/legacy-characterization/m0.characterization.test.cjs | Pass, 2 tests before cutover | Parser, Excel, JSON, protoc, Unreal fixture contracts recorded at the reference implementation.                                                                                                                                           |
+| npm run legacy:typecheck                                               | Pass                         | Existing Electron TypeScript projects type-check.                                                                                                                                                                                         |
+| npm run legacy:lint                                                    | Fail                         | Existing baseline errors include the unused ProtoParserService filename parameter and React set-state-in-effect rules in ExcelPanel and SettingsPanel. These are baseline debt, not Tauri gates.                                          |
+| Legacy packaged app smoke                                              | Fail                         | dist/win-unpacked/data-manager.exe exited during a hidden five-second launch attempt with exit code -36861. This does not prevent source-service characterization; M8 needs a clean Tauri installer smoke on a clean Windows environment. |
 
-## Manual Baseline Routes
+## Historical Manual Baseline Routes
 
-These routes are retained for comparison while Electron remains in the tree.
-The currently packaged Electron artifact did not stay running, so M0 records
-them as explicit manual verification procedures rather than passing UI runs.
+These routes describe the reference revision and remain for historical
+comparison. Electron source is available at the baseline commit, not in the
+final active branch.
 
 | Flow                | Procedure                                                                                                 | Observable result                                                                               |
 | ------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
@@ -102,3 +106,20 @@ them as explicit manual verification procedures rather than passing UI runs.
 | Diagram             | Load fixture and inspect reference relationships.                                                         | Nodes, edges, search dimming, hover emphasis, pan/zoom, MiniMap, and Enum detail are available. |
 | Excel and JSON      | Generate selected workbooks, choose backup/overwrite behavior, enter values, then export selected sheets. | Workbook sheets and dropdowns work; JSON preserves legacy reference shapes.                     |
 | Code generation     | Configure protoc and output directories; run one language and Unreal.                                     | Generated outputs and failures are surfaced to the user.                                        |
+
+## Final Cutover Evidence
+
+- Windows workflow run
+  [`29089116827`](https://github.com/hhhhm8826/DataManager/actions/runs/29089116827)
+  passed all TypeScript, Rust, native E2E, NSIS, install/launch/uninstall, and
+  artifact-upload steps for commit `61208cea2e6a69d5b295c6f7fece02017e91a26e`.
+- The installer artifact ZIP digest is
+  `7778CE22083A80761F9B4BF12F0916057E44F48CC006965667A3611085041F13`.
+  Its single installer is 2,465,105 bytes with SHA-256
+  `A833537C4EFEB09663714A00C2CBFAD0AA88292F27E3B0CBC500C6EBA8086E5F`.
+- The interactive artifact ZIP digest is
+  `132D2EF60D05D55FFCB4E951BC02558A479881C0D6DBBD17602EB9B68C107FD6`.
+  Both contained reports pass all six normal-session checks.
+- Electron packages, source processes, IPC, build configuration, npm lockfile,
+  and legacy scripts are absent from the final active build. Rollback uses a
+  separate worktree at the baseline commit.

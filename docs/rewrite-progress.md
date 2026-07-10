@@ -5,8 +5,10 @@
 Status: complete
 
 - `tests/fixtures/m0-legacy` is the coherent compatibility fixture.
-- The legacy parser, XLSX, JSON, C++ protoc, and Unreal behavior are fixed by
-  `tests/legacy-characterization/m0.characterization.test.cjs`.
+- Before cutover, the Electron parser, XLSX, JSON, C++ protoc, and Unreal
+  behavior was recorded by the M0 characterization suite at the reference
+  commit. The active branch verifies those observations with
+  `tests/baseline/m0-golden.test.cjs` and the replacement core/native suites.
 - `docs/parity-matrix.md`, `docs/migration.md`, and ADR 0001 separate required
   compatibility from known legacy defects.
 
@@ -331,7 +333,7 @@ Interactive evidence:
 
 ## M8: Integration, Packaging, and Cutover
 
-Status: native E2E, local package, and interactive gates complete; CI and cutover pending
+Status: complete
 
 Completed:
 
@@ -360,7 +362,9 @@ Completed:
 - EdgeDriver is pinned as a project dev dependency and cached under
   `.e2e-runtime`. A minimal pnpm patch makes `@wdio/tauri-service` recognize the
   Edge 150 `Microsoft Edge WebDriver` version string as well as the older
-  `MSEdgeDriver` form; no global driver install is needed.
+  `MSEdgeDriver` form. It also splits multi-path Windows `where` output with
+  CRLF-safe trimming, which is required on GitHub-hosted runners that already
+  expose another driver. No global driver install is needed.
 - Windows GitHub Actions runs locked install, format/lint/typecheck/tests, Cargo
   test/clippy, embedded WebDriver E2E, normal-feature NSIS build, silent
   install/launch/uninstall smoke, and separate installer/manual-evidence artifact
@@ -378,21 +382,31 @@ Completed:
   10.0.26200, PowerShell 7.5.8, WebView2 150.0.4078.48, and Excel
   16.0.20131.20112. Their application SHA-256
   `C998B471C798014CF04F8EF8701F758E040FEFD27BBA8B428E69062CF6078B7D`
-  matches the current normal release executable.
+  identifies the normal release executable used for those interactive runs.
 - `pnpm fixtures:rewrite` regenerates the coherent Proto sources, two Excel
   workbooks, six dependency JSON files, eight actual protoc language outputs,
   and Unreal output under `examples/TAURI_REWRITE`. It never overwrites stale
   legacy examples. `pnpm fixtures:rewrite:check` verifies 51 text hashes and
   workbook structure against `tests/fixtures/m8-rewrite/manifest.json` and is
   part of the root test command.
+- Windows workflow run
+  [`29089116827`](https://github.com/hhhhm8826/DataManager/actions/runs/29089116827)
+  passed every locked install, TypeScript, Rust, native E2E, NSIS,
+  install/launch/uninstall, and artifact upload step for commit
+  `61208cea2e6a69d5b295c6f7fece02017e91a26e`.
+- After the CI and artifact gates passed, the active Electron main/preload IPC,
+  renderer, package dependencies, electron-vite/electron-builder configuration,
+  npm lockfile, legacy scripts, and stale IDE instructions were removed. The M0
+  observations remain as immutable golden fixtures and rollback remains
+  available at the reference commit.
 
 Local package evidence:
 
 | Evidence                     | Result                                                             |
 | ---------------------------- | ------------------------------------------------------------------ |
 | Installer                    | `target/release/bundle/nsis/DataManager_0.1.0_x64-setup.exe`       |
-| Installer size               | 2,466,673 bytes                                                    |
-| Installer SHA-256            | `4886B9E2CE3D11C95DC7020423CBF1AB91FB4E4445585C1B30609C480A60CB71` |
+| Installer size               | 2,465,650 bytes                                                    |
+| Installer SHA-256            | `9CEC601B8BB98F937B9B1DDB40C266B883019CC015142D11CE417CE8AAC906B2` |
 | Signature                    | Not signed; signing is explicitly outside the goal boundary        |
 | Release executable           | 9,840,640 bytes, product version 0.1.0                             |
 | Installer creation           | Pass with NSIS 3.11 local tools cache                              |
@@ -415,12 +429,19 @@ Automated evidence:
   PHP rewrite examples. Rust's experimental upb options and actual files are
   covered by the fixture harness and native E2E.
 
-Remaining gates:
+CI artifact evidence:
 
-1. Run the committed Windows workflow on GitHub and retain its installer
-   artifact evidence. A read-only GitHub check on 2026-07-10 confirmed that
-   remote `main` does not yet contain `.github/workflows/windows.yml`; publishing
-   the local rewrite changes requires a separate explicit request.
-2. Only after that gate passes, remove Electron main/preload/build dependencies
-   from the active build and finalize the parity matrix. The legacy branch and
-   rollback path remain intact until then.
+| Evidence                    | Result                                                             |
+| --------------------------- | ------------------------------------------------------------------ |
+| Workflow                    | Run `29089116827`, success                                         |
+| Installer artifact          | `DataManager-windows-x64-nsis`, 2,446,690-byte ZIP                 |
+| Installer artifact digest   | `7778CE22083A80761F9B4BF12F0916057E44F48CC006965667A3611085041F13` |
+| Installer inside artifact   | `DataManager_0.1.0_x64-setup.exe`, 2,465,105 bytes                 |
+| Installer SHA-256           | `A833537C4EFEB09663714A00C2CBFAD0AA88292F27E3B0CBC500C6EBA8086E5F` |
+| Interactive artifact        | `DataManager-interactive-smoke`, 1,300-byte ZIP                    |
+| Interactive artifact digest | `132D2EF60D05D55FFCB4E951BC02558A479881C0D6DBBD17602EB9B68C107FD6` |
+| Interactive reports         | Two reports, all six checks pass                                   |
+
+Remaining gate: run the Windows workflow from a clean checkout after the final
+Electron-removal commit is pushed. All final-cutover checks pass locally; the
+user retains commit ownership.

@@ -68,5 +68,6 @@ The script prompts for `PASS` or `FAIL` for each remaining interactive check:
 It removes the temporary profile/workspace and writes a timestamped JSON report
 under `artifacts/` containing the application hash, Windows/PowerShell/WebView2/
 Excel versions, and every result. A passing run ends with
-`Interactive Excel and desktop smoke passed.` Keep the report as M8 evidence;
-only then may the Electron active build be removed.
+`Interactive Excel and desktop smoke passed.` The passing reports are retained
+as M8 evidence and uploaded by the Windows workflow. They were verified before
+the final Tauri-only cutover.
