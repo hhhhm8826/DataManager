@@ -1,2 +1,8 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Keep generated fixture hashes stable across Windows and Unix checkouts.
+* text=auto eol=lf
+
+*.exe binary
+*.xlsx binary
+*.png binary
+*.ico binary
+*.icns binary

@@ -189,6 +189,8 @@ test('M8: rewrite examples regenerate separately from the legacy baseline', () =
   const rootPackage = JSON.parse(read('package.json'))
   const generator = read('scripts/regenerate-rewrite-fixtures.ts')
   const fixture = read('tests/fixtures/m8-rewrite/README.md')
+  const attributes = read('.gitattributes')
+  const editorConfig = read('.editorconfig')
 
   assert.match(rootPackage.scripts.test, /fixtures:rewrite:check/)
   assert.match(rootPackage.scripts['fixtures:rewrite'], /--write/)
@@ -199,4 +201,9 @@ test('M8: rewrite examples regenerate separately from the legacy baseline', () =
   )
   assert.match(generator, /Refusing to reset unexpected examples path/)
   assert.match(fixture, /legacy baseline and stale repository examples remain separate/)
+  assert.match(attributes, /^\* text=auto eol=lf$/m)
+  for (const extension of ['exe', 'xlsx', 'png', 'ico', 'icns']) {
+    assert.match(attributes, new RegExp(`^\\*\\.${extension} binary$`, 'm'))
+  }
+  assert.match(editorConfig, /^end_of_line = lf$/m)
 })
