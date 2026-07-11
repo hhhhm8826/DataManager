@@ -10,6 +10,13 @@ describe('M1 default AppData persistence', () => {
     const jsonRoot = requiredEnvironment('DATAMANAGER_E2E_APPDATA_JSON_ROOT')
 
     await openSettings()
+    const initialProtoRoot = await (await $('[aria-label="Proto 루트"]')).getValue()
+    if (
+      !initialProtoRoot.endsWith('example-workspace\\PROTO') ||
+      !existsSync(resolve(initialProtoRoot, 'StringTable.proto'))
+    ) {
+      throw new Error(`First launch did not configure the bundled examples: ${initialProtoRoot}`)
+    }
     await setInput('Proto 루트', protoRoot)
     await setInput('Excel 루트', excelRoot)
     await setInput('JSON 루트', jsonRoot)

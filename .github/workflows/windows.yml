@@ -59,13 +59,26 @@ jobs:
       - name: Build release NSIS installer
         run: pnpm tauri:build
 
-      - name: Install, launch, and uninstall smoke
+      - name: Package portable archive
         shell: pwsh
-        run: ./scripts/windows-installer-smoke.ps1 -InstallerPath (Get-ChildItem target/release/bundle/nsis/*-setup.exe -File | Select-Object -First 1 -ExpandProperty FullName)
+        run: ./scripts/package-windows-portable.ps1 -ApplicationPath target/release/datamanager-desktop.exe -ExamplesPath examples -OutputPath target/release/bundle/portable/DataManager_0.1.1_windows_x64_portable.zip
+
+      - name: Installer and portable smoke
+        shell: pwsh
+        run: |
+          ./scripts/windows-installer-smoke.ps1 -InstallerPath (Get-ChildItem target/release/bundle/nsis/*-setup.exe -File | Select-Object -First 1 -ExpandProperty FullName)
+          ./scripts/windows-portable-smoke.ps1 -ArchivePath target/release/bundle/portable/DataManager_0.1.1_windows_x64_portable.zip
 
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
           name: DataManager-windows-x64-nsis
           path: target/release/bundle/nsis/*.exe
+          if-no-files-found: error
+
+      - name: Upload portable archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: DataManager-windows-x64-portable
+          path: target/release/bundle/portable/*.zip
           if-no-files-found: error

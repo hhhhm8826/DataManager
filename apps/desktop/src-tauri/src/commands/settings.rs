@@ -100,7 +100,26 @@ pub(crate) type CommandResult<T> = Result<T, NativeError>;
 
 #[tauri::command]
 pub fn load_settings(app: AppHandle) -> CommandResult<AppSettings> {
-    load_settings_from_path(&settings_path(&app)?)
+    let target_path = settings_path(&app)?;
+    if target_path.exists() {
+        return load_settings_from_path(&target_path);
+    }
+    let resource_examples = app
+        .path()
+        .resource_dir()
+        .map_err(|error| NativeError::new("EXAMPLE_RESOURCE_PATH_UNAVAILABLE", error.to_string()))?
+        .join("examples");
+    let workspace_root = target_path
+        .parent()
+        .ok_or_else(|| {
+            NativeError::with_path(
+                "SETTINGS_PATH_INVALID",
+                "Settings path has no parent.",
+                &target_path,
+            )
+        })?
+        .join("example-workspace");
+    initialize_example_settings(&target_path, &resource_examples, &workspace_root)
 }
 
 #[tauri::command]
@@ -141,6 +160,130 @@ pub(crate) fn load_settings_from_path(path: &Path) -> CommandResult<AppSettings>
     })?;
     validate_settings(&settings)?;
     Ok(settings)
+}
+
+fn initialize_example_settings(
+    target_path: &Path,
+    resource_examples: &Path,
+    workspace_root: &Path,
+) -> CommandResult<AppSettings> {
+    if !workspace_root.exists() {
+        let parent = workspace_root.parent().ok_or_else(|| {
+            NativeError::with_path(
+                "EXAMPLE_WORKSPACE_PATH_INVALID",
+                "Example workspace path has no parent.",
+                workspace_root,
+            )
+        })?;
+        fs::create_dir_all(parent).map_err(|error| {
+            NativeError::with_path("EXAMPLE_WORKSPACE_CREATE_FAILED", error.to_string(), parent)
+        })?;
+        let staging = parent.join(format!(
+            ".example-workspace-{}-{}.tmp",
+            std::process::id(),
+            current_nonce()
+        ));
+        let copy_result = copy_directory(resource_examples, &staging).and_then(|()| {
+            fs::rename(&staging, workspace_root).map_err(|error| {
+                NativeError::with_path(
+                    "EXAMPLE_WORKSPACE_COMMIT_FAILED",
+                    error.to_string(),
+                    workspace_root,
+                )
+            })
+        });
+        if let Err(error) = copy_result {
+            let _ = fs::remove_dir_all(&staging);
+            return Err(error);
+        }
+    }
+
+    let code_root = workspace_root.join("CODE");
+    let settings = AppSettings {
+        proto_root: path_text(&workspace_root.join("PROTO")),
+        excel_root: path_text(&workspace_root.join("EXCEL")),
+        json_root: path_text(&workspace_root.join("JSON")),
+        codegen_outputs: vec![
+            codegen_output("cpp", &code_root.join("C++")),
+            codegen_output("csharp", &code_root.join("C#")),
+            codegen_output("go", &code_root.join("Go")),
+            codegen_output("unreal", &code_root.join("Unreal C++")),
+        ],
+        protoc_executable: path_text(&workspace_root.join("PROTOC").join("protoc.exe")),
+        ..AppSettings::default()
+    };
+    validate_example_workspace(&settings)?;
+    save_settings_to_path(target_path, &settings)?;
+    Ok(settings)
+}
+
+fn codegen_output(language: &str, directory: &Path) -> CodegenOutput {
+    CodegenOutput {
+        language: language.to_string(),
+        directory: path_text(directory),
+    }
+}
+
+fn path_text(path: &Path) -> String {
+    path.to_string_lossy().into_owned()
+}
+
+fn validate_example_workspace(settings: &AppSettings) -> CommandResult<()> {
+    for (field, value) in settings_paths(settings) {
+        let path = Path::new(value);
+        let valid = if field == "protocExecutable" {
+            path.is_file()
+        } else {
+            path.is_dir()
+        };
+        if !valid {
+            return Err(NativeError::with_path(
+                "EXAMPLE_WORKSPACE_INCOMPLETE",
+                "Bundled example workspace is incomplete.",
+                path,
+            )
+            .with_context("field", json!(field)));
+        }
+    }
+    Ok(())
+}
+
+fn copy_directory(source: &Path, target: &Path) -> CommandResult<()> {
+    if !source.is_dir() {
+        return Err(NativeError::with_path(
+            "EXAMPLE_RESOURCE_MISSING",
+            "Bundled example resources were not found.",
+            source,
+        ));
+    }
+    fs::create_dir_all(target).map_err(|error| {
+        NativeError::with_path("EXAMPLE_COPY_FAILED", error.to_string(), target)
+    })?;
+    for entry in fs::read_dir(source)
+        .map_err(|error| NativeError::with_path("EXAMPLE_COPY_FAILED", error.to_string(), source))?
+    {
+        let entry = entry.map_err(|error| {
+            NativeError::with_path("EXAMPLE_COPY_FAILED", error.to_string(), source)
+        })?;
+        let file_type = entry.file_type().map_err(|error| {
+            NativeError::with_path("EXAMPLE_COPY_FAILED", error.to_string(), &entry.path())
+        })?;
+        let destination = target.join(entry.file_name());
+        if file_type.is_dir() {
+            copy_directory(&entry.path(), &destination)?;
+        } else if file_type.is_file() {
+            fs::copy(entry.path(), &destination).map_err(|error| {
+                NativeError::with_path("EXAMPLE_COPY_FAILED", error.to_string(), &destination)
+            })?;
+        } else {
+            return Err(NativeError::with_path(
+                "EXAMPLE_RESOURCE_UNSUPPORTED",
+                "Bundled example resources cannot contain symbolic links.",
+                &entry.path(),
+            ));
+        }
+    }
+    Ok(())
 }
 
 pub(crate) fn save_settings_to_path(path: &Path, settings: &AppSettings) -> CommandResult<()> {
@@ -238,9 +381,7 @@ where
         )
     })?;
 
-    let nonce = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map_or(0, |duration| duration.as_nanos());
+    let nonce = current_nonce();
     let temporary_path = parent.join(format!(".settings-{}-{nonce}.tmp", std::process::id()));
 
     let result = (|| -> std::io::Result<()> {
@@ -266,6 +407,12 @@ where
     Ok(())
 }
 
+fn current_nonce() -> u128 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_or(0, |duration| duration.as_nanos())
+}
+
 #[cfg(test)]
 pub(crate) fn temporary_directory(label: &str) -> PathBuf {
     let nonce = SystemTime::now()
@@ -282,13 +429,67 @@ mod tests {
     use std::{ffi::OsString, fs, io};
 
     use super::{
-        temporary_directory, validate_settings, write_atomically, write_atomically_with,
-        AppSettings, CodegenOutput, SETTINGS_VERSION,
+        initialize_example_settings, load_settings_from_path, temporary_directory,
+        validate_settings, write_atomically, write_atomically_with, AppSettings, CodegenOutput,
+        SETTINGS_VERSION,
     };
 
     #[test]
     fn defaults_are_valid() {
         assert!(validate_settings(&AppSettings::default()).is_ok());
+    }
+
+    #[test]
+    fn missing_settings_copy_bundled_examples_and_configure_every_workspace_root() {
+        let directory = temporary_directory("example-defaults");
+        let resources = directory.join("resources").join("examples");
+        let workspace = directory.join("data").join("example-workspace");
+        let settings_path = directory.join("data").join("settings.v2.json");
+        for relative in [
+            "PROTO",
+            "EXCEL",
+            "JSON",
+            "CODE/C++",
+            "CODE/C#",
+            "CODE/Go",
+            "CODE/Unreal C++",
+            "PROTOC",
+        ] {
+            fs::create_dir_all(resources.join(relative)).unwrap();
+        }
+        fs::write(
+            resources.join("PROTO/ItemTable.proto"),
+            b"message Item {}\n",
+        )
+        .unwrap();
+        fs::write(resources.join("PROTOC/protoc.exe"), b"fixture").unwrap();
+
+        let settings = initialize_example_settings(&settings_path, &resources, &workspace).unwrap();
+
+        assert_eq!(
+            settings.proto_root,
+            workspace.join("PROTO").to_string_lossy()
+        );
+        assert_eq!(settings.codegen_outputs.len(), 4);
+        assert_eq!(
+            settings.protoc_executable,
+            workspace
+                .join("PROTOC")
+                .join("protoc.exe")
+                .to_string_lossy()
+        );
+        assert!(workspace.join("PROTO/ItemTable.proto").is_file());
+        assert_eq!(load_settings_from_path(&settings_path).unwrap(), settings);
+
+        fs::write(workspace.join("PROTO/ItemTable.proto"), b"user change\n").unwrap();
+        fs::remove_file(&settings_path).unwrap();
+        initialize_example_settings(&settings_path, &resources, &workspace).unwrap();
+        assert_eq!(
+            fs::read(workspace.join("PROTO/ItemTable.proto")).unwrap(),
+            b"user change\n"
+        );
+
+        fs::remove_dir_all(directory).unwrap();
     }
 
     #[test]

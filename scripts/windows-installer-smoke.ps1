@@ -83,6 +83,7 @@ try {
     if ($applicationProcess.HasExited) {
         throw "Installed application exited early with code $($applicationProcess.ExitCode)."
     }
+    & (Join-Path $PSScriptRoot 'windows-example-settings-check.ps1') -ProfileDirectory $profileDirectory
     Write-Output "Installed application stayed running: $application"
 }
 finally {

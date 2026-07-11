@@ -1,6 +1,6 @@
 [package]
 name = "datamanager-desktop"
-version = "0.1.0"
+version = "0.1.1"
 description = "DataManager Tauri desktop application"
 authors = ["DataManager contributors"]
 edition = "2021"

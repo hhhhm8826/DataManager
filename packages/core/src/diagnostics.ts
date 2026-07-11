@@ -24,6 +24,7 @@ export const FIRST_PARTY_DIAGNOSTIC_PREFIXES = [
   'CODEGEN_',
   'CURRENT_',
   'E2E_',
+  'EXAMPLE_',
   'EXCEL_',
   'FILE_',
   'JSON_',
@@ -218,6 +219,10 @@ const familyCatalog: Readonly<Record<string, CatalogEntry>> = {
   E2E_: {
     title: '테스트 환경 설정이 올바르지 않습니다',
     message: '테스트 경로와 실행 환경을 확인하세요.'
+  },
+  EXAMPLE_: {
+    title: '예제 프로젝트를 준비할 수 없습니다',
+    message: '앱 리소스와 사용자 데이터 폴더의 쓰기 권한을 확인한 뒤 다시 실행하세요.'
   },
   EXCEL_: {
     title: 'Excel 데이터를 처리할 수 없습니다',

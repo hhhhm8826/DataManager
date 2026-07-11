@@ -1,6 +1,6 @@
 {
   "name": "datamanager",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Windows data schema and generation desktop application built with Tauri 2",
   "author": "hhhhm8826",
   "homepage": "https://github.com/hhhhm8826/DataManager",

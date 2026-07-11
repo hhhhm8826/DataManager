@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs'
+import { copyFileSync, cpSync, existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs'
 import { basename, dirname, resolve } from 'node:path'
 import { env, platform } from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -24,6 +24,7 @@ if (platform === 'win32' && existsSync(resolve(edgeDriverDirectory, 'msedgedrive
 function prepareAppDataWorkspace() {
   resetOwnedDirectory(profileDirectory, '.e2e-appdata-profile')
   resetOwnedDirectory(workspaceDirectory, '.e2e-appdata-workspace')
+  prepareRuntimeExamples()
 
   const protoRoot = resolve(workspaceDirectory, 'proto')
   const excelRoot = resolve(workspaceDirectory, 'excel')
@@ -54,6 +55,18 @@ function prepareAppDataWorkspace() {
     DATAMANAGER_E2E_APPDATA_JSON_ROOT: jsonRoot
   })
   env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS ??= '--no-sandbox'
+}
+
+function prepareRuntimeExamples() {
+  const sourceRoot = resolve(repositoryDirectory, 'examples')
+  const targetRoot = resolve(dirname(appBinaryPath), 'examples')
+  mkdirSync(targetRoot, { recursive: true })
+  for (const name of ['PROTO', 'EXCEL', 'JSON', 'CODE', 'PROTOC']) {
+    cpSync(resolve(sourceRoot, name), resolve(targetRoot, name), {
+      force: true,
+      recursive: true
+    })
+  }
 }
 
 function resetOwnedDirectory(path, expectedName) {

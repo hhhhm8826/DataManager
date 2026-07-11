@@ -31,8 +31,10 @@ test('M8: native E2E uses an isolated workspace and covers the core flow', () =>
   assert.match(config, /driverProvider: 'embedded'/)
   assert.match(appDataConfig, /delete env\.DATAMANAGER_E2E_SETTINGS_PATH/)
   assert.match(appDataConfig, /\.e2e-appdata-profile/)
+  assert.match(appDataConfig, /prepareRuntimeExamples/)
   assert.match(appDataConfig, /resetOwnedDirectory/)
   assert.match(appDataSave, /settings\.v2\.json/)
+  assert.match(appDataSave, /example-workspace/)
   assert.match(appDataReload, /fresh native application session/)
   assert.match(appDataCleanup, /Refusing to remove unexpected E2E path/)
   assert.match(appDataCleanup, /removeWithRetry/)
@@ -92,10 +94,13 @@ test('M8: native E2E uses an isolated workspace and covers the core flow', () =>
   assert.match(flow, /plugin:window\|set_size/)
 })
 
-test('M8: Windows CI verifies, runs E2E, packages NSIS, and uploads the installer', () => {
+test('M8: Windows CI verifies and packages tested installer and portable artifacts', () => {
   const rootPackage = JSON.parse(read('package.json'))
   const workflow = read('.github/workflows/windows.yml')
   const installerSmoke = read('scripts/windows-installer-smoke.ps1')
+  const portablePackage = read('scripts/package-windows-portable.ps1')
+  const portableSmoke = read('scripts/windows-portable-smoke.ps1')
+  const exampleSettingsCheck = read('scripts/windows-example-settings-check.ps1')
   const tauri = JSON.parse(read('apps/desktop/src-tauri/tauri.conf.json'))
   const capability = JSON.parse(read('apps/desktop/src-tauri/capabilities/main.json'))
 
@@ -107,11 +112,16 @@ test('M8: Windows CI verifies, runs E2E, packages NSIS, and uploads the installe
     'pnpm test:e2e',
     'pnpm tauri:build',
     'windows-installer-smoke.ps1',
-    'target/release/bundle/nsis/*.exe'
+    'windows-portable-smoke.ps1',
+    'DataManager-windows-x64-portable',
+    'target/release/bundle/nsis/*.exe',
+    'target/release/bundle/portable/*.zip'
   ]) {
     assert.match(workflow, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
   }
   assert.deepEqual(tauri.bundle.targets, ['nsis'])
+  assert.equal(tauri.version, '0.1.1')
+  assert.equal(tauri.bundle.resources['../../../examples/PROTO/'], 'examples/PROTO/')
   assert.equal(tauri.bundle.useLocalToolsDir, true)
   assert.equal(tauri.app.windows[0].minWidth, 520)
   assert.deepEqual(capability.permissions, ['dialog:allow-open'])
@@ -123,6 +133,14 @@ test('M8: Windows CI verifies, runs E2E, packages NSIS, and uploads the installe
   assert.match(installerSmoke, /Remove-TemporaryProfile/)
   assert.match(installerSmoke, /Refusing to remove profile outside the temporary root/)
   assert.match(installerSmoke, /Start-Process -FilePath \$uninstaller/)
+  assert.match(installerSmoke, /windows-example-settings-check\.ps1/)
+  assert.match(portablePackage, /Compress-Archive/)
+  assert.match(portablePackage, /DataManager\.exe/)
+  assert.match(portableSmoke, /Expand-Archive/)
+  assert.match(portableSmoke, /windows-example-settings-check\.ps1/)
+  assert.match(exampleSettingsCheck, /example-workspace/)
+  assert.match(exampleSettingsCheck, /StringTable\.proto/)
+  assert.match(exampleSettingsCheck, /protoc\.exe/)
   assert.equal(rootPackage.scripts['interactive:smoke'], undefined)
   assert.equal(rootPackage.scripts['excel:smoke'], undefined)
   assert.match(read('docs/settings.md'), /experimental-codegen=enabled,kernel=upb/)

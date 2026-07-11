@@ -1,5 +1,18 @@
 # DataManager Settings Guide
 
+## First Launch Examples
+
+When `settings.v2.json` does not exist, DataManager copies its bundled `PROTO`,
+`EXCEL`, `JSON`, `CODE`, and `PROTOC` examples into a writable
+`example-workspace` under the application data directory. The first settings
+file points every workspace root, four existing code outputs, and
+`protoc.exe` to that copy.
+
+The initialization runs only when the settings file is missing. Existing
+settings and an existing example workspace are never overwritten, so edits
+made while evaluating the examples remain intact. Configure different paths
+from **설정** when starting a real project.
+
 ## Workspace Paths
 
 Open **설정** and configure absolute Windows paths for:
