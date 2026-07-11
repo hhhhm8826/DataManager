@@ -44,7 +44,7 @@ test('G2 UI exposes modal table type buttons and explicit layout persistence', (
 
   for (const marker of [
     'TypeDetailDialog',
-    '연결 모달 기준',
+    '연결 간소화 기준',
     '모달 테이블',
     '배치 저장',
     '저장 배치 불러오기',

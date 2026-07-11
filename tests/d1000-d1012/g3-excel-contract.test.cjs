@@ -58,7 +58,7 @@ test('G3: Excel and JSON selections are separate, explicit, and tri-state', () =
   assert.match(tests, /parent mixed selection/)
 })
 
-test('G3: workbook rows support tabs, included tables, search, and the Excel root action', () => {
+test('G3: workbook rows support tabs, included tables, search, and output root actions', () => {
   const screen = read('apps/desktop/src/features/excel/ExcelScreen.tsx')
   const styles = read('apps/desktop/src/styles.css')
   const tests = read('apps/desktop/test/ExcelScreen.test.tsx')
@@ -73,11 +73,12 @@ test('G3: workbook rows support tabs, included tables, search, and the Excel roo
   assert.match(screen, /selectedMessages\.size}개 table[\s\S]*전체 선택/)
   assert.match(screen, /> JSON 생성/)
   assert.match(screen, /> Excel 폴더 열기/)
+  assert.match(screen, /> JSON 폴더 열기/)
   assert.match(screen, /nativePort\.openPath\(loaded\.settings\.excelRoot\)/)
   assert.match(styles, /\.excel-generation-list[\s\S]*?max-height: 560px/)
   assert.match(styles, /\.excel-workbook-groups[\s\S]*?max-height: 560px/)
   assert.match(styles, /\.excel-json-row[\s\S]*?grid-template-columns/)
-  assert.match(tests, /opens the configured Excel root/)
+  assert.match(tests, /opens the configured output roots/)
   assert.match(tests, /separates Excel and JSON work into tabs/)
   assert.match(tests, /searches file and table names/)
 })
