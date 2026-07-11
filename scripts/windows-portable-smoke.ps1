@@ -32,8 +32,18 @@ function Remove-TemporaryDirectory([string]$Path) {
     if (-not $fullPath.StartsWith($temporaryPrefix, [StringComparison]::OrdinalIgnoreCase)) {
         throw "Refusing to remove directory outside the temporary root: $fullPath"
     }
-    if (Test-Path -LiteralPath $fullPath) {
-        Remove-Item -LiteralPath $fullPath -Recurse -Force
+
+    $deadline = [DateTime]::UtcNow.AddSeconds(30)
+    while (Test-Path -LiteralPath $fullPath) {
+        try {
+            Remove-Item -LiteralPath $fullPath -Recurse -Force -ErrorAction Stop
+        }
+        catch {
+            if ([DateTime]::UtcNow -ge $deadline) {
+                throw
+            }
+            Start-Sleep -Milliseconds 250
+        }
     }
 }
 
