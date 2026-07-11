@@ -136,21 +136,7 @@ export function buildExcelWorkbookPlans(
           name: message.name,
           columns: message.fields.map((field) => columnPlan(workspace, field)),
           memoColumns,
-          columnOrder: [
-            ...message.fields.map(({ name, order }) => ({ kind: 'field' as const, name, order })),
-            ...memoColumns.map(({ id }, index) => ({
-              kind: 'memo' as const,
-              id,
-              order:
-                message.memos.find((memo) => memo.id === id)?.order ?? message.fields.length + index
-            }))
-          ]
-            .sort((left, right) => left.order - right.order)
-            .map((entry) =>
-              entry.kind === 'field'
-                ? { kind: entry.kind, name: entry.name }
-                : { kind: entry.kind, id: entry.id }
-            )
+          columnOrder: columnOrderForMessage(message, memoColumns)
         }
       })
       return {
@@ -221,14 +207,17 @@ export function validateExcelSheets(
     } else if (sheet.embeddedMetadata) {
       const expected = createExcelEmbeddedMetadata(
         sourceFile,
-        messages.map((entry) => ({
-          name: entry.name,
-          columns: [],
-          memoColumns: memoColumnsForMessage(
+        messages.map((entry) => {
+          const memoColumns = memoColumnsForMessage(
             entry,
             tableMetadata[normalizeTableMetadataKey(sourceFile, entry.name)]?.memoColumns ?? []
           )
-        }))
+          return {
+            name: entry.name,
+            memoColumns,
+            columnOrder: columnOrderForMessage(entry, memoColumns)
+          }
+        })
       )
       if (
         sheet.embeddedMetadata.sourceFile !== sourceFile ||
@@ -579,6 +568,26 @@ function memoColumnsForMessage(
       .map(({ id, name }) => ({ id, name }))
   }
   return orderedMemoColumns(legacyMemoColumns)
+}
+
+function columnOrderForMessage(
+  message: ProtoMessageDeclaration,
+  memoColumns: readonly ExcelMemoColumnPlan[]
+): ExcelSheetPlan['columnOrder'] {
+  return [
+    ...message.fields.map(({ name, order }) => ({ kind: 'field' as const, name, order })),
+    ...memoColumns.map(({ id }, index) => ({
+      kind: 'memo' as const,
+      id,
+      order: message.memos.find((memo) => memo.id === id)?.order ?? message.fields.length + index
+    }))
+  ]
+    .sort((left, right) => left.order - right.order)
+    .map((entry) =>
+      entry.kind === 'field'
+        ? { kind: entry.kind, name: entry.name }
+        : { kind: entry.kind, id: entry.id }
+    )
 }
 
 function fnv1a(value: string): string {

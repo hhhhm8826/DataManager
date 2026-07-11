@@ -136,9 +136,10 @@ function DiagramCanvas({
   const layoutRevision = useRef(0)
   const detailOpener = useRef<HTMLElement | null>(null)
   const applyingViewport = useRef(false)
+  const pendingThresholdUpdate = useRef<Promise<void> | null>(null)
   const metadata = useWorkspaceMetadataStore((state) => state.metadata)
   const metadataBusy = useWorkspaceMetadataStore((state) => state.loading)
-  const { fitView, getViewport, setViewport } = useReactFlow<DiagramNode, DiagramEdge>()
+  const { fitView, getNodes, getViewport, setViewport } = useReactFlow<DiagramNode, DiagramEdge>()
 
   const closeDetails = useCallback((): void => {
     const opener = detailOpener.current
@@ -253,40 +254,57 @@ function DiagramCanvas({
     if (!graph || !loaded) return
     const threshold = Number(thresholdInput)
     if (!Number.isInteger(threshold) || threshold < 1 || threshold > 50) {
-      setError('연결 모달 기준은 1부터 50 사이의 정수여야 합니다.')
+      setError('연결 간소화 기준은 1부터 50 사이의 정수여야 합니다.')
       setThresholdInput(String(metadata.diagram.hubThreshold))
       return
     }
     if (threshold === metadata.diagram.hubThreshold) return
     setError(null)
     const nextProjection = projectSchemaDiagram(graph, threshold)
+    const update = (async (): Promise<void> => {
+      try {
+        await useWorkspaceMetadataStore
+          .getState()
+          .updateSection(nativePort, loaded.settings.protoRoot, 'diagram', {
+            ...metadata.diagram,
+            hubThreshold: threshold
+          })
+        setProjection(nextProjection)
+        await applyLayout(nextProjection, loaded.settings.diagram.fileColors, true)
+      } catch (cause) {
+        setError(formatDiagnosticMessage(toNativeError(cause)))
+        setThresholdInput(String(metadata.diagram.hubThreshold))
+      }
+    })()
+    pendingThresholdUpdate.current = update
     try {
-      await useWorkspaceMetadataStore
-        .getState()
-        .updateSection(nativePort, loaded.settings.protoRoot, 'diagram', {
-          ...metadata.diagram,
-          hubThreshold: threshold
-        })
-      setProjection(nextProjection)
-      await applyLayout(nextProjection, loaded.settings.diagram.fileColors, true)
-    } catch (cause) {
-      setError(formatDiagnosticMessage(toNativeError(cause)))
-      setThresholdInput(String(metadata.diagram.hubThreshold))
+      await update
+    } finally {
+      if (pendingThresholdUpdate.current === update) pendingThresholdUpdate.current = null
     }
   }
 
   const saveLayout = async (): Promise<void> => {
     if (!loaded || !graph) return
+    await pendingThresholdUpdate.current
+    const threshold = Number(thresholdInput)
+    if (!Number.isInteger(threshold) || threshold < 1 || threshold > 50) {
+      setError('연결 간소화 기준은 1부터 50 사이의 정수여야 합니다.')
+      setThresholdInput(String(useWorkspaceMetadataStore.getState().metadata.diagram.hubThreshold))
+      return
+    }
+    const currentDiagram = useWorkspaceMetadataStore.getState().metadata.diagram
     const messageIds = new Set(
       graph.nodes.filter(({ kind }) => kind === 'message').map(({ id }) => id)
     )
     const positions = Object.fromEntries(
-      Object.entries(metadata.diagram.savedLayout?.positions ?? {}).filter(([id]) =>
+      Object.entries(currentDiagram.savedLayout?.positions ?? {}).filter(([id]) =>
         messageIds.has(id)
       )
     )
-    for (const node of nodes) positions[node.id] = normalizeDiagramPosition(node.position)
+    for (const node of getNodes()) positions[node.id] = normalizeDiagramPosition(node.position)
     const savedLayout: SavedDiagramLayout = {
+      hubThreshold: threshold,
       positions,
       viewport: normalizeDiagramViewport(getViewport())
     }
@@ -294,7 +312,8 @@ function DiagramCanvas({
       await useWorkspaceMetadataStore
         .getState()
         .updateSection(nativePort, loaded.settings.protoRoot, 'diagram', {
-          ...metadata.diagram,
+          ...currentDiagram,
+          hubThreshold: threshold,
           savedLayout
         })
       setDirty(false)
@@ -303,17 +322,36 @@ function DiagramCanvas({
     }
   }
 
-  const loadSavedLayout = (): void => {
-    if (!projection || !loaded || !metadata.diagram.savedLayout) return
-    const result = layoutFromSaved(projection, metadata.diagram.savedLayout)
-    setNodes(toFlowNodes(projection, result, loaded.settings.diagram.fileColors, openDetail))
-    setEdges(toFlowEdges(projection.edges, { nodes: result.nodes, edges: [] }))
+  const loadSavedLayout = async (): Promise<void> => {
+    if (!projection || !graph || !loaded || !metadata.diagram.savedLayout) return
+    const savedLayout = metadata.diagram.savedLayout
+    const savedThreshold = savedLayout.hubThreshold ?? metadata.diagram.hubThreshold
+    const nextProjection = projectSchemaDiagram(graph, savedThreshold)
+    if (savedThreshold !== metadata.diagram.hubThreshold) {
+      try {
+        await useWorkspaceMetadataStore
+          .getState()
+          .updateSection(nativePort, loaded.settings.protoRoot, 'diagram', {
+            ...metadata.diagram,
+            hubThreshold: savedThreshold
+          })
+      } catch (cause) {
+        setError(formatDiagnosticMessage(toNativeError(cause)))
+        return
+      }
+    }
+    setError(null)
+    setThresholdInput(String(savedThreshold))
+    setProjection(nextProjection)
+    const result = layoutFromSaved(nextProjection, savedLayout)
+    setNodes(toFlowNodes(nextProjection, result, loaded.settings.diagram.fileColors, openDetail))
+    setEdges(toFlowEdges(nextProjection.edges, { nodes: result.nodes, edges: [] }))
     applyingViewport.current = true
-    void setViewport(metadata.diagram.savedLayout.viewport, { duration: 0 }).finally(() => {
+    void setViewport(savedLayout.viewport, { duration: 0 }).finally(() => {
       applyingViewport.current = false
       setDirty(false)
     })
-    warnForSavedOverlap(projection, result, setLayoutWarning)
+    warnForSavedOverlap(nextProjection, result, setLayoutWarning)
   }
 
   const deleteSavedLayout = async (): Promise<void> => {
@@ -334,7 +372,7 @@ function DiagramCanvas({
   const confirmLayoutAction = (): void => {
     const action = pendingLayoutAction
     setPendingLayoutAction(null)
-    if (action === 'load') loadSavedLayout()
+    if (action === 'load') void loadSavedLayout()
     if (action === 'delete') void deleteSavedLayout()
   }
 
@@ -413,9 +451,9 @@ function DiagramCanvas({
         </div>
         <div className="diagram-toolbar-actions">
           <label className="hub-threshold-control">
-            <span>연결 모달 기준</span>
+            <span>연결 간소화 기준</span>
             <input
-              aria-label="연결 모달 기준"
+              aria-label="연결 간소화 기준"
               inputMode="numeric"
               max={50}
               min={1}
@@ -450,7 +488,7 @@ function DiagramCanvas({
           <button
             aria-label="배치 저장"
             className="icon-button"
-            disabled={metadataBusy || nodes.length === 0}
+            disabled={layouting || nodes.length === 0}
             onClick={() => void saveLayout()}
             title="배치 저장"
           >
@@ -460,7 +498,7 @@ function DiagramCanvas({
             aria-label="저장 배치 불러오기"
             className="icon-button"
             disabled={!metadata.diagram.savedLayout || metadataBusy}
-            onClick={() => (dirty ? setPendingLayoutAction('load') : loadSavedLayout())}
+            onClick={() => (dirty ? setPendingLayoutAction('load') : void loadSavedLayout())}
             title="저장 배치 불러오기"
           >
             <FolderInput aria-hidden="true" size={17} />

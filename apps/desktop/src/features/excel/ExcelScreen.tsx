@@ -291,6 +291,72 @@ export function ExcelScreen({
     }
   }
 
+  const readAllWorkbooks = async (): Promise<void> => {
+    if (!loaded) return
+    const existingPlans = plans.flatMap((plan) => {
+      const entry = existingByName.get(plan.fileName.toLocaleLowerCase())
+      return entry ? [{ entry, plan }] : []
+    })
+    if (existingPlans.length === 0) {
+      setError('읽기 검사할 Excel 파일이 없습니다.')
+      setSuccess(null)
+      return
+    }
+
+    const controller = new AbortController()
+    abortController.current = controller
+    setReadingFile('전체 workbook')
+    setError(null)
+    setSuccess(null)
+    setReadDiagnostics([])
+    setProgress({ completed: 0, total: existingPlans.length, label: '' })
+    try {
+      const diagnostics: ExcelDiagnostic[] = []
+      const memoStatuses: Record<string, string> = {}
+      let sheetCount = 0
+      let rowCount = 0
+
+      for (const [index, { entry, plan }] of existingPlans.entries()) {
+        const binary = await nativePort.readFile(entry.path)
+        const sheets = await readWorkbookInWorker(plan.sourceFile, binary, {
+          signal: controller.signal,
+          onProgress: ({ completed, total, label }) =>
+            setProgress({
+              completed: index + completed / Math.max(1, total),
+              total: existingPlans.length,
+              label: `${entry.fileName} · ${label}`
+            })
+        })
+        const validation = validateExcelSheets(
+          loaded.workspace,
+          plan.sourceFile,
+          sheets,
+          workspaceMetadata?.tables
+        )
+        diagnostics.push(...validation.diagnostics)
+        memoStatuses[entry.fileName] = memoStatus(validation.diagnostics)
+        sheetCount += validation.results.length
+        rowCount += validation.results.reduce((sum, result) => sum + result.rows.length, 0)
+      }
+
+      setReadDiagnostics(diagnostics)
+      setWorkbookMemoStatus((current) => ({ ...current, ...memoStatuses }))
+      const errorCount = diagnostics.filter(({ severity }) => severity === 'error').length
+      if (errorCount > 0) {
+        setError(`전체 읽기 검사 입력 오류 ${errorCount}개`)
+      } else {
+        setSuccess(
+          `${existingPlans.length}개 workbook 전체 읽기 검사 완료 · ${sheetCount}개 sheet, ${rowCount}개 행 확인`
+        )
+      }
+    } catch (cause) {
+      setError(formatDiagnosticMessage(toNativeError(cause)))
+    } finally {
+      abortController.current = null
+      setReadingFile(null)
+    }
+  }
+
   const exportJson = async (): Promise<void> => {
     if (!loaded) return
     setError(null)
@@ -406,6 +472,9 @@ export function ExcelScreen({
     const existing = existingByName.has(plan.fileName.toLocaleLowerCase())
     return existing ? plan.sheets.map(({ name }) => name) : []
   })
+  const existingWorkbookCount = plans.filter((plan) =>
+    existingByName.has(plan.fileName.toLocaleLowerCase())
+  ).length
   const allJsonSelected =
     selectableJsonMessages.length > 0 && selectedMessages.size === selectableJsonMessages.length
   const someJsonSelected = selectedMessages.size > 0 && !allJsonSelected
@@ -425,6 +494,28 @@ export function ExcelScreen({
     } catch (cause) {
       setError(formatDiagnosticMessage(toNativeError(cause)))
     }
+  }
+
+  const openManagedPath = async (path: string): Promise<void> => {
+    setError(null)
+    try {
+      await nativePort.openPath(path)
+    } catch (cause) {
+      setError(formatDiagnosticMessage(toNativeError(cause)))
+    }
+  }
+
+  const openJsonFile = async (messageName: string): Promise<void> => {
+    if (!loaded?.settings.jsonRoot) {
+      setError('JSON 루트를 설정하세요.')
+      return
+    }
+    await openManagedPath(workspacePath(loaded.settings.jsonRoot, `${messageName}.json`))
+  }
+
+  const openJsonRoot = async (): Promise<void> => {
+    if (!loaded?.settings.jsonRoot) return
+    await openManagedPath(loaded.settings.jsonRoot)
   }
 
   const setWorkbookJsonSelection = (messageNames: readonly string[], checked: boolean): void => {
@@ -448,6 +539,20 @@ export function ExcelScreen({
         </div>
         <div className="excel-toolbar-actions">
           <button
+            className="button button-secondary icon-text-button"
+            disabled={running || !loaded?.settings.excelRoot}
+            onClick={() => void openExcelRoot()}
+          >
+            <FolderOpen aria-hidden="true" size={16} /> Excel 폴더 열기
+          </button>
+          <button
+            className="button button-secondary icon-text-button"
+            disabled={running || !loaded?.settings.jsonRoot}
+            onClick={() => void openJsonRoot()}
+          >
+            <FolderOpen aria-hidden="true" size={16} /> JSON 폴더 열기
+          </button>
+          <button
             aria-label="Excel 목록 새로고침"
             className="icon-button"
             disabled={running}
@@ -455,13 +560,6 @@ export function ExcelScreen({
             title="Excel 목록 새로고침"
           >
             <RefreshCw aria-hidden="true" size={17} />
-          </button>
-          <button
-            className="button button-secondary icon-text-button"
-            disabled={running || !loaded?.settings.excelRoot}
-            onClick={() => void openExcelRoot()}
-          >
-            <FolderOpen aria-hidden="true" size={16} /> Excel 폴더 열기
           </button>
         </div>
       </div>
@@ -542,30 +640,45 @@ export function ExcelScreen({
                 </div>
               </div>
               <div className="excel-generation-list">
-                {visiblePlans.map((plan) => (
-                  <label className="excel-generation-row" key={plan.sourceFile}>
-                    <input
-                      aria-label={`${plan.fileName} Excel 생성`}
-                      checked={selected.has(plan.sourceFile)}
-                      onChange={(event) =>
-                        setSelected((current) =>
-                          toggleSet(current, plan.sourceFile, event.target.checked)
-                        )
-                      }
-                      type="checkbox"
-                    />
-                    <span className="excel-workbook-identity">
-                      <strong>{plan.fileName}</strong>
-                      <small>{plan.sheets.length}개 table</small>
-                    </span>
-                    <span
-                      className="excel-included-tables"
-                      title={plan.sheets.map(({ name }) => name).join(', ')}
-                    >
-                      {plan.sheets.map(({ name }) => name).join(', ')}
-                    </span>
-                  </label>
-                ))}
+                {visiblePlans.map((plan) => {
+                  const existing = existingByName.get(plan.fileName.toLocaleLowerCase())
+                  return (
+                    <div className="excel-generation-row" key={plan.sourceFile}>
+                      <input
+                        aria-label={`${plan.fileName} Excel 생성`}
+                        checked={selected.has(plan.sourceFile)}
+                        onChange={(event) =>
+                          setSelected((current) =>
+                            toggleSet(current, plan.sourceFile, event.target.checked)
+                          )
+                        }
+                        type="checkbox"
+                      />
+                      <span className="excel-workbook-identity">
+                        <strong>{plan.fileName}</strong>
+                        <small>{plan.sheets.length}개 table</small>
+                      </span>
+                      <span
+                        className="excel-included-tables"
+                        title={plan.sheets.map(({ name }) => name).join(', ')}
+                      >
+                        {plan.sheets.map(({ name }) => name).join(', ')}
+                      </span>
+                      <div className="excel-row-actions">
+                        {existing ? (
+                          <button
+                            aria-label={`${plan.fileName} 열기`}
+                            className="icon-button icon-button-compact"
+                            onClick={() => void openManagedPath(existing.path)}
+                            title="Excel 파일 열기"
+                          >
+                            <FolderOpen aria-hidden="true" size={15} />
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                  )
+                })}
                 {visiblePlans.length === 0 ? (
                   <p className="excel-empty">검색 결과가 없습니다.</p>
                 ) : null}
@@ -641,7 +754,7 @@ export function ExcelScreen({
                         aria-label={`${plan.fileName} 포함 테이블`}
                       >
                         {plan.sheets.map((sheet) => (
-                          <label key={sheet.name}>
+                          <div className="excel-json-table-option" key={sheet.name}>
                             <input
                               aria-label={`${plan.fileName} ${sheet.name} JSON 테이블`}
                               checked={selectedMessages.has(sheet.name)}
@@ -653,8 +766,14 @@ export function ExcelScreen({
                               }
                               type="checkbox"
                             />
-                            <span>{sheet.name}</span>
-                          </label>
+                            <span
+                              className="excel-json-file-name"
+                              onDoubleClick={() => void openJsonFile(sheet.name)}
+                              title="더블클릭하여 JSON 파일 열기"
+                            >
+                              {sheet.name}.json
+                            </span>
+                          </div>
                         ))}
                       </div>
                       <span className={existing ? 'excel-status-existing' : 'excel-status-new'}>
@@ -673,14 +792,6 @@ export function ExcelScreen({
                               title="읽기 검사"
                             >
                               <FileCheck2 aria-hidden="true" size={15} />
-                            </button>
-                            <button
-                              aria-label={`${plan.fileName} 열기`}
-                              className="icon-button icon-button-compact"
-                              onClick={() => void nativePort.openPath(existing.path)}
-                              title="파일 열기"
-                            >
-                              <FolderOpen aria-hidden="true" size={15} />
                             </button>
                           </>
                         ) : null}
@@ -703,9 +814,21 @@ export function ExcelScreen({
                     : `직접 선택 ${selectedMessages.size}개 · 자동 포함 ${automaticDependencyCount}개`}
                 </span>
                 <button
+                  className="button button-secondary icon-text-button"
+                  disabled={running || Boolean(readingFile) || existingWorkbookCount === 0}
+                  onClick={() => void readAllWorkbooks()}
+                >
+                  <ShieldCheck aria-hidden="true" size={16} /> 전체 읽기 검사
+                </button>
+                <button
                   aria-describedby="json-export-reason"
                   className="button button-secondary icon-text-button"
-                  disabled={running || !loaded?.settings.jsonRoot || selectedMessages.size === 0}
+                  disabled={
+                    running ||
+                    Boolean(readingFile) ||
+                    !loaded?.settings.jsonRoot ||
+                    selectedMessages.size === 0
+                  }
                   onClick={() => void exportJson()}
                 >
                   <FileCheck2 aria-hidden="true" size={16} /> JSON 생성

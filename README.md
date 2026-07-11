@@ -3,6 +3,7 @@
   <h1>DataManager</h1>
   <p><strong>게임과 서비스의 기획 데이터를 Excel에서 관리하고 JSON과 코드로 안전하게 연결하는 Windows 도구</strong></p>
   <p>테이블 설계, 관계 확인, Excel 양식 생성, 데이터 배포 준비를 하나의 작업 공간에서 처리합니다.</p>
+  <p>이 프로젝트는 GPT 5.6 으로 작업되었습니다.</p>
   <p>
     <img src="https://img.shields.io/badge/Windows-x64-0078D4?logo=windows&logoColor=white" alt="Windows x64" />
     <img src="https://img.shields.io/badge/Tauri-2-24C8DB?logo=tauri&logoColor=white" alt="Tauri 2" />
@@ -154,9 +155,7 @@ DataManager/
 ## 관련 문서
 
 - [설정 가이드](docs/settings.md)
-- [마이그레이션과 롤백](docs/migration.md)
 - [기능 동등성 및 검증 근거](docs/parity-matrix.md)
 
-## 라이선스
-
-이 프로젝트는 [Apache License 2.0](LICENSE)에 따라 배포됩니다.
+## TODO List
+연관 테이블 데이터 정합성 검사

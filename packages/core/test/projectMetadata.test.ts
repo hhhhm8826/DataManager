@@ -71,6 +71,7 @@ describe('D1003/D1007/D1009/D1012 project metadata', () => {
       diagram: {
         hubThreshold: 7,
         savedLayout: {
+          hubThreshold: 6,
           positions: { 'message:ItemTable.proto:Item': { x: 120.1, y: 80.2 } },
           viewport: { x: 0, y: 0, zoom: 1.125 }
         }

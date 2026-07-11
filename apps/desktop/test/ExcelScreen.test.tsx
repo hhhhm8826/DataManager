@@ -199,7 +199,7 @@ describe('ExcelScreen collision policy', () => {
     expect(screen.getAllByText('Excel 생성 필요').length).toBeGreaterThan(0)
   })
 
-  it('opens the configured Excel root from the labeled folder action', async () => {
+  it('opens the configured output roots and keeps refresh as the last toolbar action', async () => {
     const fixture = excelFixture(true)
     const openPath = vi.fn(async (): Promise<void> => undefined)
     fixture.nativePort.openPath = openPath
@@ -208,8 +208,16 @@ describe('ExcelScreen collision policy', () => {
       <ExcelScreen generateWorkbooks={fixture.generateWorkbooks} nativePort={fixture.nativePort} />
     )
 
-    await user.click(await screen.findByRole('button', { name: 'Excel 폴더 열기' }))
+    const excelButton = await screen.findByRole('button', { name: 'Excel 폴더 열기' })
+    const jsonButton = screen.getByRole('button', { name: 'JSON 폴더 열기' })
+    const refreshButton = screen.getByRole('button', { name: 'Excel 목록 새로고침' })
+    const toolbarActions = excelButton.parentElement
+
+    expect(Array.from(toolbarActions?.querySelectorAll('button') ?? []).at(-1)).toBe(refreshButton)
+    await user.click(excelButton)
     expect(openPath).toHaveBeenCalledWith('D:\\EXCEL')
+    await user.click(jsonButton)
+    expect(openPath).toHaveBeenLastCalledWith('D:\\JSON')
   })
 
   it('separates Excel and JSON work into tabs and searches file and table names', async () => {
@@ -231,7 +239,7 @@ describe('ExcelScreen collision policy', () => {
     const workbookCheckbox = screen.getByRole('checkbox', {
       name: 'ItemTable.xlsx Excel 생성'
     })
-    const workbookRow = workbookCheckbox.closest('label')
+    const workbookRow = workbookCheckbox.closest('.excel-generation-row')
     expect(workbookRow?.textContent).toContain('2개 table')
     expect(workbookRow?.textContent).toContain('Item, Detail')
 
@@ -247,6 +255,59 @@ describe('ExcelScreen collision policy', () => {
     expect(jsonTab.getAttribute('aria-selected')).toBe('true')
     expect(screen.getByRole('button', { name: 'JSON 생성' })).toBeTruthy()
     expect(screen.getByLabelText('ItemTable.xlsx 포함 테이블').textContent).toContain('Detail')
+  })
+
+  it('opens Excel files from Excel generation and JSON files by double-clicking their names', async () => {
+    const fixture = excelFixture(true)
+    const openPath = vi.fn(async (): Promise<void> => undefined)
+    fixture.nativePort.openPath = openPath
+    const user = userEvent.setup()
+    render(
+      <ExcelScreen generateWorkbooks={fixture.generateWorkbooks} nativePort={fixture.nativePort} />
+    )
+
+    await user.click(await screen.findByRole('button', { name: 'ItemTable.xlsx 열기' }))
+    expect(openPath).toHaveBeenLastCalledWith('D:\\EXCEL\\ItemTable.xlsx')
+
+    await openJsonTab(user)
+    expect(screen.queryByRole('button', { name: 'ItemTable.xlsx 열기' })).toBeNull()
+    const jsonFile = screen.getByText('Item.json')
+    const jsonCheckbox = screen.getByRole('checkbox', {
+      name: 'ItemTable.xlsx Item JSON 테이블'
+    }) as HTMLInputElement
+    expect(jsonFile.classList.contains('excel-json-file-name')).toBe(true)
+    expect(jsonFile.getAttribute('title')).toBe('더블클릭하여 JSON 파일 열기')
+    await user.click(jsonFile)
+    expect(jsonCheckbox.checked).toBe(false)
+    await user.dblClick(jsonFile)
+    expect(jsonCheckbox.checked).toBe(false)
+    expect(openPath).toHaveBeenLastCalledWith('D:\\JSON\\Item.json')
+  })
+
+  it('validates every existing workbook from the JSON generation tab', async () => {
+    const fixture = excelFixture(true)
+    const readWorkbook = vi.fn<ReadWorkbook>(async () => [
+      {
+        name: 'Item',
+        headers: ['id', 'label'],
+        rows: [[1, 'valid']]
+      }
+    ])
+    const user = userEvent.setup()
+    render(
+      <ExcelScreen
+        generateWorkbooks={fixture.generateWorkbooks}
+        nativePort={fixture.nativePort}
+        readWorkbook={readWorkbook}
+      />
+    )
+
+    await openJsonTab(user)
+    await user.click(await screen.findByRole('button', { name: '전체 읽기 검사' }))
+
+    expect(await screen.findByText(/1개 workbook 전체 읽기 검사 완료/)).toBeTruthy()
+    expect(readWorkbook).toHaveBeenCalledTimes(1)
+    expect(readWorkbook.mock.calls[0]?.[0]).toBe('ItemTable.proto')
   })
 
   it('inspects embedded memo metadata and shows stale changes on the workbook row', async () => {

@@ -78,6 +78,33 @@ message GameItem {
     )
   })
 
+  it('accepts the embedded metadata fingerprint from a newly generated workbook plan', () => {
+    const workspace = parseProtoWorkspace([
+      {
+        sourceFile: 'StringTable.proto',
+        source: `syntax = "proto3";
+message StringData {
+  int32 Id = 1;
+  // @Memo(memo-translation) 번역 메모
+  int32 ko = 2;
+  int32 en = 3;
+}
+`
+      }
+    ])
+    const plan = buildExcelWorkbookPlans(workspace)[0]!
+    const validation = validateExcelSheets(workspace, plan.sourceFile, [
+      {
+        name: 'StringData',
+        headers: ['Id', '번역 메모', 'ko', 'en'],
+        rows: [],
+        embeddedMetadata: plan.embeddedMetadata
+      }
+    ])
+
+    expect(validation.diagnostics.map(({ code }) => code)).not.toContain('EXCEL_MEMO_SCHEMA_STALE')
+  })
+
   it('groups one workbook per selected Proto file with schema-backed dropdown plans', () => {
     const plans = buildExcelWorkbookPlans(fixtureWorkspace())
 

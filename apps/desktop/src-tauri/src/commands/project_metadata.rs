@@ -63,6 +63,8 @@ pub struct DiagramViewport {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SavedDiagramLayout {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    hub_threshold: Option<u32>,
     positions: BTreeMap<String, DiagramPosition>,
     viewport: DiagramViewport,
 }
@@ -441,6 +443,15 @@ fn validate_metadata(metadata: &WorkspaceMetadata) -> CommandResult<()> {
     }
 
     if let Some(layout) = &metadata.diagram.saved_layout {
+        if layout
+            .hub_threshold
+            .is_some_and(|threshold| !(1..=50).contains(&threshold))
+        {
+            return Err(NativeError::new(
+                "WORKSPACE_METADATA_HUB_THRESHOLD_INVALID",
+                "diagram.savedLayout.hubThreshold must be between 1 and 50.",
+            ));
+        }
         for (key, position) in &layout.positions {
             if key.is_empty()
                 || key.chars().count() > MAX_IDENTIFIER_LENGTH
@@ -1043,7 +1054,7 @@ mod tests {
     use super::{
         load_metadata_from_root, metadata_file_path, update_metadata_in_root, validate_metadata,
         write_metadata_atomically_with, write_proto_with_metadata_in_root, ProtoMetadataMutation,
-        ProtoMetadataTransactionRequest, StopAfterPhase, WorkspaceMetadata,
+        ProtoMetadataTransactionRequest, SavedDiagramLayout, StopAfterPhase, WorkspaceMetadata,
         WorkspaceMetadataUpdateRequest, METADATA_DIRECTORY_NAME, METADATA_FILE_NAME,
         TRANSACTION_FILE_NAME,
     };
@@ -1405,19 +1416,18 @@ mod tests {
             parsed.primary_key_type_policy
         );
         assert_eq!(fixture.diagram.hub_threshold, 5);
-        assert!(fixture.diagram.saved_layout.is_some());
+        assert!(fixture.tables.is_empty());
         assert_eq!(
-            fixture
-                .tables
-                .get("ShapeTable.proto#Shape")
-                .unwrap()
-                .memo_columns,
-            parsed
-                .tables
-                .get("ItemTable.proto#Item")
-                .unwrap()
-                .memo_columns
+            fixture.diagram.saved_layout.as_ref().unwrap().hub_threshold,
+            None
         );
+        let saved_threshold: SavedDiagramLayout = serde_json::from_value(json!({
+          "hubThreshold": 3,
+          "positions": {},
+          "viewport": { "x": 0, "y": 0, "zoom": 1 }
+        }))
+        .unwrap();
+        assert_eq!(saved_threshold.hub_threshold, Some(3));
         let proto_files = list_proto_files_in_root(&fixture_root).unwrap();
         assert_eq!(proto_files.len(), 11);
         assert!(proto_files

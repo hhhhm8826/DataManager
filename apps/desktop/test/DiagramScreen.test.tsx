@@ -154,7 +154,7 @@ describe('DiagramScreen', () => {
     )
     render(<DiagramScreen layoutRunner={layoutRunner} nativePort={fixture.nativePort} />)
 
-    const threshold = await screen.findByRole('spinbutton', { name: '연결 모달 기준' })
+    const threshold = await screen.findByRole('spinbutton', { name: '연결 간소화 기준' })
     await waitFor(() => expect(layoutRunner).toHaveBeenCalledTimes(1))
     await user.clear(threshold)
     await user.type(threshold, '3')
@@ -213,7 +213,7 @@ message StringData { int32 id = 1; }
     expect(screen.getByRole('button', { name: /StringData\s*HubTable\.proto/ })).toBeTruthy()
   })
 
-  it('saves and deletes normalized layout without resetting the hub threshold', async () => {
+  it('saves the current modal threshold with the normalized layout and preserves it on delete', async () => {
     const fixture = diagramFixture()
     const user = userEvent.setup()
     render(
@@ -223,33 +223,38 @@ message StringData { int32 id = 1; }
       />
     )
 
-    await user.click(await screen.findByRole('button', { name: '배치 저장' }))
-    await waitFor(() => expect(fixture.updateWorkspaceMetadata).toHaveBeenCalledTimes(1))
-    const saveUpdate = fixture.updateWorkspaceMetadata.mock.calls[0]?.[0]
+    const threshold = await screen.findByRole('spinbutton', { name: '연결 간소화 기준' })
+    await user.clear(threshold)
+    await user.type(threshold, '3')
+    await user.click(screen.getByRole('button', { name: '배치 저장' }))
+    await waitFor(() => expect(fixture.updateWorkspaceMetadata).toHaveBeenCalledTimes(2))
+    const saveUpdate = fixture.updateWorkspaceMetadata.mock.calls[1]?.[0]
     expect(saveUpdate?.section).toBe('diagram')
     if (saveUpdate?.section !== 'diagram') throw new Error('diagram update expected')
     const savedDiagram = saveUpdate.value as {
       hubThreshold: number
       savedLayout: SavedDiagramLayout | null
     }
-    expect(savedDiagram.hubThreshold).toBe(5)
+    expect(savedDiagram.hubThreshold).toBe(3)
+    expect(savedDiagram.savedLayout?.hubThreshold).toBe(3)
     expect(Object.keys(savedDiagram.savedLayout?.positions ?? {})).toHaveLength(2)
 
     await user.click(screen.getByRole('button', { name: '저장 배치 삭제' }))
-    await waitFor(() => expect(fixture.updateWorkspaceMetadata).toHaveBeenCalledTimes(2))
-    const deleteUpdate = fixture.updateWorkspaceMetadata.mock.calls[1]?.[0]
+    await waitFor(() => expect(fixture.updateWorkspaceMetadata).toHaveBeenCalledTimes(3))
+    const deleteUpdate = fixture.updateWorkspaceMetadata.mock.calls[2]?.[0]
     expect(deleteUpdate?.section).toBe('diagram')
     if (deleteUpdate?.section !== 'diagram') throw new Error('diagram update expected')
     expect(
       deleteUpdate.value as { hubThreshold: number; savedLayout: SavedDiagramLayout | null }
     ).toEqual({
-      hubThreshold: 5,
+      hubThreshold: 3,
       savedLayout: null
     })
   })
 
   it('restores saved positions without dirty state and confirms discarding an auto layout', async () => {
     const fixture = diagramFixture(files, 5, {
+      hubThreshold: 3,
       positions: {
         'message:TargetTable.proto:Target': { x: 120.1, y: 220.2 },
         'message:OtherTable.proto:Other': { x: 520.3, y: 220.2 }
@@ -272,6 +277,16 @@ message StringData { int32 id = 1; }
     expect(screen.getByRole('dialog', { name: '저장되지 않은 배치가 있습니다' })).toBeTruthy()
     await user.click(screen.getByRole('button', { name: '계속' }))
     await waitFor(() => expect(screen.queryByText('저장되지 않은 배치')).toBeNull())
+    await waitFor(() =>
+      expect(
+        (screen.getByRole('spinbutton', { name: '연결 간소화 기준' }) as HTMLInputElement).value
+      ).toBe('3')
+    )
+    expect(fixture.updateWorkspaceMetadata).toHaveBeenLastCalledWith({
+      expectedRevision: 0,
+      section: 'diagram',
+      value: expect.objectContaining({ hubThreshold: 3 })
+    })
   })
 
   it('keeps saved coordinates for currently hidden Messages and prunes Enum coordinates on save', async () => {

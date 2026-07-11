@@ -82,6 +82,7 @@ export const DiagramViewportSchema = z
 
 export const SavedDiagramLayoutSchema = z
   .object({
+    hubThreshold: z.number().int().min(1).max(50).optional(),
     positions: z.record(z.string().min(1).max(MAX_IDENTIFIER_LENGTH), DiagramPositionSchema),
     viewport: DiagramViewportSchema
   })

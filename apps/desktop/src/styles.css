@@ -1541,10 +1541,9 @@ button:disabled {
 .excel-generation-row {
   align-items: center;
   border-bottom: 1px solid #e5eaea;
-  cursor: pointer;
   display: grid;
   gap: 12px;
-  grid-template-columns: 22px minmax(180px, 0.7fr) minmax(240px, 1.3fr);
+  grid-template-columns: 22px minmax(180px, 0.7fr) minmax(240px, 1.3fr) auto;
   min-height: 58px;
   padding: 8px 14px;
 }
@@ -1634,13 +1633,25 @@ button:disabled {
   min-width: 0;
 }
 
-.excel-json-tables label {
+.excel-json-table-option {
   align-items: center;
   color: #435255;
-  cursor: pointer;
   display: inline-flex;
   font-size: 11px;
   gap: 5px;
+}
+
+.excel-json-file-name {
+  border-radius: 3px;
+  padding: 2px 4px;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.excel-json-file-name:hover {
+  background: #e8f3f1;
+  color: #006c64;
 }
 
 .excel-selection-section input[type='checkbox'] {
@@ -2202,6 +2213,11 @@ button:disabled {
 
   .excel-included-tables {
     grid-column: 2;
+  }
+
+  .excel-generation-row > .excel-row-actions {
+    grid-column: 2 / -1;
+    justify-content: flex-end;
   }
 
   .excel-json-row {
