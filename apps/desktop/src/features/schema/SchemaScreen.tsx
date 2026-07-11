@@ -1,20 +1,29 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   addEnum,
   addMessage,
+  buildProtoFileName,
+  createMemoColumnId,
   createProtoDocument,
+  defaultProtoFileStem,
   deleteDeclaration,
   findReferenceImpacts,
   findWorkspaceDocument,
-  isEnumFileName,
-  isMessageFileName,
+  formatDiagnosticMessage,
+  normalizeTableMetadataKey,
+  normalizeProtoFileStem,
   toNativeError,
   updateEnum,
   updateMessage,
+  validateMemoColumnName,
+  validatePrimaryKeyDraftPolicy,
+  type MemoColumn,
+  type PrimaryKeyTypePolicy,
   type ProtoDiagnostic,
   type ProtoEnumDraft,
   type ProtoFieldDraft,
   type ProtoMessageDraft,
+  type ProtoMemoDraft,
   type ProtoReferenceImpact
 } from '@datamanager/core'
 import {
@@ -32,6 +41,8 @@ import {
 } from 'lucide-react'
 import { createNativePort } from '../../adapters/native/createNativePort'
 import type { NativePort } from '../../adapters/native/NativePort'
+import type { ProtoMetadataMutation } from '../../adapters/native/NativePort'
+import { useWorkspaceMetadataStore } from '../projectMetadata/workspaceMetadataStore'
 import {
   encodeProtoSource,
   loadProtoWorkspace,
@@ -68,6 +79,8 @@ type EditorState = MessageEditorState | EnumEditorState
 interface MessageEditorState {
   kind: 'message'
   sourceFile: string
+  fileStem: string
+  fileStemEdited: boolean
   originalName?: string
   readOnly: boolean
   draft: ProtoMessageDraft
@@ -76,6 +89,8 @@ interface MessageEditorState {
 interface EnumEditorState {
   kind: 'enum'
   sourceFile: string
+  fileStem: string
+  fileStemEdited: boolean
   originalName?: string
   readOnly: boolean
   draft: ProtoEnumDraft
@@ -88,6 +103,7 @@ interface PendingMutation {
   source: string
   nextSelection: { kind: 'message' | 'enum'; name: string } | null
   impacts: ProtoReferenceImpact[]
+  metadataMutation?: ProtoMetadataMutation
 }
 
 export function SchemaScreen({
@@ -105,6 +121,7 @@ export function SchemaScreen({
   const [success, setSuccess] = useState<string | null>(null)
   const [diagnostics, setDiagnostics] = useState<ProtoDiagnostic[]>([])
   const [pendingMutation, setPendingMutation] = useState<PendingMutation | null>(null)
+  const metadata = useWorkspaceMetadataStore((state) => state.metadata)
 
   const reload = useCallback(
     async (selection?: { kind: 'message' | 'enum'; name: string } | null): Promise<void> => {
@@ -112,6 +129,9 @@ export function SchemaScreen({
       setError(null)
       try {
         const next = await loadProtoWorkspace(nativePort)
+        if (next.settings.protoRoot) {
+          await useWorkspaceMetadataStore.getState().load(nativePort, next.settings.protoRoot)
+        }
         setLoaded(next)
         if (selection) {
           if (selection.kind === 'message') {
@@ -119,7 +139,16 @@ export function SchemaScreen({
             const document = declaration
               ? findWorkspaceDocument(next.workspace, declaration.sourceFile)
               : undefined
-            setEditor(declaration ? messageEditor(declaration, document?.readOnly ?? false) : null)
+            const currentMetadata = useWorkspaceMetadataStore.getState().metadata
+            setEditor(
+              declaration
+                ? messageEditor(
+                    declaration,
+                    document?.readOnly ?? false,
+                    legacyMemoColumnsForDeclaration(currentMetadata.tables, declaration)
+                  )
+                : null
+            )
           } else {
             const declaration = next.workspace.enums.find(({ name }) => name === selection.name)
             const document = declaration
@@ -129,7 +158,7 @@ export function SchemaScreen({
           }
         }
       } catch (cause) {
-        setError(toNativeError(cause).message)
+        setError(formatDiagnosticMessage(toNativeError(cause)))
       } finally {
         setLoading(false)
       }
@@ -174,7 +203,15 @@ export function SchemaScreen({
     const document = declaration
       ? findWorkspaceDocument(loaded!.workspace, declaration.sourceFile)
       : undefined
-    if (declaration) setEditor(messageEditor(declaration, document?.readOnly ?? false))
+    if (declaration) {
+      setEditor(
+        messageEditor(
+          declaration,
+          document?.readOnly ?? false,
+          legacyMemoColumnsForDeclaration(metadata.tables, declaration)
+        )
+      )
+    }
     setDiagnostics([])
     setSuccess(null)
   }
@@ -193,10 +230,13 @@ export function SchemaScreen({
     setEditor({
       kind: 'message',
       sourceFile: '',
+      fileStem: '',
+      fileStemEdited: false,
       readOnly: false,
       draft: {
         name: '',
-        fields: [{ name: 'id', type: 'int32', isPrimaryKey: true }]
+        fields: [{ name: 'id', type: 'int32', isPrimaryKey: true, order: 0 }],
+        memos: []
       }
     })
     setDiagnostics([])
@@ -207,6 +247,8 @@ export function SchemaScreen({
     setEditor({
       kind: 'enum',
       sourceFile: '',
+      fileStem: '',
+      fileStemEdited: false,
       readOnly: false,
       draft: { name: '', values: [] }
     })
@@ -255,20 +297,47 @@ export function SchemaScreen({
       return
     }
 
-    const sourceFile = editor.sourceFile || defaultFileName(editor)
-    const validFileName =
-      editor.kind === 'message' ? isMessageFileName(sourceFile) : isEnumFileName(sourceFile)
-    if (!validFileName) {
+    if (editor.kind === 'message') {
+      const policyViolations = validatePrimaryKeyDraftPolicy(
+        loaded.workspace,
+        metadata.primaryKeyTypePolicy,
+        editor.sourceFile || `${currentFileStem(editor)}.proto`,
+        editor.draft.name,
+        editor.draft.fields
+      )
+      if (policyViolations.length > 0) {
+        setDiagnostics(
+          policyViolations.map((violation) => ({
+            ...violation,
+            severity: 'error' as const,
+            span: { start: 0, end: 0 }
+          }))
+        )
+        return
+      }
+    }
+
+    const fileNameResult = editor.originalName
+      ? { success: true as const, value: editor.sourceFile }
+      : buildProtoFileName(editor.kind, currentFileStem(editor))
+    if (!fileNameResult.success) {
+      setDiagnostics(fileNameResult.diagnostics)
+      return
+    }
+    let sourceFile = fileNameResult.value
+    const caseInsensitiveDocument = loaded.workspace.documents.find(
+      (document) => document.sourceFile.toLocaleLowerCase() === sourceFile.toLocaleLowerCase()
+    )
+    if (caseInsensitiveDocument && caseInsensitiveDocument.sourceFile !== sourceFile) {
       setDiagnostics([
         diagnostic(
-          'PROTO_FILE_NAME_INVALID',
-          editor.kind === 'message'
-            ? '테이블 파일명은 {Name}Table.proto 형식이어야 합니다.'
-            : 'Enum 파일명은 {Name}EnumType.proto 형식이어야 합니다.'
+          'PROTO_FILE_NAME_CASE_CONFLICT',
+          `File '${sourceFile}' conflicts with '${caseInsensitiveDocument.sourceFile}'.`
         )
       ])
       return
     }
+    if (caseInsensitiveDocument) sourceFile = caseInsensitiveDocument.sourceFile
 
     const existingDocument = findWorkspaceDocument(loaded.workspace, sourceFile)
     const document =
@@ -305,6 +374,12 @@ export function SchemaScreen({
       nextSelection: { kind: editor.kind, name: editor.draft.name },
       impacts
     }
+    if (editor.kind === 'message' && editor.originalName) {
+      mutation.metadataMutation = {
+        oldKey: normalizeTableMetadataKey(editor.sourceFile, editor.originalName),
+        newKey: null
+      }
+    }
     if (impacts.length > 0) setPendingMutation(mutation)
     else void commitMutation(mutation)
   }
@@ -318,14 +393,21 @@ export function SchemaScreen({
       setDiagnostics(result.diagnostics)
       return
     }
-    setPendingMutation({
+    const mutation: PendingMutation = {
       title: `${editor.originalName} 삭제`,
       sourceFile: editor.sourceFile,
       path: loaded.pathsBySourceFile.get(editor.sourceFile) ?? '',
       source: result.value,
       nextSelection: null,
       impacts: findReferenceImpacts(loaded.workspace.documents, editor.originalName)
-    })
+    }
+    if (editor.kind === 'message') {
+      mutation.metadataMutation = {
+        oldKey: normalizeTableMetadataKey(editor.sourceFile, editor.originalName),
+        newKey: null
+      }
+    }
+    setPendingMutation(mutation)
   }
 
   const commitMutation = async (requestedMutation?: PendingMutation): Promise<void> => {
@@ -334,7 +416,19 @@ export function SchemaScreen({
     setSaving(true)
     setError(null)
     try {
-      await nativePort.writeFile(mutation.path, encodeProtoSource(mutation.source))
+      const contents = encodeProtoSource(mutation.source)
+      if (mutation.metadataMutation && loaded) {
+        const metadata = await nativePort.loadWorkspaceMetadata()
+        await nativePort.writeProtoWithMetadata({
+          sourceFile: mutation.sourceFile,
+          contents,
+          expectedRevision: metadata.revision,
+          mutation: mutation.metadataMutation
+        })
+        await useWorkspaceMetadataStore.getState().load(nativePort, loaded.settings.protoRoot)
+      } else {
+        await nativePort.writeFile(mutation.path, contents)
+      }
       const selection = mutation.nextSelection
       const message = `${mutation.sourceFile} 저장 완료`
       setPendingMutation(null)
@@ -342,7 +436,7 @@ export function SchemaScreen({
       await reload(selection)
       setSuccess(message)
     } catch (cause) {
-      setError(toNativeError(cause).message)
+      setError(formatDiagnosticMessage(toNativeError(cause)))
     } finally {
       setSaving(false)
     }
@@ -422,7 +516,7 @@ export function SchemaScreen({
                   .slice(0, 5)
                   .map(({ sourceFile, diagnostic }, index) => (
                     <p key={`${sourceFile}-${diagnostic.code}-${index}`}>
-                      {sourceFile}: {diagnostic.message}
+                      {sourceFile}: {formatDiagnosticMessage(diagnostic)}
                     </p>
                   ))}
               </div>
@@ -435,7 +529,13 @@ export function SchemaScreen({
             ) : (
               <fieldset className="schema-editor-fields" disabled={editor.readOnly}>
                 {editor.kind === 'message' ? (
-                  <MessageEditor editor={editor} knownTypes={knownTypes} onChange={setEditor} />
+                  <MessageEditor
+                    editor={editor}
+                    knownTypes={knownTypes}
+                    onChange={setEditor}
+                    policy={metadata.primaryKeyTypePolicy}
+                    workspace={loaded!.workspace}
+                  />
                 ) : (
                   <EnumEditor editor={editor} onChange={setEditor} />
                 )}
@@ -451,7 +551,7 @@ export function SchemaScreen({
             {diagnostics.length > 0 ? (
               <div className="editor-diagnostics" role="alert">
                 {diagnostics.map((entry, index) => (
-                  <p key={`${entry.code}-${index}`}>{entry.message}</p>
+                  <p key={`${entry.code}-${index}`}>{formatDiagnosticMessage(entry)}</p>
                 ))}
               </div>
             ) : null}
@@ -531,11 +631,6 @@ export function SchemaScreen({
           </div>
         </div>
       ) : null}
-      <datalist id="proto-known-types">
-        {knownTypes.map((type) => (
-          <option key={type} value={type} />
-        ))}
-      </datalist>
     </main>
   )
 }
@@ -578,12 +673,19 @@ function DeclarationList({
 function MessageEditor({
   editor,
   knownTypes,
-  onChange
+  onChange,
+  policy,
+  workspace
 }: {
   editor: MessageEditorState
   knownTypes: string[]
   onChange: (editor: EditorState) => void
+  policy: PrimaryKeyTypePolicy
+  workspace: LoadedProtoWorkspace['workspace']
 }): React.JSX.Element {
+  const [keyHelpOpen, setKeyHelpOpen] = useState(false)
+  const keyHelpButton = useRef<HTMLButtonElement>(null)
+  const keyHelpDialog = useRef<HTMLDivElement>(null)
   const setDraft = (draft: ProtoMessageDraft): void => onChange({ ...editor, draft })
   const updateField = (index: number, patch: Partial<ProtoFieldDraft>): void =>
     setDraft({
@@ -592,18 +694,93 @@ function MessageEditor({
         fieldIndex === index ? { ...field, ...patch } : field
       )
     })
-  const moveField = (index: number, direction: -1 | 1): void => {
-    const target = index + direction
-    if (target < 0 || target >= editor.draft.fields.length) return
-    const fields = [...editor.draft.fields]
-    const [field] = fields.splice(index, 1)
-    fields.splice(target, 0, field!)
-    setDraft({ ...editor.draft, fields })
+  const draftMemos: ProtoMemoDraft[] = editor.draft.memos ?? []
+  const members = [
+    ...editor.draft.fields.map((field, index) => ({
+      kind: 'field' as const,
+      index,
+      order: field.order ?? index
+    })),
+    ...draftMemos.map((memo, index) => ({ kind: 'memo' as const, index, order: memo.order }))
+  ].sort((left, right) => left.order - right.order)
+  const nextMemberOrder = Math.max(-1, ...members.map(({ order }) => order)) + 1
+  const applyMemberOrder = (ordered: Array<{ kind: 'field' | 'memo'; index: number }>): void => {
+    const fieldOrders = new Map<number, number>()
+    const memoOrders = new Map<number, number>()
+    ordered.forEach((member, order) =>
+      member.kind === 'field'
+        ? fieldOrders.set(member.index, order)
+        : memoOrders.set(member.index, order)
+    )
+    setDraft({
+      ...editor.draft,
+      fields: editor.draft.fields.map((field, index) => ({
+        ...field,
+        order: fieldOrders.get(index)!
+      })),
+      memos: draftMemos.map((memo, index) => ({ ...memo, order: memoOrders.get(index)! }))
+    })
+  }
+  const moveMember = (memberIndex: number, direction: -1 | 1): void => {
+    const target = memberIndex + direction
+    if (target < 0 || target >= members.length) return
+    const ordered = members.map(({ kind, index }) => ({ kind, index }))
+    const [member] = ordered.splice(memberIndex, 1)
+    ordered.splice(target, 0, member!)
+    applyMemberOrder(ordered)
+  }
+  const closeKeyHelp = useCallback((): void => {
+    setKeyHelpOpen(false)
+    window.setTimeout(() => keyHelpButton.current?.focus(), 0)
+  }, [])
+  useEffect(() => {
+    if (!keyHelpOpen) return
+    keyHelpDialog.current?.querySelector<HTMLButtonElement>('button')?.focus()
+    const closeOnEscape = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') closeKeyHelp()
+    }
+    document.addEventListener('keydown', closeOnEscape)
+    return () => document.removeEventListener('keydown', closeOnEscape)
+  }, [closeKeyHelp, keyHelpOpen])
+
+  const policyViolations = validatePrimaryKeyDraftPolicy(
+    workspace,
+    policy,
+    editor.sourceFile || `${currentFileStem(editor)}.proto`,
+    editor.draft.name,
+    editor.draft.fields
+  )
+  const violationByField = new Map(
+    policyViolations.map((violation) => [violation.fieldName, violation])
+  )
+  const hasSelfReference = editor.draft.fields.some(
+    (field) => unqualifiedTypeName(field.type) === editor.draft.name && editor.draft.name.length > 0
+  )
+  const addMemo = (): void => {
+    let suffix = 1
+    let candidate = '메모'
+    while (
+      !validateMemoColumnName(
+        candidate,
+        editor.draft.fields.map(({ name }) => name),
+        draftMemos
+      ).success
+    ) {
+      suffix += 1
+      candidate = `메모 ${suffix}`
+    }
+    setDraft({
+      ...editor.draft,
+      fields: editor.draft.fields.map((field, index) => ({
+        ...field,
+        order: field.order ?? index
+      })),
+      memos: [...draftMemos, { id: createMemoColumnId(), name: candidate, order: nextMemberOrder }]
+    })
   }
 
   return (
     <>
-      <EditorHeader kind="테이블" name={editor.originalName} sourceFile={editor.sourceFile} />
       <div className="editor-metadata">
         <label>
           <span>Message 이름</span>
@@ -620,103 +797,239 @@ function MessageEditor({
           <span>번호</span>
           <span>이름</span>
           <span>타입</span>
-          <span>형태</span>
           <span className="key-column-heading">
             키
-            <span
+            <button
               aria-label="키 규칙 도움말"
-              className="inline-help"
-              title="기본키(@PK)는 참조 행 식별에 사용합니다. 합성키(@Key)는 같은 값의 행들을 배열로 인라인하며 복합 고유키가 아닙니다."
+              aria-haspopup="dialog"
+              className="key-help-button"
+              onClick={() => setKeyHelpOpen(true)}
+              ref={keyHelpButton}
+              title="키 규칙 도움말"
+              type="button"
             >
-              <CircleHelp aria-hidden="true" size={13} />
-            </span>
+              <CircleHelp aria-hidden="true" size={19} />
+            </button>
           </span>
           <span />
         </div>
-        {editor.draft.fields.map((field, index) => (
-          <div
-            className="field-table-row"
-            key={`${field.originalName ?? 'new'}-${index}`}
-            role="row"
-          >
-            <span className="field-number">{field.fieldNumber ?? '자동'}</span>
-            <input
-              aria-label={`필드 ${index + 1} 이름`}
-              onChange={(event) => updateField(index, { name: event.target.value })}
-              value={field.name}
-            />
-            <input
-              aria-label={`필드 ${index + 1} 타입`}
-              list="proto-known-types"
-              onChange={(event) => updateField(index, { type: event.target.value })}
-              value={field.type}
-            />
-            <select
-              aria-label={`필드 ${index + 1} 형태`}
-              onChange={(event) =>
-                updateField(index, {
-                  label: event.target.value as 'singular' | 'optional' | 'repeated'
-                })
-              }
-              value={field.label ?? 'singular'}
+        {members.map((member, memberIndex) => {
+          if (member.kind === 'memo') {
+            const memo = draftMemos[member.index]!
+            return (
+              <div className="field-table-row memo-field-row" key={memo.id} role="row">
+                <span className="field-number">메모</span>
+                <input
+                  aria-label={`메모 ${member.index + 1} 이름`}
+                  onChange={(event) =>
+                    setDraft({
+                      ...editor.draft,
+                      memos: draftMemos.map((entry, index) =>
+                        index === member.index ? { ...entry, name: event.target.value } : entry
+                      )
+                    })
+                  }
+                  value={memo.name}
+                />
+                <span className="memo-badge">Excel 전용</span>
+                <span className="memo-not-applicable">JSON·코드 제외</span>
+                <div className="row-tools">
+                  <IconButton label="메모 위로 이동" onClick={() => moveMember(memberIndex, -1)}>
+                    <ArrowUp aria-hidden="true" size={15} />
+                  </IconButton>
+                  <IconButton label="메모 아래로 이동" onClick={() => moveMember(memberIndex, 1)}>
+                    <ArrowDown aria-hidden="true" size={15} />
+                  </IconButton>
+                  <IconButton
+                    label="메모 삭제"
+                    onClick={() =>
+                      setDraft({
+                        ...editor.draft,
+                        memos: draftMemos.filter((_, index) => index !== member.index)
+                      })
+                    }
+                  >
+                    <Trash2 aria-hidden="true" size={15} />
+                  </IconButton>
+                </div>
+              </div>
+            )
+          }
+          const field = editor.draft.fields[member.index]!
+          return (
+            <div
+              className="field-table-row"
+              key={`${field.originalName ?? 'new'}-${member.index}`}
+              role="row"
             >
-              <option value="singular">단일</option>
-              <option value="optional">선택</option>
-              <option value="repeated">반복</option>
-            </select>
-            <select
-              aria-label={`필드 ${index + 1} 키`}
-              onChange={(event) =>
-                updateField(index, {
-                  isPrimaryKey: event.target.value === 'primary',
-                  isGroupKey: event.target.value === 'group'
-                })
-              }
-              value={field.isPrimaryKey ? 'primary' : field.isGroupKey ? 'group' : 'none'}
-            >
-              <option value="none">없음</option>
-              <option value="primary">기본키</option>
-              <option value="group">합성키</option>
-            </select>
-            <div className="row-tools">
-              <IconButton label="필드 위로 이동" onClick={() => moveField(index, -1)}>
-                <ArrowUp aria-hidden="true" size={15} />
-              </IconButton>
-              <IconButton label="필드 아래로 이동" onClick={() => moveField(index, 1)}>
-                <ArrowDown aria-hidden="true" size={15} />
-              </IconButton>
-              <IconButton
-                label="필드 삭제"
-                onClick={() =>
-                  setDraft({
-                    ...editor.draft,
-                    fields: editor.draft.fields.filter((_, fieldIndex) => fieldIndex !== index)
+              <span className="field-number">{field.fieldNumber ?? '자동'}</span>
+              <input
+                aria-label={`필드 ${member.index + 1} 이름`}
+                onChange={(event) => updateField(member.index, { name: event.target.value })}
+                value={field.name}
+              />
+              <input
+                aria-label={`필드 ${member.index + 1} 타입`}
+                list="message-known-types"
+                onChange={(event) => updateField(member.index, { type: event.target.value })}
+                value={field.type}
+              />
+              <select
+                aria-label={`필드 ${member.index + 1} 키`}
+                aria-invalid={violationByField.has(field.name)}
+                onChange={(event) =>
+                  updateField(member.index, {
+                    isPrimaryKey: event.target.value === 'primary',
+                    isGroupKey: event.target.value === 'group'
                   })
                 }
+                value={field.isPrimaryKey ? 'primary' : field.isGroupKey ? 'group' : 'none'}
               >
-                <Trash2 aria-hidden="true" size={15} />
-              </IconButton>
+                <option value="none">없음</option>
+                <option value="primary">기본키</option>
+                <option value="group">합성키</option>
+              </select>
+              <div className="row-tools">
+                <IconButton label="필드 위로 이동" onClick={() => moveMember(memberIndex, -1)}>
+                  <ArrowUp aria-hidden="true" size={15} />
+                </IconButton>
+                <IconButton label="필드 아래로 이동" onClick={() => moveMember(memberIndex, 1)}>
+                  <ArrowDown aria-hidden="true" size={15} />
+                </IconButton>
+                <IconButton
+                  label="필드 삭제"
+                  onClick={() =>
+                    setDraft({
+                      ...editor.draft,
+                      fields: editor.draft.fields.filter(
+                        (_, fieldIndex) => fieldIndex !== member.index
+                      )
+                    })
+                  }
+                >
+                  <Trash2 aria-hidden="true" size={15} />
+                </IconButton>
+              </div>
+              {violationByField.has(field.name) ? (
+                <p className="field-inline-error">
+                  {field.name || `필드 ${member.index + 1}`}의 {field.type || '빈 타입'}은 현재
+                  기본키 정책에 맞지 않습니다.
+                </p>
+              ) : null}
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
-      <button
-        className="button button-secondary icon-text-button add-row-button"
-        onClick={() =>
-          setDraft({
-            ...editor.draft,
-            fields: [...editor.draft.fields, { name: '', type: 'string' }]
-          })
-        }
-      >
-        <Plus aria-hidden="true" size={16} /> 필드 추가
-      </button>
+      <div className="add-row-actions">
+        <button
+          className="button button-secondary icon-text-button add-row-button"
+          onClick={() =>
+            setDraft({
+              ...editor.draft,
+              fields: [
+                ...editor.draft.fields,
+                { name: '', type: 'string', order: nextMemberOrder }
+              ],
+              memos: draftMemos
+            })
+          }
+        >
+          <Plus aria-hidden="true" size={16} /> 데이터 칼럼 추가
+        </button>
+        <button
+          className="button button-secondary icon-text-button add-row-button"
+          onClick={addMemo}
+          type="button"
+        >
+          <Plus aria-hidden="true" size={16} /> Excel 메모 칼럼 추가
+        </button>
+      </div>
+      {hasSelfReference ? (
+        <div className="self-reference-help">
+          <strong>현재 테이블 참조</strong>
+          <p>
+            조직도 상위 구성원이나 카테고리 부모처럼 같은 Excel 시트의 키 값을 입력합니다. 빈 값은
+            최상위 항목으로 사용할 수 있고, 실제 행 순환이 생기면 JSON 생성이 중단됩니다.
+          </p>
+        </div>
+      ) : null}
       <datalist id="message-known-types">
-        {knownTypes.map((type) => (
-          <option key={type} value={type} />
-        ))}
+        {editor.draft.name ? <option label="현재 테이블" value={editor.draft.name} /> : null}
+        {knownTypes
+          .filter((type) => type !== editor.draft.name)
+          .map((type) => (
+            <option key={type} value={type} />
+          ))}
       </datalist>
+      {keyHelpOpen ? <KeyHelpDialog dialogRef={keyHelpDialog} onClose={closeKeyHelp} /> : null}
     </>
+  )
+}
+
+function KeyHelpDialog({
+  dialogRef,
+  onClose
+}: {
+  dialogRef: React.RefObject<HTMLDivElement | null>
+  onClose: () => void
+}): React.JSX.Element {
+  return (
+    <div className="modal-backdrop" role="presentation">
+      <div
+        aria-labelledby="key-help-title"
+        aria-modal="true"
+        className="impact-dialog key-help-dialog"
+        ref={dialogRef}
+        role="dialog"
+      >
+        <div className="dialog-heading">
+          <h3 id="key-help-title">테이블 키 사용 기준</h3>
+          <button
+            aria-label="키 규칙 도움말 닫기"
+            className="icon-button"
+            onClick={onClose}
+            title="닫기"
+            type="button"
+          >
+            <X aria-hidden="true" size={17} />
+          </button>
+        </div>
+        <div className="key-help-content">
+          <section>
+            <h4>기본키</h4>
+            <p>한 행을 구분하는 값이며 비워 둘 수 없습니다.</p>
+            <pre>{`Excel: ItemId = 1001\nJSON: { "ItemId": 1001 }`}</pre>
+          </section>
+          <section>
+            <h4>여러 기본키</h4>
+            <p>여러 칼럼 값의 조합으로 행 중복을 검사합니다.</p>
+            <pre>{`Excel: Region = 1, ItemId = 1001\nJSON: { "Region": 1, "ItemId": 1001 }`}</pre>
+          </section>
+          <section>
+            <h4>합성키</h4>
+            <p>
+              같은 키 값을 가진 여러 행을 한 묶음으로 참조하며 JSON 결과는 배열입니다. 일반
+              데이터베이스의 여러 칼럼으로 만든 복합 고유키가 아니라 기존 그룹 키입니다.
+            </p>
+            <pre>{`Excel: GroupId = 10 (3개 행)\nJSON: { "items": [{...}, {...}, {...}] }`}</pre>
+          </section>
+          <section>
+            <h4>호환 주의</h4>
+            <p>
+              한 테이블에서 기본키와 합성키를 함께 사용할 수 없습니다. 여러 기본키를 다른 테이블에서
+              참조할 때는 첫 번째 기본키 값으로 행을 찾고, 같은 값의 행들을 배열로 출력합니다.
+            </p>
+            <pre>{`대상 Excel: Region = 1, ItemId = 1001 / 1002\n참조 Excel: RegionRef = 1\nJSON: { "RegionRef": [{ "ItemId": 1001 }, { "ItemId": 1002 }] }`}</pre>
+          </section>
+          <p className="key-help-annotation">호환 표기: 기본키 @PK, 합성키 @Key</p>
+        </div>
+        <div className="dialog-actions">
+          <button className="button button-primary" onClick={onClose} type="button">
+            확인
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -730,7 +1043,6 @@ function EnumEditor({
   const setDraft = (draft: ProtoEnumDraft): void => onChange({ ...editor, draft })
   return (
     <>
-      <EditorHeader kind="Enum" name={editor.originalName} sourceFile={editor.sourceFile} />
       <div className="editor-metadata">
         <label>
           <span>Enum 이름</span>
@@ -828,36 +1140,31 @@ function FileNameField({
   onChange: (editor: EditorState) => void
 }): React.JSX.Element {
   return (
-    <label>
+    <label className="file-name-field">
       <span>파일명</span>
-      <input
-        aria-label="Proto 파일명"
-        onChange={(event) => onChange({ ...editor, sourceFile: event.target.value })}
-        placeholder={defaultFileName(editor)}
-        readOnly={Boolean(editor.originalName)}
-        value={editor.sourceFile}
-      />
-    </label>
-  )
-}
-
-function EditorHeader({
-  kind,
-  name,
-  sourceFile
-}: {
-  kind: string
-  name?: string
-  sourceFile: string
-}): React.JSX.Element {
-  return (
-    <div className="editor-heading">
-      <div>
-        <p className="section-eyebrow">{kind}</p>
-        <h3>{name ?? `새 ${kind}`}</h3>
+      <div className="file-name-input">
+        <input
+          aria-label="Proto 파일명"
+          onChange={(event) => {
+            const fileStem = normalizeProtoFileStem(event.target.value)
+            onChange({
+              ...editor,
+              fileStem,
+              fileStemEdited: true
+            })
+          }}
+          onBlur={() => {
+            if (!editor.fileStem) onChange({ ...editor, fileStemEdited: false })
+          }}
+          placeholder={defaultProtoFileStem(editor.kind, editor.draft.name)}
+          readOnly={Boolean(editor.originalName)}
+          value={currentFileStem(editor)}
+        />
+        <span aria-hidden="true" className="file-name-suffix">
+          .proto
+        </span>
       </div>
-      {sourceFile ? <span>{sourceFile}</span> : null}
-    </div>
+    </label>
   )
 }
 
@@ -884,11 +1191,22 @@ function IconButton({
 
 function messageEditor(
   declaration: LoadedProtoWorkspace['workspace']['messages'][number],
-  readOnly: boolean
+  readOnly: boolean,
+  legacyMemoColumns: readonly MemoColumn[] = []
 ): MessageEditorState {
+  const memos =
+    declaration.memos.length > 0
+      ? declaration.memos.map(({ id, name, order }) => ({ id, name, order }))
+      : legacyMemoColumns.map(({ id, name }, index) => ({
+          id,
+          name,
+          order: declaration.fields.length + index
+        }))
   return {
     kind: 'message',
     sourceFile: declaration.sourceFile,
+    fileStem: normalizeProtoFileStem(declaration.sourceFile),
+    fileStemEdited: true,
     originalName: declaration.name,
     readOnly,
     draft: {
@@ -901,8 +1219,10 @@ function messageEditor(
         fieldNumber: field.fieldNumber,
         isPrimaryKey: field.isPrimaryKey,
         isGroupKey: field.isGroupKey,
-        optionsText: field.optionsText
-      }))
+        optionsText: field.optionsText,
+        order: field.order
+      })),
+      memos
     }
   }
 }
@@ -915,6 +1235,8 @@ function enumEditor(
   return {
     kind: 'enum',
     sourceFile: declaration.sourceFile,
+    fileStem: normalizeProtoFileStem(declaration.sourceFile),
+    fileStemEdited: true,
     originalName: declaration.name,
     readOnly,
     draft: {
@@ -926,9 +1248,22 @@ function enumEditor(
   }
 }
 
-function defaultFileName(editor: EditorState): string {
-  const name = editor.draft.name || (editor.kind === 'message' ? 'New' : 'New')
-  return editor.kind === 'message' ? `${name}Table.proto` : `${name}EnumType.proto`
+function currentFileStem(editor: EditorState): string {
+  return editor.fileStemEdited
+    ? editor.fileStem
+    : defaultProtoFileStem(editor.kind, editor.draft.name)
+}
+
+function unqualifiedTypeName(type: string): string {
+  return type.replace(/^\./, '').split('.').at(-1) ?? type
+}
+
+function legacyMemoColumnsForDeclaration(
+  tables: Readonly<Record<string, { memoColumns: MemoColumn[] }>>,
+  declaration: LoadedProtoWorkspace['workspace']['messages'][number]
+): MemoColumn[] {
+  const key = normalizeTableMetadataKey(declaration.sourceFile, declaration.name)
+  return [...(tables[key]?.memoColumns ?? [])].sort((left, right) => left.order - right.order)
 }
 
 function nextEnumNumber(draft: ProtoEnumDraft): number {

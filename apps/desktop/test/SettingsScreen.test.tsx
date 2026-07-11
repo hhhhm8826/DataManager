@@ -2,7 +2,13 @@
 
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { defaultAppSettings, type AppSettings, type LegacyImportPreview } from '@datamanager/core'
+import {
+  applyWorkspaceMetadataSectionUpdate,
+  defaultAppSettings,
+  defaultWorkspaceMetadata,
+  type AppSettings,
+  type LegacyImportPreview
+} from '@datamanager/core'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { type NativePort } from '../src/adapters/native/NativePort'
 import { SettingsScreen } from '../src/features/settings/SettingsScreen'
@@ -10,9 +16,16 @@ import { SettingsScreen } from '../src/features/settings/SettingsScreen'
 afterEach(cleanup)
 
 function createNativePort(overrides: Partial<NativePort> = {}): NativePort {
+  let metadata = defaultWorkspaceMetadata()
   return {
     loadSettings: async () => defaultAppSettings,
     saveSettings: async (settings) => settings,
+    loadWorkspaceMetadata: async () => metadata,
+    updateWorkspaceMetadata: async (update) => {
+      metadata = applyWorkspaceMetadataSectionUpdate(metadata, update)
+      return metadata
+    },
+    writeProtoWithMetadata: async () => metadata,
     selectDirectory: async () => null,
     selectFile: async () => null,
     findLegacyConfig: async () => null,
@@ -74,21 +87,24 @@ describe('SettingsScreen', () => {
     expect(selectDirectory).toHaveBeenCalledWith(undefined)
   })
 
-  it('keeps the diagram column limit within the settings contract', async () => {
-    const nativePort = createNativePort()
+  it('hides the deprecated diagram column limit while preserving its stored value', async () => {
+    const preservedSettings: AppSettings = {
+      ...defaultAppSettings,
+      diagram: { ...defaultAppSettings.diagram, maxNodesPerColumn: 12 }
+    }
+    const saveSettings = vi.fn(async (settings: AppSettings) => settings)
+    const nativePort = createNativePort({
+      loadSettings: async () => preservedSettings,
+      saveSettings
+    })
     const user = userEvent.setup()
 
     render(<SettingsScreen nativePort={nativePort} />)
 
-    const diagramLimit = await screen.findByRole('spinbutton', { name: '열당 최대 테이블 수' })
-    await user.clear(diagramLimit)
-    await user.type(diagramLimit, '7')
-    expect((diagramLimit as HTMLInputElement).value).toBe('7')
-
-    await user.clear(diagramLimit)
-    await user.type(diagramLimit, '99')
-
-    expect((diagramLimit as HTMLInputElement).value).toBe('50')
+    await screen.findByRole('button', { name: '저장' })
+    expect(screen.queryByRole('spinbutton', { name: '열당 최대 테이블 수' })).toBeNull()
+    await user.click(screen.getByRole('button', { name: '저장' }))
+    await waitFor(() => expect(saveSettings).toHaveBeenCalledWith(preservedSettings))
   })
 
   it('adds a known codegen language and selects its output directory', async () => {
@@ -113,6 +129,47 @@ describe('SettingsScreen', () => {
         codegenOutputs: [{ language: 'unreal', directory: outputDirectory }]
       })
     )
+  })
+
+  it('rejects a stricter key policy with exact violations and persists a valid policy', async () => {
+    const protoRoot = 'D:\\DataManager\\PROTO'
+    const settings = { ...defaultAppSettings, protoRoot }
+    let metadata = defaultWorkspaceMetadata()
+    const updateWorkspaceMetadata = vi.fn<NativePort['updateWorkspaceMetadata']>(async (update) => {
+      metadata = applyWorkspaceMetadataSectionUpdate(metadata, update)
+      return metadata
+    })
+    const nativePort = createNativePort({
+      loadSettings: async () => settings,
+      loadWorkspaceMetadata: async () => metadata,
+      updateWorkspaceMetadata,
+      listProtoFiles: async () => [
+        { path: `${protoRoot}\\ItemTable.proto`, fileName: 'ItemTable.proto' }
+      ],
+      readFile: async () =>
+        new TextEncoder().encode(`syntax = "proto3";
+message Item {
+  // @PK
+  string code = 1;
+}
+`)
+    })
+    const user = userEvent.setup()
+
+    render(<SettingsScreen nativePort={nativePort} />)
+
+    const numericPolicy = await screen.findByRole('radio', { name: /숫자 또는 Enum/ })
+    await user.click(numericPolicy)
+    expect(await screen.findByText(/Item\.code: string/)).toBeTruthy()
+    expect(updateWorkspaceMetadata).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('radio', { name: /^문자열/ }))
+    await waitFor(() => expect(updateWorkspaceMetadata).toHaveBeenCalledTimes(1))
+    expect(updateWorkspaceMetadata).toHaveBeenCalledWith({
+      expectedRevision: 0,
+      section: 'primaryKeyTypePolicy',
+      value: 'string'
+    })
   })
 
   it('shows a legacy dry-run before committing the one-time import', async () => {

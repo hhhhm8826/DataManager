@@ -1,0 +1,8 @@
+syntax = "proto3";
+package d1000;
+import "HubTable.proto";
+message SatelliteG {
+  // @PK
+  int32 id = 1;
+  Hub hub = 2;
+}

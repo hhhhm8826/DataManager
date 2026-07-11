@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package d1000;
+option go_package = "./d1000";
+
+message Category {
+  // @PK
+  int32 id = 1;
+  optional Category parent = 2;
+  repeated Category children = 3;
+}

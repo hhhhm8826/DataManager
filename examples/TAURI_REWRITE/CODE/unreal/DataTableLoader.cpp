@@ -17,6 +17,20 @@ TEnum ParseEnumFromString(const FString& Value)
 }
 } // namespace
 
+void FCategory::ParseFromJson(const TSharedPtr<FJsonObject>& Obj)
+{
+    { double Value = 0; if (Obj->TryGetNumberField(TEXT("id"), Value)) id = static_cast<int32>(Value); }
+    { const TSharedPtr<FJsonObject>* Value; if (Obj->TryGetObjectField(TEXT("parent"), Value)) { parent = MakeShared<FCategory>(); parent->ParseFromJson(*Value); } }
+    {
+        const TArray<TSharedPtr<FJsonValue>>* Array;
+        if (Obj->TryGetArrayField(TEXT("children"), Array))
+        {
+            children.Reset();
+            for (const TSharedPtr<FJsonValue>& Item : *Array) { const TSharedPtr<FJsonObject>* Object; if (Item->TryGetObject(Object)) { TSharedPtr<FCategory> Row = MakeShared<FCategory>(); Row->ParseFromJson(*Object); children.Add(Row); } }
+        }
+    }
+}
+
 void FCompositeTarget::ParseFromJson(const TSharedPtr<FJsonObject>& Obj)
 {
     { double Value = 0; if (Obj->TryGetNumberField(TEXT("region"), Value)) region = static_cast<int32>(Value); }

@@ -8,6 +8,7 @@
 
 class FJsonObject;
 
+struct FCategory;
 struct FCompositeTarget;
 struct FCycleA;
 struct FCycleB;
@@ -16,6 +17,23 @@ struct FSingleTarget;
 struct FMiddleTarget;
 struct FNoKeyTarget;
 struct FRootTarget;
+
+USTRUCT(BlueprintType)
+struct FCategory : public FTableRowBase
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    int32 id = 0;
+
+    // Cyclic references are not reflected as UPROPERTY values.
+    TSharedPtr<FCategory> parent;
+
+    // Cyclic references are not reflected as UPROPERTY values.
+    TArray<TSharedPtr<FCategory>> children;
+
+    void ParseFromJson(const TSharedPtr<FJsonObject>& Obj);
+};
 
 USTRUCT(BlueprintType)
 struct FCompositeTarget : public FTableRowBase

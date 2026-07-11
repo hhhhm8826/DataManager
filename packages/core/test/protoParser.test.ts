@@ -19,6 +19,41 @@ function readFixture(name: string): string {
 }
 
 describe('parseProtoDocument', () => {
+  it('parses ordered Message-local @Memo directives without creating Proto fields', () => {
+    const source = `syntax = "proto3";
+message GameItem {
+  int32 id = 1;
+  // @Memo(memo-planning) 기획 메모
+  string name = 2;
+  // @Memo(memo-review) 검수 의견
+}
+`
+    const message = parseProtoDocument(source, 'GameItemTable.proto').messages[0]!
+
+    expect(message.fields.map(({ name }) => name)).toEqual(['id', 'name'])
+    expect(message.memos.map(({ id, name }) => ({ id, name }))).toEqual([
+      { id: 'memo-planning', name: '기획 메모' },
+      { id: 'memo-review', name: '검수 의견' }
+    ])
+    expect(
+      [
+        ...message.fields.map(({ name, order }) => ({ kind: 'field', name, order })),
+        ...message.memos.map(({ name, order }) => ({ kind: 'memo', name, order }))
+      ]
+        .sort((left, right) => left.order - right.order)
+        .map(({ kind, name }) => `${kind}:${name}`)
+    ).toEqual(['field:id', 'memo:기획 메모', 'field:name', 'memo:검수 의견'])
+  })
+
+  it('rejects malformed @Memo directives instead of silently dropping Excel columns', () => {
+    const document = parseProtoDocument(
+      `syntax = "proto3";\nmessage Item {\n  int32 id = 1;\n  // @Memo missing-id\n}\n`,
+      'ItemTable.proto'
+    )
+    expect(document.readOnly).toBe(true)
+    expect(document.diagnostics.map(({ code }) => code)).toContain('PROTO_MEMO_DIRECTIVE_INVALID')
+  })
+
   it('matches the M0 fixture declaration and annotation snapshot', () => {
     const keyDocument = parseProtoDocument(readFixture('KeyTable.proto'), 'KeyTable.proto')
     const referenceDocument = parseProtoDocument(

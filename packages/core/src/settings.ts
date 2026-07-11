@@ -66,6 +66,7 @@ export const defaultAppSettings: AppSettings = {
 export const NativeErrorSchema = z.object({
   code: z.string().min(1),
   message: z.string().min(1),
+  params: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()])).optional(),
   context: z.record(z.string(), z.unknown())
 })
 
@@ -100,11 +101,33 @@ export function toNativeError(input: unknown): NativeError {
   if (input instanceof Error) {
     const serialized = parseSerializedNativeError(input.message)
     if (serialized) return serialized
+
+    const externalCode = externalErrorCode(input.name)
+    if (externalCode) {
+      return {
+        code: externalCode,
+        message: input.message,
+        context: {}
+      }
+    }
   }
 
   return {
     code: 'NATIVE_UNKNOWN',
     message: input instanceof Error ? input.message : String(input),
     context: {}
+  }
+}
+
+function externalErrorCode(name: string): string | undefined {
+  switch (name) {
+    case 'AbortError':
+      return 'NATIVE_OPERATION_ABORTED'
+    case 'TimeoutError':
+      return 'NATIVE_OPERATION_TIMED_OUT'
+    case 'ZodError':
+      return 'NATIVE_VALIDATION_FAILED'
+    default:
+      return undefined
   }
 }

@@ -11,14 +11,14 @@
     "pnpm": "11.10.0"
   },
   "scripts": {
-    "format": "pnpm --filter @datamanager/core format && pnpm --filter @datamanager/desktop format && prettier --write tests/e2e tests/baseline tests/tauri-rewrite scripts/regenerate-rewrite-fixtures.ts tests/fixtures/m0-legacy/README.md tests/fixtures/m8-rewrite/README.md tsconfig.scripts.json && cargo fmt",
-    "format:check": "pnpm --filter @datamanager/core format:check && pnpm --filter @datamanager/desktop format:check && prettier --check tests/e2e tests/baseline tests/tauri-rewrite scripts/regenerate-rewrite-fixtures.ts tests/fixtures/m0-legacy/README.md tests/fixtures/m8-rewrite/README.md tsconfig.scripts.json && cargo fmt --check",
+    "format": "pnpm --filter @datamanager/core format && pnpm --filter @datamanager/desktop format && prettier --write tests/e2e tests/baseline tests/tauri-rewrite tests/d1000-d1012 scripts/regenerate-rewrite-fixtures.ts tests/fixtures/m0-legacy/README.md tests/fixtures/m8-rewrite/README.md tsconfig.scripts.json && cargo fmt",
+    "format:check": "pnpm --filter @datamanager/core format:check && pnpm --filter @datamanager/desktop format:check && prettier --check tests/e2e tests/baseline tests/tauri-rewrite tests/d1000-d1012 scripts/regenerate-rewrite-fixtures.ts tests/fixtures/m0-legacy/README.md tests/fixtures/m8-rewrite/README.md tsconfig.scripts.json && cargo fmt --check",
     "lint": "pnpm --filter @datamanager/core lint && pnpm --filter @datamanager/desktop lint && pnpm run lint:e2e && pnpm run lint:fixtures",
     "lint:e2e": "eslint --config eslint.e2e.config.mjs tests/e2e --max-warnings=0",
     "lint:fixtures": "eslint scripts/regenerate-rewrite-fixtures.ts --max-warnings=0",
     "typecheck": "pnpm --filter @datamanager/core typecheck && pnpm --filter @datamanager/desktop typecheck && pnpm run typecheck:fixtures",
     "typecheck:fixtures": "tsc --noEmit -p tsconfig.scripts.json",
-    "test": "pnpm run test:baseline && pnpm --filter @datamanager/core test && pnpm --filter @datamanager/desktop test && pnpm run test:rewrite:m1 && pnpm run test:rewrite:m2 && pnpm run test:rewrite:m3 && pnpm run test:rewrite:m4 && pnpm run test:rewrite:m5 && pnpm run test:rewrite:m6 && pnpm run test:rewrite:m7 && pnpm run test:rewrite:m8 && pnpm fixtures:rewrite:check",
+    "test": "pnpm run test:baseline && pnpm --filter @datamanager/core test && pnpm --filter @datamanager/desktop test && pnpm run test:rewrite:m1 && pnpm run test:rewrite:m2 && pnpm run test:rewrite:m3 && pnpm run test:rewrite:m4 && pnpm run test:rewrite:m5 && pnpm run test:rewrite:m6 && pnpm run test:rewrite:m7 && pnpm run test:rewrite:m8 && pnpm run test:d1000-d1012:g0 && pnpm run test:d1000-d1012:g1 && pnpm run test:d1000-d1012:g2 && pnpm run test:d1000-d1012:g3 && pnpm run test:d1000-d1012:g4 && pnpm fixtures:rewrite:check",
     "test:e2e": "pnpm --filter @datamanager/desktop exec tauri build --features e2e --no-bundle --config src-tauri/tauri.e2e.conf.json && pnpm --filter @datamanager/desktop test:e2e",
     "dev": "pnpm --filter @datamanager/desktop dev",
     "tauri:dev": "pnpm --filter @datamanager/desktop tauri dev",
@@ -28,8 +28,6 @@
     "rust:test": "cargo test",
     "fixtures:rewrite": "tsx scripts/regenerate-rewrite-fixtures.ts --write",
     "fixtures:rewrite:check": "tsx scripts/regenerate-rewrite-fixtures.ts --check",
-    "excel:smoke": "pwsh -NoProfile -File ./scripts/windows-excel-smoke.ps1",
-    "interactive:smoke": "pwsh -NoProfile -File ./scripts/windows-interactive-smoke.ps1",
     "test:baseline": "node --test tests/baseline/m0-golden.test.cjs",
     "test:rewrite:m1": "node --test tests/tauri-rewrite/m1-excel-spike.test.cjs tests/tauri-rewrite/m1-native-bridge.test.cjs tests/tauri-rewrite/m1-native-config.test.cjs tests/tauri-rewrite/m1-e2e-config.test.cjs tests/tauri-rewrite/m1-ui-test-config.test.cjs",
     "test:rewrite:m2": "node --test tests/tauri-rewrite/m2-settings-boundary.test.cjs",
@@ -38,7 +36,12 @@
     "test:rewrite:m5": "node --test tests/tauri-rewrite/m5-excel-workflow.test.cjs",
     "test:rewrite:m6": "node --test tests/tauri-rewrite/m6-json-export.test.cjs",
     "test:rewrite:m7": "node --test tests/tauri-rewrite/m7-code-generation.test.cjs",
-    "test:rewrite:m8": "node --test tests/tauri-rewrite/m8-integration-package.test.cjs"
+    "test:rewrite:m8": "node --test tests/tauri-rewrite/m8-integration-package.test.cjs",
+    "test:d1000-d1012:g0": "node --test tests/d1000-d1012/g0-project-metadata.test.cjs",
+    "test:d1000-d1012:g1": "node --test tests/d1000-d1012/g1-diagnostic-catalog.test.cjs",
+    "test:d1000-d1012:g2": "node --test tests/d1000-d1012/g2-diagram-contract.test.cjs",
+    "test:d1000-d1012:g3": "node --test tests/d1000-d1012/g3-excel-contract.test.cjs",
+    "test:d1000-d1012:g4": "node --test tests/d1000-d1012/g4-self-reference.test.cjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

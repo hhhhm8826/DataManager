@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package d1000;
+
+message Hub {
+  // @PK
+  int32 id = 1;
+  string name = 2;
+}

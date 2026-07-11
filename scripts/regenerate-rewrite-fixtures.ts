@@ -28,6 +28,15 @@ import { generateExcelWorkbook } from '../apps/desktop/src/adapters/excel/excelW
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const sourceFixtureRoot = resolve(repositoryRoot, 'tests', 'fixtures', 'm0-legacy', 'proto')
+const selfReferenceFixture = resolve(
+  repositoryRoot,
+  'tests',
+  'fixtures',
+  'd1000-d1012',
+  '긴 한글 경로',
+  'PROTO',
+  'CategoryTable.proto'
+)
 const examplesRoot = resolve(repositoryRoot, 'examples')
 const outputRoot = resolve(examplesRoot, 'TAURI_REWRITE')
 const fixtureRoot = resolve(repositoryRoot, 'tests', 'fixtures', 'm8-rewrite')
@@ -65,7 +74,7 @@ async function main(): Promise<void> {
     mkdirSync(fixtureRoot, { recursive: true })
     await writeJson(manifestPath, manifest)
     const textFiles = manifest.textFiles as Record<string, unknown>
-    console.log(`Regenerated ${Object.keys(textFiles).length} text files and 2 workbooks.`)
+    console.log(`Regenerated ${Object.keys(textFiles).length} text files and 3 workbooks.`)
     return
   }
 
@@ -102,13 +111,19 @@ async function generateExamples(root: string): Promise<GenerationEvidence> {
   const sourceFiles = readdirSync(sourceFixtureRoot)
     .filter((fileName) => fileName.endsWith('.proto'))
     .sort((left, right) => left.localeCompare(right, 'en'))
+  sourceFiles.push(basename(selfReferenceFixture))
+  sourceFiles.sort((left, right) => left.localeCompare(right, 'en'))
   for (const fileName of sourceFiles) {
-    copyFileSync(resolve(sourceFixtureRoot, fileName), resolve(protoOutput, fileName))
+    const sourcePath =
+      fileName === basename(selfReferenceFixture)
+        ? selfReferenceFixture
+        : resolve(sourceFixtureRoot, fileName)
+    copyFileSync(sourcePath, resolve(protoOutput, fileName))
   }
   const workspace = parseProtoWorkspace(
     sourceFiles.map((sourceFile) => ({
       sourceFile,
-      source: readFileSync(resolve(sourceFixtureRoot, sourceFile), 'utf8')
+      source: readFileSync(resolve(protoOutput, sourceFile), 'utf8')
     }))
   )
   if (workspace.diagnostics.length > 0) {
@@ -133,7 +148,7 @@ async function generateExamples(root: string): Promise<GenerationEvidence> {
     writeFileSync(resolve(jsonOutput, file.fileName), file.contents, 'utf8')
   }
 
-  generateProtocOutputs(sourceFiles, codeOutput)
+  generateProtocOutputs(sourceFiles, protoOutput, codeOutput)
   const unreal = generateUnrealFiles(workspace)
   const unrealOutput = resolve(codeOutput, 'unreal')
   mkdirSync(unrealOutput, { recursive: true })
@@ -145,11 +160,15 @@ async function generateExamples(root: string): Promise<GenerationEvidence> {
   return { unrealDiagnostics: unreal.diagnostics }
 }
 
-function generateProtocOutputs(sourceFiles: readonly string[], codeOutput: string): void {
+function generateProtocOutputs(
+  sourceFiles: readonly string[],
+  protoRoot: string,
+  codeOutput: string
+): void {
   for (const language of protocLanguages) {
     const languageOutput = resolve(codeOutput, language)
     mkdirSync(languageOutput, { recursive: true })
-    const arguments_ = [`--proto_path=${sourceFixtureRoot}`]
+    const arguments_ = [`--proto_path=${protoRoot}`]
     if (language === 'go') {
       arguments_.push(`--plugin=protoc-gen-go=${goPluginPath}`)
     }
@@ -158,7 +177,7 @@ function generateProtocOutputs(sourceFiles: readonly string[], codeOutput: strin
     }
     arguments_.push(`--${language}_out=${languageOutput}`, ...sourceFiles)
     const result = spawnSync(protocPath, arguments_, {
-      cwd: sourceFixtureRoot,
+      cwd: protoRoot,
       encoding: 'utf8',
       shell: false
     })
@@ -190,7 +209,10 @@ async function buildManifest(
   }
   return {
     formatVersion: 1,
-    sourceFixture: 'tests/fixtures/m0-legacy/proto',
+    sourceFixtures: [
+      'tests/fixtures/m0-legacy/proto',
+      'tests/fixtures/d1000-d1012/긴 한글 경로/PROTO/CategoryTable.proto'
+    ],
     generatedExamples: 'examples/TAURI_REWRITE',
     tools: {
       protoc: runVersion(protocPath),

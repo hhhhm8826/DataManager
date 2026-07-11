@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package d1000;
+
+enum CatalogState {
+  CatalogState_NONE = 0;
+  CatalogState_ACTIVE = 1;
+  CatalogState_MAX = 2;
+}

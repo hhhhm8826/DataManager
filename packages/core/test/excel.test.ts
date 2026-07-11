@@ -1,7 +1,12 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { buildExcelWorkbookPlans, hasExcelErrors, validateExcelSheets } from '../src/excel'
+import {
+  buildExcelWorkbookPlans,
+  createExcelEmbeddedMetadata,
+  hasExcelErrors,
+  validateExcelSheets
+} from '../src/excel'
 import { parseProtoWorkspace } from '../src/proto/workspace'
 
 const fixtureRoot = resolve(
@@ -25,6 +30,54 @@ function fixtureWorkspace() {
 }
 
 describe('Excel contracts', () => {
+  it('uses Message @Memo source order and excludes memo values from domain rows', () => {
+    const workspace = parseProtoWorkspace([
+      {
+        sourceFile: 'GameItemTable.proto',
+        source: `syntax = "proto3";
+message GameItem {
+  int32 id = 1;
+  // @Memo(memo-plan) 기획 메모
+  string name = 2;
+}
+`
+      }
+    ])
+    const sheet = buildExcelWorkbookPlans(workspace)[0]!.sheets[0]!
+    expect(sheet.columnOrder).toEqual([
+      { kind: 'field', name: 'id' },
+      { kind: 'memo', id: 'memo-plan' },
+      { kind: 'field', name: 'name' }
+    ])
+    expect(sheet.memoColumns).toEqual([{ id: 'memo-plan', name: '기획 메모' }])
+
+    const validation = validateExcelSheets(workspace, 'GameItemTable.proto', [
+      {
+        name: 'GameItem',
+        headers: ['id', '기획 메모', 'name'],
+        rows: [[1, 'EXCEL_ONLY', '검']]
+      }
+    ])
+    expect(validation.results[0]?.rows[0]).toEqual({ id: 1, name: '검' })
+    expect(JSON.stringify(validation.results)).not.toContain('EXCEL_ONLY')
+
+    const movedWorkspace = parseProtoWorkspace([
+      {
+        sourceFile: 'GameItemTable.proto',
+        source: `syntax = "proto3";
+message GameItem {
+  // @Memo(memo-plan) 기획 메모
+  int32 id = 1;
+  string name = 2;
+}
+`
+      }
+    ])
+    expect(buildExcelWorkbookPlans(movedWorkspace)[0]!.embeddedMetadata.fingerprint).not.toBe(
+      buildExcelWorkbookPlans(workspace)[0]!.embeddedMetadata.fingerprint
+    )
+  })
+
   it('groups one workbook per selected Proto file with schema-backed dropdown plans', () => {
     const plans = buildExcelWorkbookPlans(fixtureWorkspace())
 
@@ -101,5 +154,76 @@ describe('Excel contracts', () => {
     expect(validation.diagnostics.map(({ code }) => code)).toEqual(
       expect.arrayContaining(['EXCEL_HEADER_MISSING', 'EXCEL_SHEET_MISSING'])
     )
+  })
+
+  it('plans ordered memo columns and excludes current and stale memo values from domain rows', () => {
+    const workspace = fixtureWorkspace()
+    const tables = {
+      'KeyTable.proto#SingleTarget': {
+        memoColumns: [
+          { id: 'memo-second', name: '검토 결과', order: 1 },
+          { id: 'memo-first', name: '기획 메모', order: 0 }
+        ]
+      }
+    }
+    const plan = buildExcelWorkbookPlans(workspace, undefined, tables)[0]!
+    expect(plan.sheets[0]?.memoColumns.map(({ id, name }) => ({ id, name }))).toEqual([
+      { id: 'memo-first', name: '기획 메모' },
+      { id: 'memo-second', name: '검토 결과' }
+    ])
+
+    const staleMetadata = createExcelEmbeddedMetadata('KeyTable.proto', [
+      {
+        name: 'SingleTarget',
+        memoColumns: [{ id: 'memo-old', name: '이전 메모' }]
+      }
+    ])
+    const validation = validateExcelSheets(
+      workspace,
+      'KeyTable.proto',
+      [
+        {
+          name: 'SingleTarget',
+          headers: ['id', 'label', 'state', '기획 메모', '이전 메모'],
+          rows: [[1, 'first', 'FixtureState_ACTIVE', 'CURRENT_SENTINEL', 'OLD_SENTINEL']],
+          embeddedMetadata: staleMetadata
+        },
+        { name: 'CompositeTarget', headers: ['region', 'id', 'label'], rows: [] },
+        { name: 'GroupTarget', headers: ['groupId', 'label'], rows: [] },
+        { name: 'NoKeyTarget', headers: ['label'], rows: [] }
+      ],
+      tables
+    )
+
+    expect(validation.results[0]?.rows[0]).toEqual({
+      id: 1,
+      label: 'first',
+      state: 'FixtureState_ACTIVE'
+    })
+    expect(JSON.stringify(validation.results)).not.toMatch(/SENTINEL/)
+    expect(validation.diagnostics.map(({ code }) => code)).toEqual(
+      expect.arrayContaining(['EXCEL_MEMO_SCHEMA_STALE', 'EXCEL_MEMO_HEADER_MISSING'])
+    )
+    expect(validation.diagnostics.map(({ code }) => code)).not.toContain('EXCEL_HEADER_UNKNOWN')
+  })
+
+  it('blocks corrupt embedded memo metadata while preserving unknown-header errors', () => {
+    const workspace = fixtureWorkspace()
+    const validation = validateExcelSheets(workspace, 'KeyTable.proto', [
+      {
+        name: 'SingleTarget',
+        headers: ['id', 'label', 'state', 'mystery'],
+        rows: [[1, 'first', 'FixtureState_ACTIVE', 'value']],
+        embeddedMetadataIssue: 'corrupt'
+      },
+      { name: 'CompositeTarget', headers: ['region', 'id', 'label'], rows: [] },
+      { name: 'GroupTarget', headers: ['groupId', 'label'], rows: [] },
+      { name: 'NoKeyTarget', headers: ['label'], rows: [] }
+    ])
+
+    expect(validation.diagnostics.map(({ code }) => code)).toEqual(
+      expect.arrayContaining(['EXCEL_MEMO_METADATA_CORRUPT', 'EXCEL_HEADER_UNKNOWN'])
+    )
+    expect(hasExcelErrors(validation)).toBe(true)
   })
 })

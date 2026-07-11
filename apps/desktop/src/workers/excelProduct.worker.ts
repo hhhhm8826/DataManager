@@ -2,6 +2,7 @@ import type { ExcelWorkbookPlan } from '@datamanager/core'
 import {
   extractRawExcelSheets,
   generateExcelWorkbook,
+  inspectExcelWorkbookMetadata,
   type ExcelProgress
 } from '../adapters/excel/excelWorkbook'
 
@@ -18,12 +19,19 @@ interface ReadRequest {
   binary: Uint8Array
 }
 
-type WorkerRequest = GenerateRequest | ReadRequest
+interface InspectRequest {
+  id: string
+  type: 'inspect'
+  binary: Uint8Array
+}
+
+type WorkerRequest = GenerateRequest | ReadRequest | InspectRequest
 
 self.addEventListener('message', (event: MessageEvent<WorkerRequest>) => {
   const request = event.data
   if (request.type === 'generate') void generate(request)
-  else void read(request)
+  else if (request.type === 'read') void read(request)
+  else void inspect(request)
 })
 
 async function generate(request: GenerateRequest): Promise<void> {
@@ -48,6 +56,15 @@ async function read(request: ReadRequest): Promise<void> {
       onProgress: (progress) => postProgress(request.id, 0, 1, progress)
     })
     self.postMessage({ id: request.id, type: 'read', sourceFile: request.sourceFile, sheets })
+  } catch (error) {
+    postFailure(request.id, error)
+  }
+}
+
+async function inspect(request: InspectRequest): Promise<void> {
+  try {
+    const inspection = await inspectExcelWorkbookMetadata(request.binary)
+    self.postMessage({ id: request.id, type: 'inspected', inspection })
   } catch (error) {
     postFailure(request.id, error)
   }

@@ -55,8 +55,9 @@ cover runtime schema validation and the UI dry-run-before-commit flow.
 
 The M8 isolated E2E workspace preloads an equivalent settings v2 file and
 rechecks persistence after schema, Excel, JSON, and code generation operations.
-The real legacy `config.json` import remains covered by native preview/import
-tests; the full installed-app migration UI remains an interactive desktop gate.
+It also discovers the repository's real `config.json`, exercises preview and
+import in the native app, verifies every resolved path, and confirms that the
+legacy file remains unchanged.
 
 ## Installer and Cutover
 
@@ -104,3 +105,12 @@ Use copies of production workspaces when comparing releases. The Tauri import
 flow leaves legacy `config.json` and all workspace files unchanged. Removing the
 Tauri `settings.v2.json` resets only the new application's settings and does not
 modify legacy configuration or user data.
+
+## Excel Memo Migration
+
+Older D1007 workspaces may contain `tables[*].memoColumns` in
+`.datamanager/workspace.json`. These entries remain readable. When that Message
+is next saved in the schema editor, DataManager writes each memo as an ordered
+`// @Memo(memo-<id>) <name>` directive after the existing fields and removes the
+legacy table entry in the same native transaction. Excel and JSON continue to
+accept the legacy metadata until this save occurs.

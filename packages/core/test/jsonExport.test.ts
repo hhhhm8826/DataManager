@@ -2,7 +2,11 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import type { ExcelReadResult } from '../src/excel'
-import { collectJsonExportDependencies, exportResolvedJson } from '../src/jsonExport'
+import {
+  collectJsonExportDependencies,
+  exportResolvedJson,
+  JSON_REFERENCE_EXPANSION_LIMIT
+} from '../src/jsonExport'
 import { parseProtoWorkspace } from '../src/proto/workspace'
 
 const fixtureRoot = resolve(import.meta.dirname, '..', '..', '..', 'tests', 'fixtures', 'm0-legacy')
@@ -24,6 +28,26 @@ function fixture() {
     rows: data[message.name] ?? []
   }))
   return { workspace, results }
+}
+
+function selfFixture(rows: ExcelReadResult['rows']) {
+  const workspace = parseProtoWorkspace([
+    {
+      sourceFile: 'CategoryTable.proto',
+      source: `syntax = "proto3";
+message Category {
+  // @PK
+  int32 id = 1;
+  string name = 2;
+  Category parent = 3;
+}
+`
+    }
+  ])
+  return {
+    workspace,
+    results: [{ sourceFile: 'CategoryTable.proto', messageName: 'Category', rows }]
+  }
 }
 
 describe('resolved JSON export', () => {
@@ -111,4 +135,162 @@ describe('resolved JSON export', () => {
     ])
     expect(exported.files).toEqual([])
   })
+
+  it('excludes a direct self edge from dependency cycles and resolves a terminating chain', () => {
+    const { workspace, results } = selfFixture([
+      { id: 1, name: 'Root', parent: null },
+      { id: 2, name: 'Child', parent: 1 },
+      { id: 3, name: 'Grandchild', parent: 2 }
+    ])
+
+    expect(collectJsonExportDependencies(workspace, ['Category'])).toEqual({
+      order: ['Category'],
+      diagnostics: []
+    })
+    const exported = exportResolvedJson(workspace, results, ['Category'])
+    expect(exported.diagnostics).toEqual([])
+    const rows = JSON.parse(exported.files[0]!.contents) as Array<Record<string, unknown>>
+    expect(rows[0]?.parent).toBeNull()
+    expect(rows[2]?.parent).toMatchObject({
+      id: 2,
+      parent: { id: 1, name: 'Root', parent: null }
+    })
+  })
+
+  it.each([
+    ['direct', [{ id: 1, name: 'Self', parent: 1 }], 'Category R2 (id=1) -> Category R2 (id=1)'],
+    [
+      'multi-row',
+      [
+        { id: 1, name: 'First', parent: 2 },
+        { id: 2, name: 'Second', parent: 1 }
+      ],
+      'Category R2 (id=1) -> Category R3 (id=2) -> Category R2 (id=1)'
+    ]
+  ])('reports a %s self-reference cycle with row and key path', (_label, rows, path) => {
+    const self = selfFixture(rows)
+    const exported = exportResolvedJson(self.workspace, self.results, ['Category'])
+
+    expect(exported.files).toEqual([])
+    expect(exported.diagnostics).toContainEqual(
+      expect.objectContaining({
+        code: 'JSON_REFERENCE_ROW_CYCLE',
+        sourceFile: 'CategoryTable.proto',
+        messageName: 'Category',
+        context: { path }
+      })
+    )
+  })
+
+  it('does not treat two branches sharing the same resolved parent as a cycle', () => {
+    const { workspace, results } = selfFixture([
+      { id: 1, name: 'Root', parent: null },
+      { id: 2, name: 'Left', parent: 1 },
+      { id: 3, name: 'Right', parent: 1 }
+    ])
+    const exported = exportResolvedJson(workspace, results, ['Category'])
+
+    expect(exported.diagnostics).toEqual([])
+    const rows = JSON.parse(exported.files[0]!.contents) as Array<Record<string, unknown>>
+    expect(rows[1]?.parent).toEqual(rows[2]?.parent)
+  })
+
+  it('never serializes Excel-only memo keys or sentinel values', () => {
+    const { workspace, results } = selfFixture([
+      { id: 1, name: 'Root', parent: null, '기획 메모': 'MEMO_SENTINEL' }
+    ])
+    const exported = exportResolvedJson(workspace, results, ['Category'])
+
+    expect(exported.diagnostics).toEqual([])
+    expect(exported.files[0]?.contents).not.toContain('기획 메모')
+    expect(exported.files[0]?.contents).not.toContain('MEMO_SENTINEL')
+  })
+
+  it('keeps self-reference lookup rules for multiple primary and group keys', () => {
+    const workspace = parseProtoWorkspace([
+      {
+        sourceFile: 'SelfKeyTable.proto',
+        source: `syntax = "proto3";
+message CompositeNode {
+  // @PK
+  int32 region = 1;
+  // @PK
+  int32 id = 2;
+  CompositeNode parents = 3;
+}
+message GroupNode {
+  // @Key
+  string groupId = 1;
+  string label = 2;
+  GroupNode members = 3;
+}
+`
+      }
+    ])
+    const results: ExcelReadResult[] = [
+      {
+        sourceFile: 'SelfKeyTable.proto',
+        messageName: 'CompositeNode',
+        rows: [
+          { region: 1, id: 1, parents: null },
+          { region: 1, id: 2, parents: null },
+          { region: 2, id: 1, parents: 1 }
+        ]
+      },
+      {
+        sourceFile: 'SelfKeyTable.proto',
+        messageName: 'GroupNode',
+        rows: [
+          { groupId: 'root', label: 'A', members: null },
+          { groupId: 'root', label: 'B', members: null },
+          { groupId: 'child', label: 'C', members: 'root' }
+        ]
+      }
+    ]
+
+    const composite = exportResolvedJson(workspace, results, ['CompositeNode'])
+    const compositeRows = JSON.parse(composite.files[0]!.contents) as Array<Record<string, unknown>>
+    expect(compositeRows[2]?.parents).toHaveLength(2)
+    const group = exportResolvedJson(workspace, results, ['GroupNode'])
+    const groupRows = JSON.parse(group.files[0]!.contents) as Array<Record<string, unknown>>
+    expect(groupRows[2]?.members).toHaveLength(2)
+  })
+
+  it('keeps missing and blank self references deterministic', () => {
+    const blank = selfFixture([{ id: 1, name: 'Root', parent: null }])
+    expect(exportResolvedJson(blank.workspace, blank.results, ['Category']).diagnostics).toEqual([])
+
+    const missing = selfFixture([{ id: 1, name: 'Orphan', parent: 99 }])
+    const exported = exportResolvedJson(missing.workspace, missing.results, ['Category'])
+    expect(exported.files).toEqual([])
+    expect(exported.diagnostics).toContainEqual(
+      expect.objectContaining({
+        code: 'JSON_REFERENCE_TARGET_MISSING',
+        row: 2,
+        fieldName: 'parent'
+      })
+    )
+  })
+
+  it('handles a 10,000-row chain without recursion and stops at the expansion limit', () => {
+    const { workspace, results } = selfFixture(
+      Array.from({ length: 10_000 }, (_, index) => ({
+        id: index + 1,
+        name: `Node ${index + 1}`,
+        parent: index === 0 ? null : index
+      }))
+    )
+    const exported = exportResolvedJson(workspace, results, ['Category'])
+
+    expect(exported.files).toEqual([])
+    expect(exported.diagnostics).toContainEqual(
+      expect.objectContaining({
+        code: 'JSON_REFERENCE_EXPANSION_LIMIT',
+        params: {
+          limit: JSON_REFERENCE_EXPANSION_LIMIT,
+          count: JSON_REFERENCE_EXPANSION_LIMIT + 1
+        }
+      })
+    )
+  }, 15_000)
 })

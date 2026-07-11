@@ -19,7 +19,8 @@ message MonsterRace {
   int32 GroupID = 1;
   // @PK
   Monster MonsterID = 2;
-  int32 Memo = 3;
+  // @Memo(memo-84736e5d-0528-466e-b89d-20947c29fc11) Memo
+
 }
 
 message Monster {

@@ -8,7 +8,9 @@ describe('M1 default AppData restart', () => {
     await assertInput('Proto 루트', requiredEnvironment('DATAMANAGER_E2E_APPDATA_PROTO_ROOT'))
     await assertInput('Excel 루트', requiredEnvironment('DATAMANAGER_E2E_APPDATA_EXCEL_ROOT'))
     await assertInput('JSON 루트', requiredEnvironment('DATAMANAGER_E2E_APPDATA_JSON_ROOT'))
-    await assertInput('열당 최대 테이블 수', '17')
+    if (await (await $('[aria-label="열당 최대 테이블 수"]')).isExisting()) {
+      throw new Error('Deprecated maxNodesPerColumn control returned after restart.')
+    }
   })
 })
 

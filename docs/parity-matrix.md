@@ -73,15 +73,15 @@ Status meanings:
 - Planned: not implemented in the new Tauri application yet.
 - Pass: implemented and verified in the new application.
 
-| Area                 | Legacy user flow and source                                              | Baseline status | New app status | Current evidence                                                                                                 |
-| -------------------- | ------------------------------------------------------------------------ | --------------- | -------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Startup and settings | App.tsx, SettingsPanel.tsx, SettingsService.ts                           | Baseline fixed  | Pass           | Settings v2/native/UI and legacy import tests, two fresh AppData sessions, and native directory/file dialogs.    |
-| Table schema         | TableCreator.tsx, ProtoParserService.ts                                  | Baseline fixed  | Pass           | Parse/patch/reparse tests plus native field edit, Table CRUD, and referenced rename/delete cancellation.         |
-| Enum schema          | EnumCreator.tsx, ProtoParserService.ts                                   | Baseline fixed  | Pass           | NONE/MAX and source-preservation tests plus native Enum CRUD and referenced deletion cancellation.               |
-| Diagram              | DiagramCanvas.tsx, TableNode.tsx                                         | Baseline fixed  | Pass           | Native 9-node/10-edge, MiniMap, search/hover/zoom, compact non-overlap, and interactive drag/pan evidence.       |
-| Excel and JSON       | ExcelPanel.tsx, ExcelService.ts, excel.ipc.ts, JsonService.ts            | Baseline fixed  | Pass           | Native collision/read/cancel/diagnostic/resolved JSON E2E plus Excel COM, dropdown, and workbook-open evidence.  |
-| Code generation      | CodeGenPanel.tsx, CodeGeneratorService.ts, UnrealCodeGeneratorService.ts | Baseline fixed  | Pass           | Nine-output, cancellation, real failure/stderr E2E, generated snapshots, and interactive output-folder evidence. |
-| Windows deployment   | electron-builder                                                         | Baseline fixed  | Pass           | CI NSIS artifact, installed five-second launch, uninstall, profile cleanup, and artifact digest verification.    |
+| Area                 | Legacy user flow and source                                              | Baseline status | New app status | Current evidence                                                                                              |
+| -------------------- | ------------------------------------------------------------------------ | --------------- | -------------- | ------------------------------------------------------------------------------------------------------------- |
+| Startup and settings | App.tsx, SettingsPanel.tsx, SettingsService.ts                           | Baseline fixed  | Pass           | Settings v2/native/UI and legacy import tests, two fresh AppData sessions, and native directory/file dialogs. |
+| Table schema         | TableCreator.tsx, ProtoParserService.ts                                  | Baseline fixed  | Pass           | Parse/patch/reparse tests plus native field edit, Table CRUD, and referenced rename/delete cancellation.      |
+| Enum schema          | EnumCreator.tsx, ProtoParserService.ts                                   | Baseline fixed  | Pass           | NONE/MAX and source-preservation tests plus native Enum CRUD and referenced deletion cancellation.            |
+| Diagram              | DiagramCanvas.tsx, TableNode.tsx                                         | Baseline fixed  | Pass           | Native 9-node/10-edge projection, deterministic geometry, MiniMap, search, hover, zoom, and compact layout.   |
+| Excel and JSON       | ExcelPanel.tsx, ExcelService.ts, excel.ipc.ts, JsonService.ts            | Baseline fixed  | Pass           | Native collision/read/cancel/diagnostic/resolved JSON E2E and workbook structure tests; Excel UI is manual.   |
+| Code generation      | CodeGenPanel.tsx, CodeGeneratorService.ts, UnrealCodeGeneratorService.ts | Baseline fixed  | Pass           | Nine-output, cancellation, real failure/stderr E2E, and generated snapshots; folder opening is manual.        |
+| Windows deployment   | electron-builder                                                         | Baseline fixed  | Pass           | Standard hosted NSIS build, installed five-second launch, uninstall, and profile cleanup.                     |
 
 ## Historical Legacy Quality Evidence
 
@@ -117,9 +117,10 @@ final active branch.
   `7778CE22083A80761F9B4BF12F0916057E44F48CC006965667A3611085041F13`.
   Its single installer is 2,465,105 bytes with SHA-256
   `A833537C4EFEB09663714A00C2CBFAD0AA88292F27E3B0CBC500C6EBA8086E5F`.
-- The interactive artifact ZIP digest is
+- The historical interactive artifact ZIP digest was
   `132D2EF60D05D55FFCB4E951BC02558A479881C0D6DBBD17602EB9B68C107FD6`.
-  Both contained reports pass all six normal-session checks.
+  Those historical reports are not used by the current Goal or CI; D1000 is a
+  user-verification item pending separate automation planning.
 - Electron packages, source processes, IPC, build configuration, npm lockfile,
   and legacy scripts are absent from the final active build. Rollback uses a
   separate worktree at the baseline commit.

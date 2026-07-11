@@ -5,6 +5,7 @@ out
 .eslintcache
 *.log*
 /examples/EXCEL/backup
+/examples/PROTO/.datamanager/
 /apps/desktop/.vite
 /apps/desktop/dist
 /apps/desktop/src-tauri/gen
@@ -21,5 +22,9 @@ out
 /.pnpm-store
 /.runlogs
 /target
+/artifacts
+/tools/windows-ui-automation/**/bin
+/tools/windows-ui-automation/**/obj
+/tools/windows-ui-automation/**/TestResults
 /.tauri-localappdata
 /*_GOAL.md

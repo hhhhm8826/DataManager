@@ -1,5 +1,5 @@
 import type { ExcelWorkbookPlan, RawExcelSheet } from '@datamanager/core'
-import type { ExcelProgress } from './excelWorkbook'
+import type { ExcelMetadataInspection, ExcelProgress } from './excelWorkbook'
 
 export interface GeneratedExcelFile {
   sourceFile: string
@@ -16,6 +16,7 @@ type WorkerResponse =
   | { id: string; type: 'progress'; itemIndex: number; itemCount: number; progress: ExcelProgress }
   | { id: string; type: 'generated'; files: GeneratedExcelFile[] }
   | { id: string; type: 'read'; sourceFile: string; sheets: RawExcelSheet[] }
+  | { id: string; type: 'inspected'; inspection: ExcelMetadataInspection }
   | { id: string; type: 'error'; message: string }
 
 export function generateExcelWorkbooksInWorker(
@@ -37,6 +38,17 @@ export function readExcelWorkbookInWorker(
   return runWorker<RawExcelSheet[]>(
     { type: 'read', sourceFile, binary },
     (response) => (response.type === 'read' ? response.sheets : undefined),
+    options
+  )
+}
+
+export function inspectExcelWorkbookInWorker(
+  binary: Uint8Array,
+  options: ExcelWorkerOptions = {}
+): Promise<ExcelMetadataInspection> {
+  return runWorker<ExcelMetadataInspection>(
+    { type: 'inspect', binary },
+    (response) => (response.type === 'inspected' ? response.inspection : undefined),
     options
   )
 }

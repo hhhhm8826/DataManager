@@ -111,6 +111,7 @@ struct ProtocRequest {
     executable: PathBuf,
     args: Vec<String>,
     cwd: PathBuf,
+    input_directory: PathBuf,
     output_directory: PathBuf,
     staging_directory: PathBuf,
 }
@@ -346,17 +347,31 @@ fn build_request(
         ));
     }
     let staging_directory = unique_sibling(&output_directory, "staging")?;
+    let input_directory = unique_sibling(&output_directory, "proto-input")?;
+    fs::create_dir(&input_directory).map_err(|error| {
+        NativeError::with_path(
+            "CODEGEN_INPUT_STAGING_CREATE_FAILED",
+            error.to_string(),
+            &input_directory,
+        )
+    })?;
+    if let Err(error) = stage_proto_inputs(&proto_files, &input_directory) {
+        discard_staging(&input_directory);
+        return Err(error);
+    }
     fs::create_dir(&staging_directory).map_err(|error| {
+        discard_staging(&input_directory);
         NativeError::with_path(
             "CODEGEN_STAGING_CREATE_FAILED",
             error.to_string(),
             &staging_directory,
         )
     })?;
-    let mut args = vec![format!("--proto_path={}", proto_root.display())];
+    let mut args = vec![format!("--proto_path={}", input_directory.display())];
     if let Some(plugin) = definition.plugin {
         let plugin_path = find_executable(plugin, executable.parent()).ok_or_else(|| {
             discard_staging(&staging_directory);
+            discard_staging(&input_directory);
             NativeError::new(
                 "PROTOC_PLUGIN_MISSING",
                 format!("Required plugin '{plugin}' is not available on PATH."),
@@ -381,7 +396,8 @@ fn build_request(
         language: definition.id.to_string(),
         executable,
         args,
-        cwd: proto_root,
+        cwd: input_directory.clone(),
+        input_directory,
         output_directory,
         staging_directory,
     })
@@ -394,6 +410,7 @@ fn execute_request(request: &ProtocRequest) -> CommandResult<ProtocRunResult> {
         .output()
         .map_err(|error| {
             discard_staging(&request.staging_directory);
+            discard_staging(&request.input_directory);
             NativeError::with_path(
                 "PROTOC_EXECUTION_START_FAILED",
                 error.to_string(),
@@ -407,10 +424,54 @@ fn execute_request(request: &ProtocRequest) -> CommandResult<ProtocRunResult> {
     };
     if process.exit_code != 0 {
         discard_staging(&request.staging_directory);
+        discard_staging(&request.input_directory);
         return evaluate_result(request, process);
     }
-    promote_staging(&request.staging_directory, &request.output_directory)?;
+    let promotion = promote_staging(&request.staging_directory, &request.output_directory);
+    discard_staging(&request.input_directory);
+    promotion?;
     evaluate_result(request, process)
+}
+
+fn stage_proto_inputs(
+    proto_files: &[super::files::ProtoFileEntry],
+    input_directory: &Path,
+) -> CommandResult<()> {
+    for entry in proto_files {
+        let source = fs::read_to_string(&entry.path).map_err(|error| {
+            NativeError::with_path(
+                "CODEGEN_PROTO_READ_FAILED",
+                error.to_string(),
+                Path::new(&entry.path),
+            )
+        })?;
+        let sanitized = strip_memo_directives(&source);
+        let target = input_directory.join(&entry.file_name);
+        fs::write(&target, sanitized).map_err(|error| {
+            NativeError::with_path("CODEGEN_PROTO_STAGE_FAILED", error.to_string(), &target)
+        })?;
+    }
+    Ok(())
+}
+
+fn strip_memo_directives(source: &str) -> String {
+    source
+        .split_inclusive('\n')
+        .map(|line| {
+            let trimmed = line.trim_start();
+            if trimmed.starts_with("//") && trimmed.contains("@Memo(") {
+                if line.ends_with("\r\n") {
+                    "\r\n"
+                } else if line.ends_with('\n') {
+                    "\n"
+                } else {
+                    ""
+                }
+            } else {
+                line
+            }
+        })
+        .collect()
 }
 
 fn canonical_output_target(path: &Path) -> CommandResult<PathBuf> {
@@ -688,8 +749,8 @@ mod tests {
 
     use super::{
         build_request, evaluate_result, language_definition, promote_staging, same_or_ancestor,
-        valid_generated_file_name, valid_protoc_version, write_unreal_files_with_settings,
-        GeneratedFileInput, ProcessResult,
+        strip_memo_directives, valid_generated_file_name, valid_protoc_version,
+        write_unreal_files_with_settings, GeneratedFileInput, ProcessResult,
     };
     use crate::commands::settings::{temporary_directory, AppSettings, CodegenOutput};
 
@@ -701,7 +762,11 @@ mod tests {
         let executable = directory.join("protoc.exe");
         fs::create_dir_all(&proto_root).expect("proto root should be created");
         fs::write(&executable, b"fake").expect("fake executable should be created");
-        fs::write(proto_root.join("BTable.proto"), b"fixture").expect("fixture should be written");
+        fs::write(
+            proto_root.join("BTable.proto"),
+            b"message B {\n  // @Memo(memo-note) note\n  int32 id = 1;\n}",
+        )
+        .expect("fixture should be written");
         fs::write(proto_root.join("AEnumType.proto"), b"fixture")
             .expect("fixture should be written");
         let settings = AppSettings {
@@ -715,7 +780,7 @@ mod tests {
         };
 
         let request = build_request(&settings, language_definition("cpp").unwrap()).unwrap();
-        assert_eq!(request.cwd, dunce::canonicalize(&proto_root).unwrap());
+        assert_eq!(request.cwd, request.input_directory);
         assert_eq!(
             request.args[0],
             format!("--proto_path={}", request.cwd.display())
@@ -725,11 +790,15 @@ mod tests {
             format!("--cpp_out={}", request.staging_directory.display())
         );
         assert_eq!(&request.args[2..], ["AEnumType.proto", "BTable.proto"]);
+        assert!(!fs::read_to_string(request.cwd.join("BTable.proto"))
+            .unwrap()
+            .contains("@Memo"));
 
         assert!(!request.output_directory.exists());
         assert!(request.staging_directory.is_dir());
 
         fs::remove_dir_all(&request.staging_directory).expect("staging should be removed");
+        fs::remove_dir_all(&request.input_directory).expect("input staging should be removed");
         fs::remove_dir_all(&directory).expect("test directory should be removed");
     }
 
@@ -765,6 +834,7 @@ mod tests {
         assert_eq!(&request.args[3..], ["ItemTable.proto"]);
 
         fs::remove_dir_all(&request.staging_directory).expect("staging should be removed");
+        fs::remove_dir_all(&request.input_directory).expect("input staging should be removed");
         fs::remove_dir_all(&directory).expect("test directory should be removed");
     }
 
@@ -778,6 +848,7 @@ mod tests {
                 "ItemTable.proto".to_string(),
             ],
             cwd: "D:\\proto".into(),
+            input_directory: "D:\\proto-input".into(),
             output_directory: "D:\\out".into(),
             staging_directory: "D:\\out-staging".into(),
         };
@@ -920,5 +991,15 @@ mod tests {
             language_definition("typescript").unwrap_err().code,
             "CODEGEN_LANGUAGE_UNSUPPORTED"
         );
+    }
+
+    #[test]
+    fn memo_directives_are_removed_without_changing_line_count() {
+        let source =
+            "message Item {\r\n  int32 id = 1;\r\n  // @Memo(memo-note) 기획 메모\r\n}\r\n";
+        let sanitized = strip_memo_directives(source);
+        assert!(!sanitized.contains("@Memo"));
+        assert_eq!(sanitized.lines().count(), source.lines().count());
+        assert!(sanitized.contains("int32 id = 1;"));
     }
 }

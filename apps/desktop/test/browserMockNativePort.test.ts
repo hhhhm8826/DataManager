@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { defaultAppSettings } from '@datamanager/core'
+import { defaultAppSettings, defaultWorkspaceMetadata } from '@datamanager/core'
 import { BrowserMockNativePort } from '../src/adapters/native/BrowserMockNativePort'
 
 let storage: Map<string, string>
@@ -44,8 +44,72 @@ describe('BrowserMockNativePort', () => {
     const port = new BrowserMockNativePort()
 
     await expect(port.loadSettings()).rejects.toMatchObject({
-      code: 'NATIVE_UNKNOWN',
+      code: 'NATIVE_VALIDATION_FAILED',
       context: {}
     })
+  })
+
+  it('keeps project metadata separate per Proto root and defaults missing projects', async () => {
+    const port = new BrowserMockNativePort()
+    await port.saveSettings({ ...defaultAppSettings, protoRoot: 'D:\\Workspace\\A' })
+
+    expect(await port.loadWorkspaceMetadata()).toEqual(defaultWorkspaceMetadata())
+    await port.updateWorkspaceMetadata({
+      expectedRevision: 0,
+      section: 'primaryKeyTypePolicy',
+      value: 'string'
+    })
+
+    await port.saveSettings({ ...defaultAppSettings, protoRoot: 'D:\\Workspace\\B' })
+    expect(await port.loadWorkspaceMetadata()).toEqual(defaultWorkspaceMetadata())
+
+    await port.saveSettings({ ...defaultAppSettings, protoRoot: 'D:\\Workspace\\A' })
+    await expect(port.loadWorkspaceMetadata()).resolves.toMatchObject({
+      revision: 1,
+      primaryKeyTypePolicy: 'string'
+    })
+  })
+
+  it('rejects stale metadata and preserves another section after reload', async () => {
+    const firstScreen = new BrowserMockNativePort()
+    const secondScreen = new BrowserMockNativePort()
+    const firstSnapshot = await firstScreen.loadWorkspaceMetadata()
+    const secondSnapshot = await secondScreen.loadWorkspaceMetadata()
+
+    await firstScreen.updateWorkspaceMetadata({
+      expectedRevision: firstSnapshot.revision,
+      section: 'tables',
+      value: {
+        'ItemTable.proto#Item': {
+          memoColumns: [{ id: 'memo-plan', name: '기획 메모', order: 0 }]
+        }
+      }
+    })
+
+    await expect(
+      secondScreen.updateWorkspaceMetadata({
+        expectedRevision: secondSnapshot.revision,
+        section: 'diagram',
+        value: { hubThreshold: 7, savedLayout: null }
+      })
+    ).rejects.toMatchObject({
+      code: 'WORKSPACE_METADATA_REVISION_CONFLICT',
+      context: { expectedRevision: 0, actualRevision: 1 }
+    })
+
+    const reloaded = await secondScreen.loadWorkspaceMetadata()
+    const merged = await secondScreen.updateWorkspaceMetadata({
+      expectedRevision: reloaded.revision,
+      section: 'diagram',
+      value: { hubThreshold: 7, savedLayout: null }
+    })
+
+    expect(merged.tables).toEqual({
+      'ItemTable.proto#Item': {
+        memoColumns: [{ id: 'memo-plan', name: '기획 메모', order: 0 }]
+      }
+    })
+    expect(merged.diagram.hubThreshold).toBe(7)
+    expect(merged.revision).toBe(2)
   })
 })

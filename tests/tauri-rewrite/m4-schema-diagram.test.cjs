@@ -33,13 +33,15 @@ test('M4: React Flow diagram includes interaction, search, hover, and detail sur
     'onNodeMouseEnter',
     'onEdgeMouseEnter',
     'diagram-node-dimmed',
-    'EnumNodeBody',
-    'maxNodesPerColumn',
+    'TypeDetailDialog',
+    'projectSchemaDiagram',
+    'layoutRunner',
+    'savedLayout',
     'fileColors'
   ]) {
     assert.match(screen, new RegExp(marker))
   }
-  assert.match(tests, /dims nonmatching search results/)
+  assert.match(tests, /nonmatching search results/)
   assert.match(tests, /Status_ACTIVE/)
 })
 

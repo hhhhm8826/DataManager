@@ -1,9 +1,17 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import ExcelJS from 'exceljs'
-import { buildExcelWorkbookPlans, parseProtoWorkspace } from '@datamanager/core'
+import {
+  EXCEL_METADATA_MAGIC,
+  buildExcelWorkbookPlans,
+  parseProtoWorkspace
+} from '@datamanager/core'
 import { describe, expect, it } from 'vitest'
-import { extractRawExcelSheets, generateExcelWorkbook } from '../src/adapters/excel/excelWorkbook'
+import {
+  extractRawExcelSheets,
+  generateExcelWorkbook,
+  inspectExcelWorkbookMetadata
+} from '../src/adapters/excel/excelWorkbook'
 
 const fixtureRoot = resolve(
   import.meta.dirname,
@@ -16,17 +24,47 @@ const fixtureRoot = resolve(
   'proto'
 )
 
-function plans() {
-  const workspace = parseProtoWorkspace(
+function fixtureWorkspace() {
+  return parseProtoWorkspace(
     ['FixtureEnumType.proto', 'KeyTable.proto', 'ReferenceTable.proto'].map((sourceFile) => ({
       sourceFile,
       source: readFileSync(resolve(fixtureRoot, sourceFile), 'utf8')
     }))
   )
-  return buildExcelWorkbookPlans(workspace)
+}
+
+function plans() {
+  return buildExcelWorkbookPlans(fixtureWorkspace())
 }
 
 describe('Excel workbook adapter', () => {
+  it('renders Message-local memo columns at their exact source positions', async () => {
+    const workspace = parseProtoWorkspace([
+      {
+        sourceFile: 'GameItemTable.proto',
+        source: `syntax = "proto3";
+message GameItem {
+  int32 id = 1;
+  // @Memo(memo-plan) 기획 메모
+  string name = 2;
+}
+`
+      }
+    ])
+    const binary = await generateExcelWorkbook(buildExcelWorkbookPlans(workspace)[0]!)
+    const workbook = new ExcelJS.Workbook()
+    await workbook.xlsx.load(binary as unknown as Parameters<typeof workbook.xlsx.load>[0])
+    const sheet = workbook.getWorksheet('GameItem')!
+    expect((sheet.getRow(1).values as ExcelJS.CellValue[]).slice(1)).toEqual([
+      'id',
+      '기획 메모',
+      'name'
+    ])
+    expect(sheet.getCell('B1').note).toBe('메모')
+    expect(sheet.getCell('B1').fill).toMatchObject({ fgColor: { argb: 'FF6B7280' } })
+    expect(sheet.getCell('C1').fill).toMatchObject({ fgColor: { argb: 'FF4472C4' } })
+  })
+
   it('round-trips workbook structure, style, and 10,000-row validations', async () => {
     const binary = await generateExcelWorkbook(plans()[0]!)
     const workbook = new ExcelJS.Workbook()
@@ -36,7 +74,8 @@ describe('Excel workbook adapter', () => {
       'CompositeTarget',
       'GroupTarget',
       'NoKeyTarget',
-      '_DropDown'
+      '_DropDown',
+      '_DataManager'
     ])
     const sheet = workbook.getWorksheet('SingleTarget')!
     expect((sheet.getRow(1).values as ExcelJS.CellValue[]).slice(1)).toEqual([
@@ -59,6 +98,43 @@ describe('Excel workbook adapter', () => {
       'FixtureState_NONE',
       'FixtureState_ACTIVE'
     ])
+    const metadata = workbook.getWorksheet('_DataManager')!
+    expect(metadata.state).toBe('veryHidden')
+    expect(metadata.getCell('A1').value).toBe(EXCEL_METADATA_MAGIC)
+  })
+
+  it('writes memo headers after schema fields and reads marker metadata by magic', async () => {
+    const plan = buildExcelWorkbookPlans(fixtureWorkspace(), undefined, {
+      'KeyTable.proto#SingleTarget': {
+        memoColumns: [{ id: 'memo-note', name: '기획 메모', order: 0 }]
+      }
+    })[0]!
+    const binary = await generateExcelWorkbook(plan)
+    const workbook = new ExcelJS.Workbook()
+    await workbook.xlsx.load(binary as unknown as Parameters<typeof workbook.xlsx.load>[0])
+    const sheet = workbook.getWorksheet('SingleTarget')!
+    expect((sheet.getRow(1).values as ExcelJS.CellValue[]).slice(1)).toEqual([
+      'id',
+      'label',
+      'state',
+      '기획 메모'
+    ])
+    expect(sheet.getCell('D1').fill).toMatchObject({ fgColor: { argb: 'FF6B7280' } })
+    expect(sheet.getCell('D1').note).toBe('메모')
+    expect(sheet.getColumn(4).numFmt).toBe('@')
+    sheet.getCell('D2').value = 'MEMO_SENTINEL'
+    const updated = Uint8Array.from(
+      (await workbook.xlsx.writeBuffer()) as unknown as ArrayLike<number>
+    )
+
+    const extracted = await extractRawExcelSheets(updated)
+    expect(extracted.map(({ name }) => name)).not.toContain('_DataManager')
+    expect(extracted.find(({ name }) => name === 'SingleTarget')?.embeddedMetadata).toEqual(
+      plan.embeddedMetadata
+    )
+    await expect(inspectExcelWorkbookMetadata(updated)).resolves.toEqual({
+      metadata: plan.embeddedMetadata
+    })
   })
 
   it('uses the full 10,000-row candidate range for same-workbook Message references', async () => {
@@ -71,6 +147,45 @@ describe('Excel workbook adapter', () => {
     ).dataValidations.model
     expect(validation.B2?.formulae[0]).toContain("COUNTA('CycleB'!$A$2:$A$10001)")
     expect(validation.B10001?.formulae[0]).toContain("COUNTA('CycleB'!$A$2:$A$10001)")
+  })
+
+  it('creates same-sheet validation for a direct self reference', async () => {
+    const workspace = parseProtoWorkspace([
+      {
+        sourceFile: 'CategoryTable.proto',
+        source:
+          'syntax = "proto3";\nmessage Category {\n  // @PK\n  int32 id = 1;\n  Category parent = 2;\n}\n'
+      }
+    ])
+    const binary = await generateExcelWorkbook(buildExcelWorkbookPlans(workspace)[0]!)
+    const workbook = new ExcelJS.Workbook()
+    await workbook.xlsx.load(binary as unknown as Parameters<typeof workbook.xlsx.load>[0])
+    const sheet = workbook.getWorksheet('Category')!
+    const validation = (
+      sheet as unknown as { dataValidations: { model: Record<string, { formulae: string[] }> } }
+    ).dataValidations.model
+
+    expect(validation.B2?.formulae[0]).toContain("COUNTA('Category'!$A$2:$A$10001)")
+    expect(validation.B10001?.formulae[0]).toContain("COUNTA('Category'!$A$2:$A$10001)")
+  })
+
+  it('uses a deterministic suffix when a Message owns the default metadata sheet name', async () => {
+    const workspace = parseProtoWorkspace([
+      {
+        sourceFile: 'MetadataTable.proto',
+        source: 'syntax = "proto3";\nmessage _DataManager { string value = 1; }\n'
+      }
+    ])
+    const plan = buildExcelWorkbookPlans(workspace)[0]!
+    const binary = await generateExcelWorkbook(plan)
+    const workbook = new ExcelJS.Workbook()
+    await workbook.xlsx.load(binary as unknown as Parameters<typeof workbook.xlsx.load>[0])
+
+    expect(workbook.getWorksheet('_DataManager')).toBeDefined()
+    expect(workbook.getWorksheet('_DataManager_2')?.getCell('A1').value).toBe(EXCEL_METADATA_MAGIC)
+    const extracted = await extractRawExcelSheets(binary)
+    expect(extracted.map(({ name }) => name)).toContain('_DataManager')
+    expect(extracted.map(({ name }) => name)).not.toContain('_DataManager_2')
   })
 
   it('normalizes rich text, formulas, and blanks while reporting read progress', async () => {

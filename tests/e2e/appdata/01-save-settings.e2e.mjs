@@ -13,7 +13,9 @@ describe('M1 default AppData persistence', () => {
     await setInput('Proto 루트', protoRoot)
     await setInput('Excel 루트', excelRoot)
     await setInput('JSON 루트', jsonRoot)
-    await setInput('열당 최대 테이블 수', '17')
+    if (await (await $('[aria-label="열당 최대 테이블 수"]')).isExisting()) {
+      throw new Error('Deprecated maxNodesPerColumn control is still visible.')
+    }
     await clickButton('저장')
     await waitForToast('설정을 저장했습니다.')
 
@@ -23,7 +25,7 @@ describe('M1 default AppData persistence', () => {
       settings.protoRoot !== protoRoot ||
       settings.excelRoot !== excelRoot ||
       settings.jsonRoot !== jsonRoot ||
-      settings.diagram?.maxNodesPerColumn !== 17
+      settings.diagram?.maxNodesPerColumn !== 8
     ) {
       throw new Error(`Default AppData settings were not persisted: ${JSON.stringify(settings)}`)
     }

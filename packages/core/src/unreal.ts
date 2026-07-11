@@ -10,7 +10,7 @@ export interface UnrealGeneratedFile {
   contents: string
 }
 
-export interface UnrealGenerationDiagnostic {
+export interface UnrealGenerationDiagnostic extends DiagnosticLike {
   code: string
   message: string
   sourceFile: string
@@ -435,3 +435,4 @@ function joinLines(lines: readonly string[]): string {
 function unqualified(type: string): string {
   return type.replace(/^\./, '').split('.').at(-1) ?? type
 }
+import type { DiagnosticLike } from './diagnostics'

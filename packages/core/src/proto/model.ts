@@ -5,7 +5,7 @@ export interface SourceSpan {
 
 export type ProtoDiagnosticSeverity = 'warning' | 'error'
 
-export interface ProtoDiagnostic {
+export interface ProtoDiagnostic extends DiagnosticLike {
   code: string
   message: string
   severity: ProtoDiagnosticSeverity
@@ -28,6 +28,14 @@ export interface ProtoFieldDeclaration {
   leadingTrivia: string
   rawDeclaration: string
   optionsText: string
+  order: number
+  span: SourceSpan
+}
+
+export interface ProtoMemoDeclaration {
+  id: string
+  name: string
+  order: number
   span: SourceSpan
 }
 
@@ -35,6 +43,7 @@ export interface ProtoMessageDeclaration {
   kind: 'message'
   name: string
   fields: ProtoFieldDeclaration[]
+  memos: ProtoMemoDeclaration[]
   sourceFile: string
   span: SourceSpan
   bodySpan: SourceSpan
@@ -111,11 +120,19 @@ export interface ProtoFieldDraft {
   isPrimaryKey?: boolean
   isGroupKey?: boolean
   optionsText?: string
+  order?: number
+}
+
+export interface ProtoMemoDraft {
+  id: string
+  name: string
+  order: number
 }
 
 export interface ProtoMessageDraft {
   name: string
   fields: ProtoFieldDraft[]
+  memos?: ProtoMemoDraft[]
 }
 
 export interface ProtoEnumValueDraft {
@@ -130,3 +147,4 @@ export interface ProtoEnumDraft {
 
 export type ProtoEditResult<T> =
   { success: true; value: T } | { success: false; diagnostics: ProtoDiagnostic[] }
+import type { DiagnosticLike } from '../diagnostics'

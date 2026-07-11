@@ -5,6 +5,7 @@ import type {
   ProtoEnumDraft,
   ProtoEnumValueDraft,
   ProtoFieldDeclaration,
+  ProtoMemoDeclaration,
   ProtoMessageDeclaration,
   ProtoMessageDraft,
   SourceSpan
@@ -128,8 +129,42 @@ export function prepareMessageDraft(
       leadingTrivia: previous?.leadingTrivia ?? '',
       rawDeclaration: previous?.rawDeclaration ?? '',
       optionsText: field.optionsText ?? previous?.optionsText ?? '',
+      order: field.order ?? index,
       span: previous?.span ?? { start: 0, end: 0 }
     }
+  })
+
+  const memoIds = new Set<string>()
+  const memos = (draft.memos ?? []).map((memo, index): ProtoMemoDeclaration => {
+    const memoSpan = existing?.memos.find(({ id }) => id === memo.id)?.span ?? span
+    const name = memo.name.trim()
+    const normalizedName = name.toLocaleLowerCase()
+    if (!/^memo-[A-Za-z0-9-]+$/.test(memo.id) || memoIds.has(memo.id)) {
+      diagnostics.push(
+        validationError(
+          'PROTO_MEMO_ID_INVALID',
+          `Invalid or duplicate memo id '${memo.id}'.`,
+          memoSpan
+        )
+      )
+    }
+    if (
+      [...name].length < 1 ||
+      [...name].length > 128 ||
+      [...name].some((character) => (character.codePointAt(0) ?? 0) < 32) ||
+      names.has(normalizedName)
+    ) {
+      diagnostics.push(
+        validationError(
+          'PROTO_MEMO_NAME_INVALID',
+          `Invalid or duplicate memo name '${name}'.`,
+          memoSpan
+        )
+      )
+    }
+    memoIds.add(memo.id)
+    names.add(normalizedName)
+    return { id: memo.id, name, order: memo.order ?? fields.length + index, span: memoSpan }
   })
 
   if (hasPrimaryKey && hasGroupKey) {
@@ -149,6 +184,7 @@ export function prepareMessageDraft(
       kind: 'message',
       name: draft.name,
       fields,
+      memos,
       sourceFile: existing?.sourceFile ?? '',
       span,
       bodySpan: existing?.bodySpan ?? span,

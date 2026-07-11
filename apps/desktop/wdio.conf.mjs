@@ -27,6 +27,15 @@ function prepareWorkspace() {
   const jsonRoot = resolve(e2eWorkspace, 'json')
   const codeRoot = resolve(e2eWorkspace, 'code')
   const sourceRoot = resolve(repositoryDirectory, 'tests', 'fixtures', 'm0-legacy', 'proto')
+  const selfReferenceSource = resolve(
+    repositoryDirectory,
+    'tests',
+    'fixtures',
+    'd1000-d1012',
+    '긴 한글 경로',
+    'PROTO',
+    'CategoryTable.proto'
+  )
   const protocRoot = resolve(repositoryDirectory, 'examples', 'PROTOC')
   const settingsPath = resolve(e2eWorkspace, 'settings.v2.json')
 
@@ -46,6 +55,7 @@ function prepareWorkspace() {
   )) {
     copyFileSync(resolve(sourceRoot, fileName), resolve(protoRoot, fileName))
   }
+  copyFileSync(selfReferenceSource, resolve(protoRoot, 'CategoryTable.proto'))
   writeFileSync(
     settingsPath,
     `${JSON.stringify(

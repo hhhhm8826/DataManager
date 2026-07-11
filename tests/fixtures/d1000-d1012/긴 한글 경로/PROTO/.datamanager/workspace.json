@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "revision": 0,
+  "primaryKeyTypePolicy": "unrestricted",
+  "tables": {},
+  "diagram": {
+    "hubThreshold": 5,
+    "savedLayout": {
+      "positions": {
+        "message:HubTable.proto:Hub": {
+          "x": 120,
+          "y": 80
+        },
+        "message:ShapeTable.proto:Shape": {
+          "x": 420,
+          "y": 80
+        }
+      },
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
+      }
+    }
+  }
+}

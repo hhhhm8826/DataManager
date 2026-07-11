@@ -28,6 +28,15 @@ describe('AppSettingsSchema', () => {
     ).toThrow()
   })
 
+  it('preserves deprecated maxNodesPerColumn for settings v2 compatibility', () => {
+    const existing = {
+      ...defaultAppSettings,
+      diagram: { fileColors: { 'ItemTable.proto': '#2457a6' }, maxNodesPerColumn: 17 }
+    }
+
+    expect(AppSettingsSchema.parse(JSON.parse(JSON.stringify(existing)))).toEqual(existing)
+  })
+
   it('requires non-empty languages for code generation outputs', () => {
     expect(() =>
       AppSettingsSchema.parse({
@@ -65,6 +74,21 @@ describe('toNativeError', () => {
     expect(toNativeError('native failed')).toEqual({
       code: 'NATIVE_UNKNOWN',
       message: 'native failed',
+      context: {}
+    })
+  })
+
+  it.each([
+    ['AbortError', 'NATIVE_OPERATION_ABORTED'],
+    ['TimeoutError', 'NATIVE_OPERATION_TIMED_OUT'],
+    ['ZodError', 'NATIVE_VALIDATION_FAILED']
+  ])('maps external %s instances to a stable product code', (name, code) => {
+    const error = new Error('third-party details')
+    error.name = name
+
+    expect(toNativeError(error)).toEqual({
+      code,
+      message: 'third-party details',
       context: {}
     })
   })

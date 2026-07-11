@@ -76,7 +76,7 @@ test('M8: native E2E uses an isolated workspace and covers the core flow', () =>
     'assertResolvedRootJson',
     'exerciseExcelCancellationAndDiagnostics',
     '9_998',
-    'Excel operation was cancelled.',
+    '작업이 취소되었습니다',
     'EXCEL_CELL_TYPE_MISMATCH',
     "'9개 성공'",
     'createCancellationFixtures',
@@ -96,7 +96,6 @@ test('M8: Windows CI verifies, runs E2E, packages NSIS, and uploads the installe
   const rootPackage = JSON.parse(read('package.json'))
   const workflow = read('.github/workflows/windows.yml')
   const installerSmoke = read('scripts/windows-installer-smoke.ps1')
-  const interactiveSmoke = read('scripts/windows-interactive-smoke.ps1')
   const tauri = JSON.parse(read('apps/desktop/src-tauri/tauri.conf.json'))
   const capability = JSON.parse(read('apps/desktop/src-tauri/capabilities/main.json'))
 
@@ -108,9 +107,7 @@ test('M8: Windows CI verifies, runs E2E, packages NSIS, and uploads the installe
     'pnpm test:e2e',
     'pnpm tauri:build',
     'windows-installer-smoke.ps1',
-    'target/release/bundle/nsis/*.exe',
-    'DataManager-interactive-smoke',
-    'artifacts/interactive-smoke-*.json'
+    'target/release/bundle/nsis/*.exe'
   ]) {
     assert.match(workflow, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
   }
@@ -126,64 +123,9 @@ test('M8: Windows CI verifies, runs E2E, packages NSIS, and uploads the installe
   assert.match(installerSmoke, /Remove-TemporaryProfile/)
   assert.match(installerSmoke, /Refusing to remove profile outside the temporary root/)
   assert.match(installerSmoke, /Start-Process -FilePath \$uninstaller/)
-  assert.equal(
-    rootPackage.scripts['interactive:smoke'],
-    'pwsh -NoProfile -File ./scripts/windows-interactive-smoke.ps1'
-  )
-  assert.match(interactiveSmoke, /Assert-NormalInteractiveSession/)
-  assert.match(interactiveSmoke, /ValidateOnly/)
-  assert.match(interactiveSmoke, /DataManager-interactive-profile-/)
-  assert.match(interactiveSmoke, /DataManager-interactive-workspace-/)
-  assert.match(interactiveSmoke, /Refusing to remove unexpected interactive-smoke path/)
-  assert.match(interactiveSmoke, /excel-com-structure/)
-  assert.match(interactiveSmoke, /desktop prompts were not started/)
-  assert.match(interactiveSmoke, /native-dialogs/)
-  assert.match(interactiveSmoke, /diagram-drag-pan/)
-  assert.match(interactiveSmoke, /excel-dropdowns/)
-  assert.match(interactiveSmoke, /excel-file-open/)
-  assert.match(interactiveSmoke, /code-output-open/)
-  assert.match(interactiveSmoke, /ConvertTo-Json -Depth 6/)
-  assert.match(interactiveSmoke, /Interactive Excel and desktop smoke passed/)
+  assert.equal(rootPackage.scripts['interactive:smoke'], undefined)
+  assert.equal(rootPackage.scripts['excel:smoke'], undefined)
   assert.match(read('docs/settings.md'), /experimental-codegen=enabled,kernel=upb/)
-  assert.match(read('docs/interactive-smoke.md'), /pnpm test:e2e/)
-  assert.match(read('docs/interactive-smoke.md'), /pnpm interactive:smoke/)
-  assert.match(read('scripts/windows-excel-smoke.ps1'), /C10001/)
-  assert.match(read('scripts/windows-excel-smoke.ps1'), /E10001/)
-  assert.match(read('scripts/windows-excel-smoke.ps1'), /normal signed-in Windows PowerShell/)
-})
-
-test('M8: normal-session interactive reports close every manual gate', () => {
-  const reportDirectory = path.join(repositoryRoot, 'artifacts')
-  const reports = fs
-    .readdirSync(reportDirectory)
-    .filter((fileName) => /^interactive-smoke-\d{8}-\d{6}\.json$/.test(fileName))
-  assert.ok(reports.length > 0, 'At least one interactive smoke report is required.')
-
-  const expectedChecks = [
-    'excel-com-structure',
-    'native-dialogs',
-    'diagram-drag-pan',
-    'excel-dropdowns',
-    'excel-file-open',
-    'code-output-open'
-  ]
-  for (const fileName of reports) {
-    const report = JSON.parse(read(path.join('artifacts', fileName)))
-    assert.equal(report.schemaVersion, 1)
-    assert.equal(report.passed, true)
-    assert.equal(report.error, null)
-    assert.match(report.generatedAt, /^\d{4}-\d{2}-\d{2}T/)
-    assert.match(report.environment.os, /^Microsoft Windows /)
-    assert.match(report.environment.powershell, /^\d+\.\d+\.\d+$/)
-    assert.match(report.environment.webView2, /^\d+(\.\d+){3}$/)
-    assert.match(report.environment.excel, /^\d+(\.\d+){3}$/)
-    assert.match(report.application.sha256, /^[A-F0-9]{64}$/)
-    assert.deepEqual(
-      report.checks.map((check) => check.id),
-      expectedChecks
-    )
-    assert.ok(report.checks.every((check) => check.passed === true))
-  }
 })
 
 test('M8: rewrite examples regenerate separately from the legacy baseline', () => {

@@ -2,10 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   CODEGEN_DEFINITIONS,
   configuredCodegenSelections,
+  formatDiagnostic,
+  formatDiagnosticMessage,
   generateUnrealFiles,
   toNativeError,
+  validatePrimaryKeyTypePolicy,
   type CodegenLanguage,
-  type NativeError
+  type NativeError,
+  type PrimaryKeyPolicyViolation
 } from '@datamanager/core'
 import {
   Ban,
@@ -45,6 +49,7 @@ interface RunLog {
   stderr: string
   exitCode: number | null
   args: string[]
+  technicalDetails: string
 }
 
 interface CodegenScreenProps {
@@ -60,6 +65,7 @@ export function CodegenScreen({
   const [loaded, setLoaded] = useState<LoadedProtoWorkspace | null>(null)
   const [environment, setEnvironment] = useState<CodegenEnvironment | null>(null)
   const [environmentError, setEnvironmentError] = useState<NativeError | null>(null)
+  const [policyViolations, setPolicyViolations] = useState<PrimaryKeyPolicyViolation[]>([])
   const [loading, setLoading] = useState(true)
   const [checking, setChecking] = useState(false)
   const [running, setRunning] = useState(false)
@@ -91,7 +97,11 @@ export function CodegenScreen({
     setSummary(null)
     try {
       const next = await loadProtoWorkspace(nativePort)
+      const metadata = await nativePort.loadWorkspaceMetadata()
       setLoaded(next)
+      setPolicyViolations(
+        validatePrimaryKeyTypePolicy(next.workspace, metadata.primaryKeyTypePolicy)
+      )
       if (next.settings.protocExecutable) await checkEnvironment()
       else {
         setEnvironment(null)
@@ -101,6 +111,7 @@ export function CodegenScreen({
       setLoaded(null)
       setEnvironment(null)
       setEnvironmentError(toNativeError(cause))
+      setPolicyViolations([])
     } finally {
       setLoading(false)
     }
@@ -149,13 +160,15 @@ export function CodegenScreen({
   }
   const rowReady = (row: GeneratorRow): boolean =>
     Boolean(
-      row.outputDirectory && (row.id === 'unreal' || (environment !== null && pluginAvailable(row)))
+      policyViolations.length === 0 &&
+      row.outputDirectory &&
+      (row.id === 'unreal' || (environment !== null && pluginAvailable(row)))
     )
   const configuredRows = rows.filter(({ outputDirectory }) => outputDirectory)
   const allReady = configuredRows.length > 0 && configuredRows.every(rowReady)
 
   const runGenerators = async (requestedRows: GeneratorRow[]): Promise<void> => {
-    if (!loaded || running || requestedRows.length === 0) return
+    if (!loaded || running || requestedRows.length === 0 || policyViolations.length > 0) return
     cancelRequested.current = false
     setCancelPending(false)
     setRunning(true)
@@ -256,7 +269,7 @@ export function CodegenScreen({
                 <strong>{environment?.protocVersion ?? 'protoc 환경 미확인'}</strong>
                 <span>
                   {environment?.protocExecutable ??
-                    environmentError?.message ??
+                    (environmentError ? formatDiagnosticMessage(environmentError) : null) ??
                     '설정에서 protoc 실행 파일을 선택하세요.'}
                 </span>
               </div>
@@ -286,7 +299,22 @@ export function CodegenScreen({
 
           {environmentError ? (
             <div className="notice notice-error" role="alert">
-              <strong>{environmentError.code}</strong> {environmentError.message}
+              {formatDiagnosticMessage(environmentError)}
+              <details className="technical-details">
+                <summary>기술 상세</summary>
+                <pre>{formatDiagnostic(environmentError).technicalDetails}</pre>
+              </details>
+            </div>
+          ) : null}
+          {policyViolations.length > 0 ? (
+            <div className="notice notice-error" role="alert">
+              기본키 타입이 프로젝트 정책에 맞지 않습니다:{' '}
+              {policyViolations
+                .map(
+                  ({ messageName, fieldName, fieldType }) =>
+                    `${messageName}.${fieldName}(${fieldType})`
+                )
+                .join(', ')}
             </div>
           ) : null}
           {summary ? (
@@ -364,9 +392,15 @@ export function CodegenScreen({
                     <span>{log.message}</span>
                     {log.exitCode !== null ? <code>exit {log.exitCode}</code> : null}
                   </div>
-                  {log.args.length > 0 ? <pre>{log.args.join(' ')}</pre> : null}
-                  {log.stdout ? <pre>{log.stdout}</pre> : null}
-                  {log.stderr ? <pre className="codegen-stderr">{log.stderr}</pre> : null}
+                  {log.args.length > 0 || log.stdout || log.stderr || log.technicalDetails ? (
+                    <details className="technical-details" open={log.status === 'error'}>
+                      <summary>기술 상세</summary>
+                      {log.args.length > 0 ? <pre>{log.args.join(' ')}</pre> : null}
+                      {log.stdout ? <pre>{log.stdout}</pre> : null}
+                      {log.stderr ? <pre className="codegen-stderr">{log.stderr}</pre> : null}
+                      {log.technicalDetails ? <pre>{log.technicalDetails}</pre> : null}
+                    </details>
+                  ) : null}
                 </article>
               ))}
             </section>
@@ -394,9 +428,10 @@ async function runUnreal(nativePort: NativePort, loaded: LoadedProtoWorkspace): 
     status: 'success',
     message: `${paths.length}개 파일 생성 완료`,
     stdout: paths.join('\n'),
-    stderr: generated.diagnostics.map(({ message }) => message).join('\n'),
+    stderr: generated.diagnostics.map(formatDiagnosticMessage).join('\n'),
     exitCode: 0,
-    args: []
+    args: [],
+    technicalDetails: ''
   }
 }
 
@@ -409,7 +444,8 @@ function successLog(row: GeneratorRow, result: ProtocRunResult): RunLog {
     stdout: result.stdout,
     stderr: result.stderr,
     exitCode: result.exitCode,
-    args: [result.executable, ...result.args]
+    args: [result.executable, ...result.args],
+    technicalDetails: ''
   }
 }
 
@@ -424,11 +460,12 @@ function errorLog(row: GeneratorRow, error: NativeError): RunLog {
     id: row.id,
     label: row.label,
     status: 'error',
-    message: `${error.code}: ${error.message}`,
+    message: formatDiagnosticMessage(error),
     stdout,
     stderr,
     exitCode,
-    args
+    args,
+    technicalDetails: `code=${error.code}`
   }
 }
 

@@ -3,10 +3,12 @@ import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
   addMessage,
+  buildProtoFileName,
   createProtoDocument,
   findReferenceImpacts,
   isEnumFileName,
   isMessageFileName,
+  normalizeProtoFileStem,
   updateEnum,
   updateMessage
 } from '../src/proto/patcher'
@@ -28,6 +30,51 @@ function readFixture(name: string): string {
 }
 
 describe('message patching', () => {
+  it('writes and reorders @Memo directives as Message-local virtual members', () => {
+    const document = parseProtoDocument(
+      `syntax = "proto3";\nmessage GameItem {\n  int32 id = 1;\n}\n`,
+      'GameItemTable.proto'
+    )
+    const result = updateMessage(document, 'GameItem', {
+      name: 'GameItem',
+      fields: [{ originalName: 'id', name: 'id', type: 'int32', fieldNumber: 1, order: 1 }],
+      memos: [{ id: 'memo-planning', name: '기획 메모', order: 0 }]
+    })
+
+    expect(result.success).toBe(true)
+    if (!result.success) return
+    expect(result.value.source).toContain('// @Memo(memo-planning) 기획 메모')
+    expect(result.value.source.indexOf('@Memo')).toBeLessThan(
+      result.value.source.indexOf('int32 id')
+    )
+    expect(result.value.declaration.fields).toHaveLength(1)
+    expect(result.value.declaration.memos[0]).toMatchObject({
+      id: 'memo-planning',
+      name: '기획 메모',
+      order: 0
+    })
+  })
+
+  it('normalizes a pasted extension and appends .proto exactly once', () => {
+    expect(buildProtoFileName('message', 'CustomTable')).toEqual({
+      success: true,
+      value: 'CustomTable.proto'
+    })
+    expect(buildProtoFileName('message', normalizeProtoFileStem('CustomTable.PROTO'))).toEqual({
+      success: true,
+      value: 'CustomTable.proto'
+    })
+  })
+
+  it.each(['Foo.proto.proto', ' FooTable', 'FooTable.', 'folder/FooTable', 'Foo'])(
+    'rejects an invalid filename stem: %s',
+    (stem) => {
+      const result = buildProtoFileName('message', stem)
+      expect(result.success).toBe(false)
+      if (!result.success) expect(result.diagnostics[0]?.code).toBe('PROTO_FILE_NAME_INVALID')
+    }
+  )
+
   it('preserves bytes outside the target and keeps field numbers through reorder and rename', () => {
     const source = readFixture('KeyTable.proto')
     const document = parseProtoDocument(source, 'KeyTable.proto')

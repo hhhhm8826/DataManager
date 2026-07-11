@@ -1,4 +1,11 @@
-import type { AppSettings, LegacyImportPreview, UnrealGeneratedFile } from '@datamanager/core'
+import type {
+  AppSettings,
+  LegacyImportPreview,
+  UnrealGeneratedFile,
+  WorkspaceMetadata,
+  WorkspaceMetadataSection,
+  WorkspaceMetadataSectionUpdate
+} from '@datamanager/core'
 
 export interface ProtoFileEntry {
   path: string
@@ -29,9 +36,26 @@ export interface ProtocRunResult {
   exitCode: number
 }
 
+export interface ProtoMetadataMutation {
+  oldKey: string
+  newKey: string | null
+}
+
+export interface ProtoMetadataTransactionRequest {
+  sourceFile: string
+  contents: Uint8Array
+  expectedRevision: number
+  mutation: ProtoMetadataMutation
+}
+
 export interface NativePort {
   loadSettings(): Promise<AppSettings>
   saveSettings(settings: AppSettings): Promise<AppSettings>
+  loadWorkspaceMetadata(): Promise<WorkspaceMetadata>
+  updateWorkspaceMetadata<S extends WorkspaceMetadataSection>(
+    update: WorkspaceMetadataSectionUpdate<S>
+  ): Promise<WorkspaceMetadata>
+  writeProtoWithMetadata(request: ProtoMetadataTransactionRequest): Promise<WorkspaceMetadata>
   selectDirectory(initialPath?: string): Promise<string | null>
   selectFile(initialPath?: string): Promise<string | null>
   findLegacyConfig(): Promise<string | null>

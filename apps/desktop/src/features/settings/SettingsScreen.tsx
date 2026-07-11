@@ -3,13 +3,20 @@ import { toast } from 'sonner'
 import {
   CODEGEN_DEFINITIONS,
   defaultAppSettings,
+  formatDiagnosticMessage,
   normalizeCodegenLanguage,
   toNativeError,
+  validatePrimaryKeyTypePolicy,
   type AppSettings,
-  type LegacyImportPreview
+  type LegacyPathCheck,
+  type LegacyImportPreview,
+  type PrimaryKeyPolicyViolation,
+  type PrimaryKeyTypePolicy
 } from '@datamanager/core'
 import { createNativePort } from '../../adapters/native/createNativePort'
 import type { NativePort } from '../../adapters/native/NativePort'
+import { useWorkspaceMetadataStore } from '../projectMetadata/workspaceMetadataStore'
+import { loadProtoWorkspace, type LoadedProtoWorkspace } from '../schema/protoWorkspaceService'
 
 type RootField = 'protoRoot' | 'excelRoot' | 'jsonRoot'
 
@@ -25,7 +32,7 @@ const codegenLanguageOptions = [
 ] as const
 
 function errorMessage(error: unknown): string {
-  return toNativeError(error).message
+  return formatDiagnosticMessage(toNativeError(error))
 }
 
 interface SettingsScreenProps {
@@ -45,16 +52,25 @@ export function SettingsScreen({
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [isMigrating, setIsMigrating] = useState(false)
-  const [diagramLimitInput, setDiagramLimitInput] = useState(
-    String(defaultAppSettings.diagram.maxNodesPerColumn)
-  )
+  const [policyWorkspace, setPolicyWorkspace] = useState<LoadedProtoWorkspace | null>(null)
+  const [policyViolations, setPolicyViolations] = useState<PrimaryKeyPolicyViolation[]>([])
+  const metadata = useWorkspaceMetadataStore((state) => state.metadata)
+  const metadataLoading = useWorkspaceMetadataStore((state) => state.loading)
 
   const reloadSettings = useCallback(async () => {
     setIsLoading(true)
     try {
       const loaded = await nativePort.loadSettings()
       setSettings(loaded)
-      setDiagramLimitInput(String(loaded.diagram.maxNodesPerColumn))
+      if (loaded.protoRoot) {
+        const workspace = await loadProtoWorkspace(nativePort)
+        setPolicyWorkspace(workspace)
+        await useWorkspaceMetadataStore.getState().load(nativePort, loaded.protoRoot)
+      } else {
+        setPolicyWorkspace(null)
+        useWorkspaceMetadataStore.getState().reset()
+      }
+      setPolicyViolations([])
       if (loaded.legacyImport) {
         setLegacyConfigPath(null)
         setMigrationPreview(null)
@@ -95,7 +111,6 @@ export function SettingsScreen({
     try {
       const saved = await nativePort.saveSettings(settings)
       setSettings(saved)
-      setDiagramLimitInput(String(saved.diagram.maxNodesPerColumn))
       toast.success('설정을 저장했습니다.')
     } catch (error) {
       toast.error(errorMessage(error))
@@ -122,7 +137,6 @@ export function SettingsScreen({
     try {
       const imported = await nativePort.importLegacySettings(migrationPreview.sourcePath)
       setSettings(imported)
-      setDiagramLimitInput(String(imported.diagram.maxNodesPerColumn))
       setLegacyConfigPath(null)
       setMigrationPreview(null)
       toast.success('기존 설정을 가져왔습니다.')
@@ -130,6 +144,24 @@ export function SettingsScreen({
       toast.error(errorMessage(error))
     } finally {
       setIsMigrating(false)
+    }
+  }
+
+  const updatePrimaryKeyPolicy = async (policy: PrimaryKeyTypePolicy): Promise<void> => {
+    if (!settings.protoRoot || !policyWorkspace || policy === metadata.primaryKeyTypePolicy) return
+    const violations = validatePrimaryKeyTypePolicy(policyWorkspace.workspace, policy)
+    if (violations.length > 0) {
+      setPolicyViolations(violations)
+      return
+    }
+    setPolicyViolations([])
+    try {
+      await useWorkspaceMetadataStore
+        .getState()
+        .updateSection(nativePort, settings.protoRoot, 'primaryKeyTypePolicy', policy)
+      toast.success('프로젝트 기본키 정책을 저장했습니다.')
+    } catch (error) {
+      toast.error(errorMessage(error))
     }
   }
 
@@ -197,6 +229,53 @@ export function SettingsScreen({
 
         <CodegenOutputs nativePort={nativePort} onChange={setSettings} settings={settings} />
 
+        <div className="settings-group project-policy-group">
+          <div className="settings-group-header">
+            <h3>프로젝트 기본키 타입</h3>
+          </div>
+          {!settings.protoRoot ? (
+            <p className="empty-row">Proto 루트를 설정하면 프로젝트 정책을 선택할 수 있습니다.</p>
+          ) : (
+            <div className="policy-options" role="radiogroup" aria-label="기본키 타입 정책">
+              <PolicyOption
+                checked={metadata.primaryKeyTypePolicy === 'numeric-or-enum'}
+                description="숫자 ID와 Enum만 허용합니다. 예: ItemId = 1001, Grade = LEGENDARY"
+                disabled={metadataLoading}
+                label="숫자 또는 Enum"
+                onSelect={() => void updatePrimaryKeyPolicy('numeric-or-enum')}
+                value="numeric-or-enum"
+              />
+              <PolicyOption
+                checked={metadata.primaryKeyTypePolicy === 'string'}
+                description={'문자열 코드만 허용합니다. 예: ItemCode = "SWORD_001"'}
+                disabled={metadataLoading}
+                label="문자열"
+                onSelect={() => void updatePrimaryKeyPolicy('string')}
+                value="string"
+              />
+              <PolicyOption
+                checked={metadata.primaryKeyTypePolicy === 'unrestricted'}
+                description="기존 프로젝트 호환을 위해 기본키 타입을 제한하지 않습니다."
+                disabled={metadataLoading}
+                label="자율"
+                onSelect={() => void updatePrimaryKeyPolicy('unrestricted')}
+                value="unrestricted"
+              />
+            </div>
+          )}
+          {policyViolations.length > 0 ? (
+            <div className="policy-violations" role="alert">
+              <strong>정책을 바꾸기 전에 다음 기본키 타입을 수정하세요.</strong>
+              {policyViolations.map((violation) => (
+                <p key={`${violation.sourceFile}-${violation.messageName}-${violation.fieldName}`}>
+                  {violation.messageName}.{violation.fieldName}: {violation.fieldType} (
+                  {violation.sourceFile})
+                </p>
+              ))}
+            </div>
+          ) : null}
+        </div>
+
         <div className="settings-group">
           <div className="settings-group-header settings-group-header-actions">
             <h3>파일 색상</h3>
@@ -245,41 +324,41 @@ export function SettingsScreen({
             ))
           )}
         </div>
-
-        <div className="settings-group">
-          <div className="settings-group-header">
-            <h3>관계도</h3>
-          </div>
-          <label className="field-row">
-            <span>열당 최대 테이블 수</span>
-            <input
-              aria-label="열당 최대 테이블 수"
-              max={50}
-              min={1}
-              onBlur={() => {
-                if (!diagramLimitInput) {
-                  setDiagramLimitInput(String(settings.diagram.maxNodesPerColumn))
-                }
-              }}
-              onChange={(event) => {
-                const input = event.target.value
-                setDiagramLimitInput(input)
-                if (!input) return
-                const normalized = Math.min(50, Math.max(1, Number(input)))
-                if (!Number.isFinite(normalized)) return
-                setDiagramLimitInput(String(normalized))
-                setSettings((current) => ({
-                  ...current,
-                  diagram: { ...current.diagram, maxNodesPerColumn: normalized }
-                }))
-              }}
-              type="number"
-              value={diagramLimitInput}
-            />
-          </label>
-        </div>
       </section>
     </main>
+  )
+}
+
+function PolicyOption({
+  checked,
+  description,
+  disabled,
+  label,
+  onSelect,
+  value
+}: {
+  checked: boolean
+  description: string
+  disabled: boolean
+  label: string
+  onSelect: () => void
+  value: PrimaryKeyTypePolicy
+}): React.JSX.Element {
+  return (
+    <label className="policy-option">
+      <input
+        checked={checked}
+        disabled={disabled}
+        name="primary-key-type-policy"
+        onChange={onSelect}
+        type="radio"
+        value={value}
+      />
+      <span>
+        <strong>{label}</strong>
+        <small>{description}</small>
+      </span>
+    </label>
   )
 }
 
@@ -457,7 +536,7 @@ function LegacyMigration({
               <div className="migration-row" key={path.field} role="row">
                 <strong>{path.field}</strong>
                 <span className="path-value">{path.resolvedPath || '미설정'}</span>
-                <span className={`status status-${path.status}`}>{path.message}</span>
+                <span className={`status status-${path.status}`}>{legacyPathMessage(path)}</span>
               </div>
             ))}
           </div>
@@ -483,6 +562,20 @@ function LegacyMigration({
       ) : null}
     </section>
   )
+}
+
+function legacyPathMessage(path: LegacyPathCheck): string {
+  const target = path.kind === 'directory' ? '폴더' : '파일'
+  switch (path.status) {
+    case 'ready':
+      return `${target}를 사용할 수 있습니다.`
+    case 'missing':
+      return `${target}을 찾을 수 없습니다.`
+    case 'wrongType':
+      return `경로의 대상 종류가 ${target}과 다릅니다.`
+    case 'readOnly':
+      return `${target}에 쓸 수 없습니다.`
+  }
 }
 
 interface PathInputProps {

@@ -44,9 +44,11 @@ Rust output directory and verifies an actual `.rs` artifact.
 
 ## Diagram Settings
 
-File colors are keyed by exact Proto filename. The maximum nodes per column is
-an integer from 1 through 50. Both values persist in settings v2 and apply on
-the next relationship graph load.
+File colors are keyed by exact Proto filename. Saved node coordinates, viewport,
+named layouts, and the hub relation threshold are project data stored in
+`.datamanager/workspace.json`. The visible hub threshold is an integer from 1
+through 50 and defaults to 5. The deprecated `maxNodesPerColumn` settings v2
+field remains readable for compatibility but is not an editable layout control.
 
 ## Legacy Import
 

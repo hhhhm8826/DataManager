@@ -37,7 +37,7 @@ require.extensions['.ts'] = (module, filename) => {
       target: TypeScript.ScriptTarget.ES2022
     }
   }).outputText
-  module._compile(output, filename)
+  module._compile(output, filename, 'commonjs')
 }
 
 const core = require(path.join(repositoryRoot, 'packages', 'core', 'src', 'settings.ts'))
@@ -97,7 +97,7 @@ test('M1: browser native bridge reports corrupted persisted settings as a struct
   const port = new BrowserMockNativePort()
 
   await assert.rejects(port.loadSettings(), (error) => {
-    assert.equal(error.code, 'NATIVE_UNKNOWN')
+    assert.equal(error.code, 'NATIVE_VALIDATION_FAILED')
     assert.equal(typeof error.message, 'string')
     return true
   })
@@ -141,7 +141,7 @@ test('M1: Tauri bridge preserves serialized native errors and validates settings
       diagram: { ...core.defaultAppSettings.diagram, maxNodesPerColumn: 0 }
     }),
     (error) => {
-      assert.equal(error.code, 'NATIVE_UNKNOWN')
+      assert.equal(error.code, 'NATIVE_VALIDATION_FAILED')
       return true
     }
   )

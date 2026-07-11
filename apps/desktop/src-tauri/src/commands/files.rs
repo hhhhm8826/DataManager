@@ -373,7 +373,7 @@ fn normalize_absolute_path(path: &Path) -> CommandResult<PathBuf> {
 }
 
 #[cfg(target_os = "windows")]
-fn path_is_within(candidate: &Path, root: &Path) -> bool {
+pub(crate) fn path_is_within(candidate: &Path, root: &Path) -> bool {
     let candidate = candidate.to_string_lossy().to_lowercase();
     let mut root = root.to_string_lossy().to_lowercase();
     while root.ends_with('\\') || root.ends_with('/') {
@@ -386,7 +386,7 @@ fn path_is_within(candidate: &Path, root: &Path) -> bool {
 }
 
 #[cfg(not(target_os = "windows"))]
-fn path_is_within(candidate: &Path, root: &Path) -> bool {
+pub(crate) fn path_is_within(candidate: &Path, root: &Path) -> bool {
     candidate.starts_with(root)
 }
 
@@ -395,7 +395,7 @@ fn write_file_atomically(path: &Path, contents: &[u8]) -> CommandResult<()> {
 }
 
 #[cfg(target_os = "windows")]
-fn replace_file(temporary_path: &Path, target_path: &Path) -> std::io::Result<()> {
+pub(crate) fn replace_file(temporary_path: &Path, target_path: &Path) -> std::io::Result<()> {
     use std::os::windows::ffi::OsStrExt;
     use windows_sys::Win32::Storage::FileSystem::{
         MoveFileExW, MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH,
@@ -426,7 +426,7 @@ fn replace_file(temporary_path: &Path, target_path: &Path) -> std::io::Result<()
 }
 
 #[cfg(not(target_os = "windows"))]
-fn replace_file(temporary_path: &Path, target_path: &Path) -> std::io::Result<()> {
+pub(crate) fn replace_file(temporary_path: &Path, target_path: &Path) -> std::io::Result<()> {
     fs::rename(temporary_path, target_path)
 }
 

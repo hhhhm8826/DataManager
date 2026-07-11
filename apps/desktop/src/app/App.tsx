@@ -85,11 +85,21 @@ function WorkspaceContent({
       return <DiagramScreen nativePort={nativePort} onOpenSettings={onOpenSettings} />
     case 'tables':
       return (
-        <SchemaScreen focusKind="message" nativePort={nativePort} onOpenSettings={onOpenSettings} />
+        <SchemaScreen
+          focusKind="message"
+          key="message-schema"
+          nativePort={nativePort}
+          onOpenSettings={onOpenSettings}
+        />
       )
     case 'enums':
       return (
-        <SchemaScreen focusKind="enum" nativePort={nativePort} onOpenSettings={onOpenSettings} />
+        <SchemaScreen
+          focusKind="enum"
+          key="enum-schema"
+          nativePort={nativePort}
+          onOpenSettings={onOpenSettings}
+        />
       )
     case 'excel':
       return <ExcelScreen nativePort={nativePort} onOpenSettings={onOpenSettings} />

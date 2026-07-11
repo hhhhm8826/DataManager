@@ -6,7 +6,9 @@ import type {
   ProtoEnumValueDeclaration,
   ProtoFieldDeclaration,
   ProtoImport,
-  ProtoMessageDeclaration
+  ProtoMemoDeclaration,
+  ProtoMessageDeclaration,
+  SourceSpan
 } from './model'
 
 const unsupportedMessageKeywords = new Set([
@@ -184,6 +186,7 @@ function parseMessage(
         kind: 'message',
         name: name?.value ?? '',
         fields: [],
+        memos: [],
         sourceFile,
         span: { start: keyword.start, end: keyword.end },
         bodySpan: { start: keyword.end, end: keyword.end },
@@ -207,6 +210,7 @@ function parseMessage(
         kind: 'message',
         name: name.value,
         fields: [],
+        memos: [],
         sourceFile,
         span: { start: keyword.start, end: source.length },
         bodySpan: { start: open.end, end: source.length },
@@ -219,7 +223,9 @@ function parseMessage(
   }
 
   const fields: ProtoFieldDeclaration[] = []
+  const memos: ProtoMemoDeclaration[] = []
   let cursor = open.end
+  let memberOrder = 0
   let index = startIndex + 3
   let readOnly = false
   while (index < closeIndex) {
@@ -239,6 +245,19 @@ function parseMessage(
       cursor = tokens[Math.max(index - 1, 0)]?.end ?? cursor
       continue
     }
+    const memoResult = parseMemoDirectives(parsed.value.leadingTrivia, cursor)
+    for (const span of memoResult.invalidSpans) {
+      diagnostics.push({
+        code: 'PROTO_MEMO_DIRECTIVE_INVALID',
+        message: 'Memo directives must use // @Memo(memo-<id>) <name>.',
+        severity: 'error',
+        span
+      })
+      readOnly = true
+    }
+    for (const memo of memoResult.memos) memos.push({ ...memo, order: memberOrder++ })
+    parsed.value.leadingTrivia = memoResult.trivia
+    parsed.value.order = memberOrder++
     fields.push(parsed.value)
     if (parsed.value.isPrimaryKey && parsed.value.isGroupKey) {
       diagnostics.push(
@@ -270,15 +289,30 @@ function parseMessage(
   readOnly ||= fieldDiagnostics.length > 0
 
   const close = tokens[closeIndex]!
+  const trailingMemoResult = parseMemoDirectives(source.slice(cursor, close.start), cursor)
+  for (const span of trailingMemoResult.invalidSpans) {
+    diagnostics.push({
+      code: 'PROTO_MEMO_DIRECTIVE_INVALID',
+      message: 'Memo directives must use // @Memo(memo-<id>) <name>.',
+      severity: 'error',
+      span
+    })
+    readOnly = true
+  }
+  for (const memo of trailingMemoResult.memos) memos.push({ ...memo, order: memberOrder++ })
+  const memoDiagnostics = validateParsedMemos(memos, fields)
+  diagnostics.push(...memoDiagnostics)
+  readOnly ||= memoDiagnostics.length > 0
   return {
     value: {
       kind: 'message',
       name: name.value,
       fields,
+      memos,
       sourceFile,
       span: { start: keyword.start, end: close.end },
       bodySpan: { start: open.end, end: close.start },
-      bodyTrailingTrivia: source.slice(cursor, close.start),
+      bodyTrailingTrivia: trailingMemoResult.trivia,
       readOnly,
       diagnostics
     },
@@ -434,6 +468,7 @@ function parseField(
       leadingTrivia,
       rawDeclaration: source.slice(declarationStart, declarationEnd),
       optionsText: source.slice(numberToken.end, tokens[semicolonIndex]!.start).trim(),
+      order: 0,
       span: { start: declarationStart, end: declarationEnd }
     },
     nextIndex: semicolonIndex + 1
@@ -639,6 +674,73 @@ function skipDeclaration(tokens: TokenList, startIndex: number, limit = tokens.l
 function annotationPresent(trivia: string, annotation: '@PK' | '@Key'): boolean {
   const comments = trivia.match(/\/\/[^\r\n]*|\/\*[\s\S]*?\*\//g) ?? []
   return comments.some((comment) => new RegExp(`${annotation}\\b`).test(comment))
+}
+
+const memoDirectivePattern =
+  /^[ \t]*\/\/[ \t]*@Memo\((memo-[A-Za-z0-9-]+)\)[ \t]+([^\r\n]+?)[ \t]*(?:\r?\n|$)/gm
+
+function parseMemoDirectives(
+  trivia: string,
+  sourceOffset: number
+): { trivia: string; memos: ProtoMemoDeclaration[]; invalidSpans: SourceSpan[] } {
+  const memos: ProtoMemoDeclaration[] = []
+  const validStarts = new Set<number>()
+  const cleaned = trivia.replace(
+    memoDirectivePattern,
+    (match, id: string, name: string, offset: number) => {
+      validStarts.add(offset)
+      memos.push({
+        id,
+        name: name.trim(),
+        order: 0,
+        span: { start: sourceOffset + offset, end: sourceOffset + offset + match.length }
+      })
+      return ''
+    }
+  )
+  const invalidSpans: SourceSpan[] = []
+  const candidatePattern = /^[ \t]*\/\/[^\r\n]*@Memo\b[^\r\n]*(?:\r?\n|$)/gm
+  for (const match of trivia.matchAll(candidatePattern)) {
+    const offset = match.index ?? 0
+    if (!validStarts.has(offset)) {
+      invalidSpans.push({
+        start: sourceOffset + offset,
+        end: sourceOffset + offset + match[0].length
+      })
+    }
+  }
+  return { trivia: cleaned, memos, invalidSpans }
+}
+
+function validateParsedMemos(
+  memos: readonly ProtoMemoDeclaration[],
+  fields: readonly ProtoFieldDeclaration[]
+): ProtoDiagnostic[] {
+  const diagnostics: ProtoDiagnostic[] = []
+  const ids = new Set<string>()
+  const names = new Set(fields.map(({ name }) => name.toLocaleLowerCase()))
+  for (const memo of memos) {
+    const normalizedName = memo.name.toLocaleLowerCase()
+    if (ids.has(memo.id)) {
+      diagnostics.push({
+        code: 'PROTO_MEMO_ID_DUPLICATE',
+        message: `Duplicate memo id '${memo.id}'.`,
+        severity: 'error',
+        span: memo.span
+      })
+    }
+    if (!memo.name || [...memo.name].length > 128 || names.has(normalizedName)) {
+      diagnostics.push({
+        code: 'PROTO_MEMO_NAME_INVALID',
+        message: `Invalid or duplicate memo name '${memo.name}'.`,
+        severity: 'error',
+        span: memo.span
+      })
+    }
+    ids.add(memo.id)
+    names.add(normalizedName)
+  }
+  return diagnostics
 }
 
 function unquote(value: string): string {

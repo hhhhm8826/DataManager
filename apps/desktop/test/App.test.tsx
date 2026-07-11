@@ -2,6 +2,7 @@
 
 import { cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { defaultAppSettings } from '@datamanager/core'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { App } from '../src/app/App'
 
@@ -29,5 +30,31 @@ describe('App workspace navigation', () => {
     settingsButton.focus()
     await user.keyboard(' ')
     expect(await screen.findByRole('heading', { name: '설정', level: 2 })).toBeTruthy()
+  })
+
+  it('resets the schema editor when switching between Table and Enum areas', async () => {
+    window.localStorage.setItem(
+      'datamanager.settings.v2',
+      JSON.stringify({ ...defaultAppSettings, protoRoot: 'D:\\Proto' })
+    )
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole('button', { name: '테이블' }))
+    await user.click(await screen.findByRole('button', { name: '테이블 추가' }))
+    await user.type(screen.getByRole('textbox', { name: 'Message 이름' }), 'UnsavedTable')
+    expect(screen.getByDisplayValue('UnsavedTable')).toBeTruthy()
+
+    await user.click(screen.getByRole('button', { name: 'Enum' }))
+    expect(await screen.findByRole('heading', { name: 'Enum', level: 2 })).toBeTruthy()
+    expect(screen.queryByRole('textbox', { name: 'Message 이름' })).toBeNull()
+    await user.click(screen.getByRole('button', { name: 'Enum 추가' }))
+    await user.type(screen.getByRole('textbox', { name: 'Enum 이름' }), 'UnsavedEnum')
+    expect(screen.getByDisplayValue('UnsavedEnum')).toBeTruthy()
+
+    await user.click(screen.getByRole('button', { name: '테이블' }))
+    expect(await screen.findByRole('heading', { name: '테이블', level: 2 })).toBeTruthy()
+    expect(screen.queryByRole('textbox', { name: 'Enum 이름' })).toBeNull()
+    expect(screen.queryByDisplayValue('UnsavedTable')).toBeNull()
   })
 })

@@ -8,6 +8,7 @@ import type {
   ProtoFieldDraft,
   ProtoMessageDeclaration,
   ProtoMessageDraft,
+  ProtoMemoDeclaration,
   ProtoReferenceImpact
 } from './model'
 import { parseProtoDocument } from './parser'
@@ -157,6 +158,41 @@ export function isEnumFileName(value: string): boolean {
   return /^[A-Za-z_][A-Za-z0-9_]*EnumType\.proto$/.test(value)
 }
 
+export type ProtoFileKind = 'message' | 'enum'
+
+export function normalizeProtoFileStem(value: string): string {
+  return value.replace(/\.proto$/i, '')
+}
+
+export function defaultProtoFileStem(kind: ProtoFileKind, declarationName: string): string {
+  const name = declarationName || 'New'
+  return kind === 'message' ? `${name}Table` : `${name}EnumType`
+}
+
+export function buildProtoFileName(
+  kind: ProtoFileKind,
+  inputStem: string
+): ProtoEditResult<string> {
+  const stem = inputStem
+  const fileName = `${stem}.proto`
+  const valid = kind === 'message' ? isMessageFileName(fileName) : isEnumFileName(fileName)
+  if (
+    !valid ||
+    stem !== stem.trim() ||
+    /[\\/]/.test(stem) ||
+    /[. ]$/.test(stem) ||
+    /\.proto$/i.test(stem)
+  ) {
+    return editFailure(
+      'PROTO_FILE_NAME_INVALID',
+      kind === 'message'
+        ? 'Message file stem must use the {Name}Table form.'
+        : 'Enum file stem must use the {Name}EnumType form.'
+    )
+  }
+  return { success: true, value: fileName }
+}
+
 export function findReferenceImpacts(
   documents: readonly ProtoDocument[],
   symbolName: string
@@ -182,9 +218,12 @@ function renderMessage(
   drafts: ProtoFieldDraft[]
 ): string {
   const existingByName = new Map(existing.fields.map((field) => [field.name, field]))
-  const chunks = prepared.fields.map((field, index) => {
-    const draft = drafts[index]!
-    const previous = existingByName.get(draft.originalName ?? draft.name)
+  const draftByName = new Map(drafts.map((draft) => [draft.name, draft]))
+  const chunks = messageMembers(prepared).map((member) => {
+    if (member.kind === 'memo') return renderMemo(document.lineEnding, member.value)
+    const field = member.value
+    const draft = draftByName.get(field.name) ?? drafts.find(({ order }) => order === field.order)
+    const previous = existingByName.get(draft?.originalName ?? field.name)
     if (previous && fieldUnchanged(previous, field)) {
       return previous.leadingTrivia + previous.rawDeclaration
     }
@@ -194,10 +233,29 @@ function renderMessage(
 }
 
 function renderNewMessage(document: ProtoDocument, message: ProtoMessageDeclaration): string {
-  const fields = message.fields
-    .map((field) => renderField(document.lineEnding, undefined, field))
+  const fields = messageMembers(message)
+    .map((member) =>
+      member.kind === 'memo'
+        ? renderMemo(document.lineEnding, member.value)
+        : renderField(document.lineEnding, undefined, member.value)
+    )
     .join('')
   return `message ${message.name} {${fields}${document.lineEnding}}`
+}
+
+function messageMembers(
+  message: ProtoMessageDeclaration
+): Array<
+  { kind: 'field'; value: ProtoFieldDeclaration } | { kind: 'memo'; value: ProtoMemoDeclaration }
+> {
+  return [
+    ...message.fields.map((value) => ({ kind: 'field' as const, value })),
+    ...message.memos.map((value) => ({ kind: 'memo' as const, value }))
+  ].sort((left, right) => left.value.order - right.value.order)
+}
+
+function renderMemo(lineEnding: string, memo: ProtoMemoDeclaration): string {
+  return `${lineEnding}  // @Memo(${memo.id}) ${memo.name}${lineEnding}`
 }
 
 function renderField(

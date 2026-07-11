@@ -26,6 +26,26 @@ function fixtureWorkspace() {
 }
 
 describe('Unreal generator', () => {
+  it('ignores Message-local @Memo virtual members', () => {
+    const generated = generateUnrealFiles(
+      parseProtoWorkspace([
+        {
+          sourceFile: 'ItemTable.proto',
+          source: `syntax = "proto3";
+message Item {
+  int32 id = 1;
+  // @Memo(memo-plan) 기획 메모
+}
+`
+        }
+      ])
+    )
+    const output = generated.files.map(({ contents }) => contents).join('\n')
+    expect(output).toContain('int32 id = 0;')
+    expect(output).not.toContain('memo-plan')
+    expect(output).not.toContain('기획 메모')
+  })
+
   it('corrects enum prefixes, declaration order, loader naming, and cyclic values', () => {
     const generated = generateUnrealFiles(fixtureWorkspace())
     expect(generated.files.map(({ fileName }) => fileName)).toEqual([
@@ -175,6 +195,36 @@ enum Wide { Wide_NONE = 0; Wide_VALUE = 256; Wide_MAX = 257; }
     expect(generated.diagnostics.map(({ code }) => code)).toEqual([
       'UNREAL_ENUM_VALUE_OUT_OF_RANGE',
       'UNREAL_ENUM_VALUE_OUT_OF_RANGE'
+    ])
+  })
+
+  it('generates direct optional and repeated self references with pointer-safe Unreal fields', () => {
+    const workspace = parseProtoWorkspace([
+      {
+        sourceFile: 'CategoryTable.proto',
+        source: `syntax = "proto3";
+message Category {
+  // @PK
+  int32 id = 1;
+  optional Category parent = 2;
+  repeated Category children = 3;
+}
+`
+      }
+    ])
+    const generated = generateUnrealFiles(workspace)
+    const tables = generated.files.find(({ fileName }) => fileName === 'DataTables.h')!.contents
+    const loader = generated.files.find(
+      ({ fileName }) => fileName === 'DataTableLoader.cpp'
+    )!.contents
+
+    expect(tables).toContain('TSharedPtr<FCategory> parent;')
+    expect(tables).toContain('TArray<TSharedPtr<FCategory>> children;')
+    expect(loader).toContain('parent = MakeShared<FCategory>()')
+    expect(loader).toContain('TSharedPtr<FCategory> Row = MakeShared<FCategory>()')
+    expect(generated.diagnostics.map(({ code }) => code)).toEqual([
+      'UNREAL_MESSAGE_CYCLE_POINTER',
+      'UNREAL_MESSAGE_CYCLE_POINTER'
     ])
   })
 })

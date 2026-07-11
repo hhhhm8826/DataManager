@@ -3,15 +3,20 @@ import { open } from '@tauri-apps/plugin-dialog'
 import {
   parseAppSettings,
   parseLegacyImportPreview,
+  parseWorkspaceMetadata,
   toNativeError,
   type AppSettings,
   type LegacyImportPreview,
-  type UnrealGeneratedFile
+  type UnrealGeneratedFile,
+  type WorkspaceMetadata,
+  type WorkspaceMetadataSection,
+  type WorkspaceMetadataSectionUpdate
 } from '@datamanager/core'
 import type {
   CodegenEnvironment,
   CodegenPluginStatus,
   NativePort,
+  ProtoMetadataTransactionRequest,
   ProtocRunResult,
   ProtoFileEntry
 } from './NativePort'
@@ -29,6 +34,40 @@ export class TauriNativePort implements NativePort {
     try {
       const validated = parseAppSettings(settings)
       return parseAppSettings(await invoke<unknown>('save_settings', { settings: validated }))
+    } catch (error) {
+      throw toNativeError(error)
+    }
+  }
+
+  async loadWorkspaceMetadata(): Promise<WorkspaceMetadata> {
+    try {
+      return parseWorkspaceMetadata(await invoke<unknown>('load_workspace_metadata'))
+    } catch (error) {
+      throw toNativeError(error)
+    }
+  }
+
+  async updateWorkspaceMetadata<S extends WorkspaceMetadataSection>(
+    update: WorkspaceMetadataSectionUpdate<S>
+  ): Promise<WorkspaceMetadata> {
+    try {
+      return parseWorkspaceMetadata(
+        await invoke<unknown>('update_workspace_metadata', { request: update })
+      )
+    } catch (error) {
+      throw toNativeError(error)
+    }
+  }
+
+  async writeProtoWithMetadata(
+    request: ProtoMetadataTransactionRequest
+  ): Promise<WorkspaceMetadata> {
+    try {
+      return parseWorkspaceMetadata(
+        await invoke<unknown>('write_proto_with_metadata', {
+          request: { ...request, contents: Array.from(request.contents) }
+        })
+      )
     } catch (error) {
       throw toNativeError(error)
     }

@@ -2,7 +2,13 @@
 
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { defaultAppSettings, type AppSettings, type LegacyImportPreview } from '@datamanager/core'
+import {
+  applyWorkspaceMetadataSectionUpdate,
+  defaultAppSettings,
+  defaultWorkspaceMetadata,
+  type AppSettings,
+  type LegacyImportPreview
+} from '@datamanager/core'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type {
   CodegenEnvironment,
@@ -25,6 +31,8 @@ function codegenFixture(
   outputs: AppSettings['codegenOutputs'],
   options: {
     environment?: CodegenEnvironment
+    primaryKeyTypePolicy?: 'numeric-or-enum' | 'string' | 'unrestricted'
+    protoSource?: string
     runProtocLanguage?: NativePort['runProtocLanguage']
     writeUnrealFiles?: NativePort['writeUnrealFiles']
   } = {}
@@ -33,6 +41,8 @@ function codegenFixture(
   runProtocLanguage: ReturnType<typeof vi.fn<NativePort['runProtocLanguage']>>
   writeUnrealFiles: ReturnType<typeof vi.fn<NativePort['writeUnrealFiles']>>
 } {
+  let metadata = defaultWorkspaceMetadata()
+  metadata.primaryKeyTypePolicy = options.primaryKeyTypePolicy ?? 'unrestricted'
   const settings: AppSettings = {
     ...defaultAppSettings,
     protoRoot,
@@ -71,6 +81,12 @@ function codegenFixture(
   const nativePort: NativePort = {
     loadSettings: async () => settings,
     saveSettings: async (value) => value,
+    loadWorkspaceMetadata: async () => metadata,
+    updateWorkspaceMetadata: async (update) => {
+      metadata = applyWorkspaceMetadataSectionUpdate(metadata, update)
+      return metadata
+    },
+    writeProtoWithMetadata: async () => metadata,
     selectDirectory: async () => null,
     selectFile: async () => null,
     findLegacyConfig: async () => null,
@@ -85,7 +101,7 @@ function codegenFixture(
     checkCodegenEnvironment: async () => environment,
     runProtocLanguage,
     writeUnrealFiles,
-    readFile: async () => new TextEncoder().encode(protoSource),
+    readFile: async () => new TextEncoder().encode(options.protoSource ?? protoSource),
     writeFile: async (path) => path,
     backupFile: async (path) => `${path}.backup`,
     openPath: async () => undefined
@@ -94,6 +110,25 @@ function codegenFixture(
 }
 
 describe('CodegenScreen', () => {
+  it('blocks protoc before native execution when the project key policy is violated', async () => {
+    const fixture = codegenFixture([{ language: 'cpp', directory: 'D:\\Generated\\cpp' }], {
+      primaryKeyTypePolicy: 'string',
+      protoSource: `syntax = "proto3";
+message Item {
+  // @PK
+  int32 id = 1;
+}
+`
+    })
+    render(<CodegenScreen nativePort={fixture.nativePort} />)
+
+    expect(await screen.findByText(/Item\.id\(int32\)/)).toBeTruthy()
+    expect((screen.getByRole('button', { name: 'C++ 생성' }) as HTMLButtonElement).disabled).toBe(
+      true
+    )
+    expect(fixture.runProtocLanguage).not.toHaveBeenCalled()
+  })
+
   it('runs an individual configured language and shows the structured process result', async () => {
     const fixture = codegenFixture([{ language: 'cpp', directory: 'D:\\Generated\\cpp' }])
     const user = userEvent.setup()
@@ -231,7 +266,9 @@ describe('CodegenScreen', () => {
     )
     await user.click(screen.getByRole('button', { name: 'C++ 생성' }))
 
-    expect(await screen.findByText(/PROTOC_EXECUTION_FAILED/)).toBeTruthy()
+    expect(await screen.findByText(/protoc 실행을 완료할 수 없습니다/)).toBeTruthy()
+    expect(screen.queryByText(/protoc generation failed for cpp/)).toBeNull()
+    expect(screen.getByText('code=PROTOC_EXECUTION_FAILED')).toBeTruthy()
     expect(screen.getByText('compiler failure')).toBeTruthy()
     expect(screen.getByText('partial output')).toBeTruthy()
     expect(screen.getByText('exit 7')).toBeTruthy()

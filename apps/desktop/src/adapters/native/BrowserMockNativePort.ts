@@ -1,14 +1,22 @@
 import {
+  applyWorkspaceMetadataSectionUpdate,
   defaultAppSettings,
+  defaultWorkspaceMetadata,
   parseAppSettings,
+  parseWorkspaceMetadata,
   toNativeError,
   type AppSettings,
   type LegacyImportPreview,
-  type UnrealGeneratedFile
+  type UnrealGeneratedFile,
+  type WorkspaceMetadata,
+  type WorkspaceMetadataSection,
+  type WorkspaceMetadataSectionUpdate,
+  WorkspaceMetadataRevisionConflictError
 } from '@datamanager/core'
-import type { NativePort, ProtoFileEntry } from './NativePort'
+import type { NativePort, ProtoFileEntry, ProtoMetadataTransactionRequest } from './NativePort'
 
 const SETTINGS_STORAGE_KEY = 'datamanager.settings.v2'
+const WORKSPACE_METADATA_STORAGE_PREFIX = 'datamanager.workspace-metadata.v1:'
 const mockFiles = new Map<string, Uint8Array>()
 
 export class BrowserMockNativePort implements NativePort {
@@ -27,6 +35,79 @@ export class BrowserMockNativePort implements NativePort {
     const parsed = parseAppSettings(settings)
     window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(parsed))
     return parsed
+  }
+
+  async loadWorkspaceMetadata(): Promise<WorkspaceMetadata> {
+    const key = await this.workspaceMetadataStorageKey()
+    const serialized = window.localStorage.getItem(key)
+    if (!serialized) return defaultWorkspaceMetadata()
+
+    try {
+      return parseWorkspaceMetadata(JSON.parse(serialized))
+    } catch (error) {
+      throw toNativeError(error)
+    }
+  }
+
+  async updateWorkspaceMetadata<S extends WorkspaceMetadataSection>(
+    update: WorkspaceMetadataSectionUpdate<S>
+  ): Promise<WorkspaceMetadata> {
+    try {
+      const current = await this.loadWorkspaceMetadata()
+      const next = applyWorkspaceMetadataSectionUpdate(current, update)
+      window.localStorage.setItem(await this.workspaceMetadataStorageKey(), JSON.stringify(next))
+      return next
+    } catch (error) {
+      if (error instanceof WorkspaceMetadataRevisionConflictError) {
+        throw toNativeError({
+          code: error.code,
+          message: error.message,
+          context: {
+            expectedRevision: error.expectedRevision,
+            actualRevision: error.actualRevision
+          }
+        })
+      }
+      throw toNativeError(error)
+    }
+  }
+
+  async writeProtoWithMetadata(
+    request: ProtoMetadataTransactionRequest
+  ): Promise<WorkspaceMetadata> {
+    try {
+      const current = await this.loadWorkspaceMetadata()
+      if (current.revision !== request.expectedRevision) {
+        throw new WorkspaceMetadataRevisionConflictError(request.expectedRevision, current.revision)
+      }
+      const tables = { ...current.tables }
+      const moved = tables[request.mutation.oldKey]
+      delete tables[request.mutation.oldKey]
+      if (request.mutation.newKey && moved) tables[request.mutation.newKey] = moved
+      const next = applyWorkspaceMetadataSectionUpdate(current, {
+        expectedRevision: request.expectedRevision,
+        section: 'tables',
+        value: tables
+      })
+      const settings = await this.loadSettings()
+      const separator = settings.protoRoot.includes('\\') ? '\\' : '/'
+      const path = `${settings.protoRoot.replace(/[\\/]$/, '')}${separator}${request.sourceFile}`
+      mockFiles.set(path, request.contents.slice())
+      window.localStorage.setItem(await this.workspaceMetadataStorageKey(), JSON.stringify(next))
+      return next
+    } catch (error) {
+      if (error instanceof WorkspaceMetadataRevisionConflictError) {
+        throw toNativeError({
+          code: error.code,
+          message: error.message,
+          context: {
+            expectedRevision: error.expectedRevision,
+            actualRevision: error.actualRevision
+          }
+        })
+      }
+      throw toNativeError(error)
+    }
   }
 
   async selectDirectory(initialPath?: string): Promise<string | null> {
@@ -107,5 +188,10 @@ export class BrowserMockNativePort implements NativePort {
 
   async openPath(path: string): Promise<void> {
     void path
+  }
+
+  private async workspaceMetadataStorageKey(): Promise<string> {
+    const { protoRoot } = await this.loadSettings()
+    return `${WORKSPACE_METADATA_STORAGE_PREFIX}${protoRoot}`
   }
 }

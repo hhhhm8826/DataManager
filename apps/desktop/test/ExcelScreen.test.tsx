@@ -3,7 +3,14 @@
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ComponentProps } from 'react'
-import { defaultAppSettings, type LegacyImportPreview } from '@datamanager/core'
+import {
+  applyWorkspaceMetadataSectionUpdate,
+  EXCEL_METADATA_MAGIC,
+  EXCEL_METADATA_VERSION,
+  defaultAppSettings,
+  defaultWorkspaceMetadata,
+  type LegacyImportPreview
+} from '@datamanager/core'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { GeneratedExcelFile } from '../src/adapters/excel/ExcelProductWorkerClient'
 import type { NativePort, ProtoFileEntry } from '../src/adapters/native/NativePort'
@@ -11,6 +18,7 @@ import { ExcelScreen } from '../src/features/excel/ExcelScreen'
 
 type GenerateWorkbooks = NonNullable<ComponentProps<typeof ExcelScreen>['generateWorkbooks']>
 type ReadWorkbook = NonNullable<ComponentProps<typeof ExcelScreen>['readWorkbook']>
+type InspectWorkbook = NonNullable<ComponentProps<typeof ExcelScreen>['inspectWorkbook']>
 
 const protoSource = `syntax = "proto3";
 message Item {
@@ -22,12 +30,17 @@ message Item {
 
 afterEach(cleanup)
 
+async function openJsonTab(user: ReturnType<typeof userEvent.setup>): Promise<void> {
+  await user.click(await screen.findByRole('tab', { name: 'JSON 생성' }))
+}
+
 function excelFixture(existing: boolean): {
   nativePort: NativePort
   generateWorkbooks: GenerateWorkbooks
   writeFile: ReturnType<typeof vi.fn>
   backupFile: ReturnType<typeof vi.fn>
 } {
+  let metadata = defaultWorkspaceMetadata()
   const protoRoot = 'D:\\PROTO'
   const excelRoot = 'D:\\EXCEL'
   const jsonRoot = 'D:\\JSON'
@@ -62,6 +75,12 @@ function excelFixture(existing: boolean): {
   const nativePort: NativePort = {
     loadSettings: async () => ({ ...defaultAppSettings, protoRoot, excelRoot, jsonRoot }),
     saveSettings: async (settings) => settings,
+    loadWorkspaceMetadata: async () => metadata,
+    updateWorkspaceMetadata: async (update) => {
+      metadata = applyWorkspaceMetadataSectionUpdate(metadata, update)
+      return metadata
+    },
+    writeProtoWithMetadata: async () => metadata,
     selectDirectory: async () => null,
     selectFile: async () => null,
     findLegacyConfig: async () => null,
@@ -99,6 +118,196 @@ function excelFixture(existing: boolean): {
 }
 
 describe('ExcelScreen collision policy', () => {
+  it('starts both purposes at zero and preserves an explicit zero selection on reload', async () => {
+    const fixture = excelFixture(true)
+    const user = userEvent.setup()
+    render(
+      <ExcelScreen generateWorkbooks={fixture.generateWorkbooks} nativePort={fixture.nativePort} />
+    )
+
+    const excel = await screen.findByRole('checkbox', { name: 'ItemTable.xlsx Excel 생성' })
+    expect((excel as HTMLInputElement).checked).toBe(false)
+    expect((screen.getByRole('button', { name: '선택 생성' }) as HTMLButtonElement).disabled).toBe(
+      true
+    )
+
+    await openJsonTab(user)
+    const json = screen.getByRole('checkbox', { name: 'ItemTable.xlsx Item JSON 테이블' })
+    expect((json as HTMLInputElement).checked).toBe(false)
+    expect((screen.getByRole('button', { name: 'JSON 생성' }) as HTMLButtonElement).disabled).toBe(
+      true
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Excel 목록 새로고침' }))
+    await waitFor(() =>
+      expect(
+        (
+          screen.getByRole('checkbox', {
+            name: 'ItemTable.xlsx Item JSON 테이블'
+          }) as HTMLInputElement
+        ).checked
+      ).toBe(false)
+    )
+
+    await user.click(screen.getByRole('tab', { name: 'Excel 생성' }))
+    expect(
+      (screen.getByRole('checkbox', { name: 'ItemTable.xlsx Excel 생성' }) as HTMLInputElement)
+        .checked
+    ).toBe(false)
+  })
+
+  it('provides parent mixed selection and disables JSON children without a workbook', async () => {
+    const fixture = excelFixture(true)
+    fixture.nativePort.readFile = async (path) =>
+      path.endsWith('.proto')
+        ? new TextEncoder().encode(`${protoSource}\nmessage Detail { string name = 1; }\n`)
+        : Uint8Array.from([])
+    const user = userEvent.setup()
+    const { unmount } = render(
+      <ExcelScreen generateWorkbooks={fixture.generateWorkbooks} nativePort={fixture.nativePort} />
+    )
+
+    await openJsonTab(user)
+
+    const item = await screen.findByRole('checkbox', {
+      name: 'ItemTable.xlsx Item JSON 테이블'
+    })
+    const detail = screen.getByRole('checkbox', {
+      name: 'ItemTable.xlsx Detail JSON 테이블'
+    })
+    const parent = screen.getByRole('checkbox', {
+      name: 'ItemTable.xlsx JSON 테이블 전체'
+    }) as HTMLInputElement
+    await user.click(item)
+    expect(parent.indeterminate).toBe(true)
+    expect(parent.getAttribute('aria-checked')).toBe('mixed')
+    await user.click(parent)
+    expect((item as HTMLInputElement).checked).toBe(true)
+    expect((detail as HTMLInputElement).checked).toBe(true)
+    unmount()
+
+    const missing = excelFixture(false)
+    render(
+      <ExcelScreen generateWorkbooks={missing.generateWorkbooks} nativePort={missing.nativePort} />
+    )
+    await openJsonTab(user)
+    expect(
+      (await screen.findByRole('checkbox', {
+        name: 'ItemTable.xlsx Item JSON 테이블'
+      })) as HTMLInputElement
+    ).toHaveProperty('disabled', true)
+    expect(screen.getAllByText('Excel 생성 필요').length).toBeGreaterThan(0)
+  })
+
+  it('opens the configured Excel root from the labeled folder action', async () => {
+    const fixture = excelFixture(true)
+    const openPath = vi.fn(async (): Promise<void> => undefined)
+    fixture.nativePort.openPath = openPath
+    const user = userEvent.setup()
+    render(
+      <ExcelScreen generateWorkbooks={fixture.generateWorkbooks} nativePort={fixture.nativePort} />
+    )
+
+    await user.click(await screen.findByRole('button', { name: 'Excel 폴더 열기' }))
+    expect(openPath).toHaveBeenCalledWith('D:\\EXCEL')
+  })
+
+  it('separates Excel and JSON work into tabs and searches file and table names', async () => {
+    const fixture = excelFixture(true)
+    fixture.nativePort.readFile = async (path) =>
+      path.endsWith('.proto')
+        ? new TextEncoder().encode(`${protoSource}\nmessage Detail { string name = 1; }\n`)
+        : Uint8Array.from([])
+    const user = userEvent.setup()
+    render(
+      <ExcelScreen generateWorkbooks={fixture.generateWorkbooks} nativePort={fixture.nativePort} />
+    )
+
+    const excelTab = await screen.findByRole('tab', { name: 'Excel 생성' })
+    const jsonTab = screen.getByRole('tab', { name: 'JSON 생성' })
+    expect(excelTab.getAttribute('aria-selected')).toBe('true')
+    expect(jsonTab.getAttribute('aria-selected')).toBe('false')
+
+    const workbookCheckbox = screen.getByRole('checkbox', {
+      name: 'ItemTable.xlsx Excel 생성'
+    })
+    const workbookRow = workbookCheckbox.closest('label')
+    expect(workbookRow?.textContent).toContain('2개 table')
+    expect(workbookRow?.textContent).toContain('Item, Detail')
+
+    const search = screen.getByRole('searchbox', { name: 'Excel과 테이블 검색' })
+    await user.type(search, 'detail')
+    expect(screen.getByRole('checkbox', { name: 'ItemTable.xlsx Excel 생성' })).toBeTruthy()
+    await user.clear(search)
+    await user.type(search, 'missing')
+    expect(screen.getByText('검색 결과가 없습니다.')).toBeTruthy()
+
+    await user.clear(search)
+    await user.click(jsonTab)
+    expect(jsonTab.getAttribute('aria-selected')).toBe('true')
+    expect(screen.getByRole('button', { name: 'JSON 생성' })).toBeTruthy()
+    expect(screen.getByLabelText('ItemTable.xlsx 포함 테이블').textContent).toContain('Detail')
+  })
+
+  it('inspects embedded memo metadata and shows stale changes on the workbook row', async () => {
+    const fixture = excelFixture(true)
+    const user = userEvent.setup()
+    fixture.nativePort.loadWorkspaceMetadata = async () => ({
+      ...defaultWorkspaceMetadata(),
+      tables: {
+        'ItemTable.proto#Item': {
+          memoColumns: [{ id: 'memo-current', name: '현재 메모', order: 0 }]
+        }
+      }
+    })
+    const inspectWorkbook = vi.fn<InspectWorkbook>(async () => ({
+      metadata: {
+        magic: EXCEL_METADATA_MAGIC,
+        version: EXCEL_METADATA_VERSION,
+        sourceFile: 'ItemTable.proto',
+        fingerprint: 'dm1-stale',
+        tables: [
+          {
+            messageName: 'Item',
+            memoColumns: [{ id: 'memo-old', name: '이전 메모' }]
+          }
+        ]
+      }
+    }))
+    render(
+      <ExcelScreen
+        generateWorkbooks={fixture.generateWorkbooks}
+        inspectWorkbook={inspectWorkbook}
+        nativePort={fixture.nativePort}
+      />
+    )
+
+    await openJsonTab(user)
+
+    expect(await screen.findByText(/메모 변경 적용 필요/)).toBeTruthy()
+    expect(screen.getByText(/추가: 현재 메모/)).toBeTruthy()
+    expect(screen.getByText(/삭제: 이전 메모/)).toBeTruthy()
+    expect(inspectWorkbook).toHaveBeenCalledTimes(1)
+  })
+
+  it('blocks workbook generation before worker/native writes when key policy is violated', async () => {
+    const fixture = excelFixture(false)
+    fixture.nativePort.loadWorkspaceMetadata = async () => ({
+      ...defaultWorkspaceMetadata(),
+      primaryKeyTypePolicy: 'string'
+    })
+    const user = userEvent.setup()
+    render(
+      <ExcelScreen generateWorkbooks={fixture.generateWorkbooks} nativePort={fixture.nativePort} />
+    )
+
+    await user.click(await screen.findByRole('checkbox', { name: 'ItemTable.xlsx Excel 생성' }))
+    await user.click(await screen.findByRole('button', { name: '선택 생성' }))
+    expect(await screen.findByText(/Item\.id\(int32\)/)).toBeTruthy()
+    expect(fixture.generateWorkbooks).not.toHaveBeenCalled()
+    expect(fixture.writeFile).not.toHaveBeenCalled()
+  })
+
   it('cancels without generating, backing up, or writing', async () => {
     const fixture = excelFixture(true)
     const user = userEvent.setup()
@@ -106,6 +315,7 @@ describe('ExcelScreen collision policy', () => {
       <ExcelScreen generateWorkbooks={fixture.generateWorkbooks} nativePort={fixture.nativePort} />
     )
 
+    await user.click(await screen.findByRole('checkbox', { name: 'ItemTable.xlsx Excel 생성' }))
     await user.click(await screen.findByRole('button', { name: '선택 생성' }))
     expect(await screen.findByRole('dialog', { name: '기존 Excel 파일' })).toBeTruthy()
     await user.click(screen.getByRole('button', { name: '생성 취소' }))
@@ -125,6 +335,7 @@ describe('ExcelScreen collision policy', () => {
       <ExcelScreen generateWorkbooks={fixture.generateWorkbooks} nativePort={fixture.nativePort} />
     )
 
+    await user.click(await screen.findByRole('checkbox', { name: 'ItemTable.xlsx Excel 생성' }))
     await user.click(await screen.findByRole('button', { name: '선택 생성' }))
     await user.click(await screen.findByRole('button', { name: action }))
 
@@ -157,6 +368,7 @@ describe('ExcelScreen collision policy', () => {
     const user = userEvent.setup()
     render(<ExcelScreen generateWorkbooks={generateWorkbooks} nativePort={fixture.nativePort} />)
 
+    await user.click(await screen.findByRole('checkbox', { name: 'ItemTable.xlsx Excel 생성' }))
     await user.click(await screen.findByRole('button', { name: '선택 생성' }))
     await user.click(await screen.findByRole('button', { name: '취소' }))
 
@@ -182,7 +394,12 @@ describe('ExcelScreen collision policy', () => {
       />
     )
 
-    await user.click(await screen.findByRole('button', { name: '선택 JSON' }))
+    await openJsonTab(user)
+
+    await user.click(
+      await screen.findByRole('checkbox', { name: 'ItemTable.xlsx Item JSON 테이블' })
+    )
+    await user.click(await screen.findByRole('button', { name: 'JSON 생성' }))
 
     await waitFor(() => expect(fixture.writeFile).toHaveBeenCalledTimes(1))
     const [path, bytes] = fixture.writeFile.mock.calls[0]!
@@ -210,9 +427,58 @@ describe('ExcelScreen collision policy', () => {
       />
     )
 
-    await user.click(await screen.findByRole('button', { name: '선택 JSON' }))
+    await openJsonTab(user)
+
+    await user.click(
+      await screen.findByRole('checkbox', { name: 'ItemTable.xlsx Item JSON 테이블' })
+    )
+    await user.click(await screen.findByRole('button', { name: 'JSON 생성' }))
 
     expect(await screen.findByText('EXCEL_REQUIRED_KEY_EMPTY')).toBeTruthy()
+    expect(fixture.writeFile).not.toHaveBeenCalled()
+  })
+
+  it('blocks self-reference row cycles before the first JSON write with a Korean path diagnostic', async () => {
+    const fixture = excelFixture(true)
+    fixture.nativePort.readFile = async (path) =>
+      path.endsWith('.proto')
+        ? new TextEncoder().encode(`syntax = "proto3";
+message Category {
+  // @PK
+  int32 id = 1;
+  string name = 2;
+  Category parent = 3;
+}
+`)
+        : Uint8Array.from([])
+    const readWorkbook = vi.fn<ReadWorkbook>(async () => [
+      {
+        name: 'Category',
+        headers: ['id', 'name', 'parent'],
+        rows: [[1, 'Self', 1]]
+      }
+    ])
+    const user = userEvent.setup()
+    render(
+      <ExcelScreen
+        generateWorkbooks={fixture.generateWorkbooks}
+        nativePort={fixture.nativePort}
+        readWorkbook={readWorkbook}
+      />
+    )
+
+    await openJsonTab(user)
+
+    await user.click(
+      await screen.findByRole('checkbox', {
+        name: 'ItemTable.xlsx Category JSON 테이블'
+      })
+    )
+    await user.click(screen.getByRole('button', { name: 'JSON 생성' }))
+
+    expect(await screen.findByText('JSON_REFERENCE_ROW_CYCLE')).toBeTruthy()
+    expect(screen.getByText(/Excel 행의 자기 참조가 순환합니다/)).toBeTruthy()
+    expect(screen.getByText(/Category R2 \(id=1\)/)).toBeTruthy()
     expect(fixture.writeFile).not.toHaveBeenCalled()
   })
 })

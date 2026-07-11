@@ -14,12 +14,12 @@ describe('M8 native core flow', () => {
     const originalLegacyConfig = readFileSync(legacyConfigPath, 'utf8')
 
     await openArea('설정', '설정')
-    const diagramLimit = await $('[aria-label="열당 최대 테이블 수"]')
-    await diagramLimit.waitForDisplayed()
-    await diagramLimit.setValue('7')
+    if (await (await $('[aria-label="열당 최대 테이블 수"]')).isExisting()) {
+      throw new Error('Deprecated maxNodesPerColumn control is still visible.')
+    }
     await clickButton('저장')
     await waitForToast('설정을 저장했습니다.')
-    await waitForFileText(settingsPath, '"maxNodesPerColumn": 7')
+    await waitForFileText(settingsPath, '"maxNodesPerColumn": 8')
 
     await openArea('테이블', '테이블')
     const declaration = await $('[aria-label="SingleTarget (KeyTable.proto)"]')
@@ -39,23 +39,23 @@ describe('M8 native core flow', () => {
     await openArea('관계도', '관계도')
     await browser.waitUntil(async () => (await $$('.react-flow__node')).length === 9, {
       timeout: 15_000,
-      timeoutMsg: 'Expected nine relationship nodes.'
+      timeoutMsg: 'Expected nine projected Message nodes including Category.'
     })
     await browser.waitUntil(async () => (await $$('.react-flow__edge')).length === 10, {
       timeout: 15_000,
-      timeoutMsg: 'Expected ten relationship edges.'
+      timeoutMsg: 'Expected ten projected Message edges including two Category self references.'
     })
     await exerciseDiagramInteractions()
 
     await openArea('Excel', 'Excel')
+    await clickAriaButton('Excel 생성 전체')
     await clickButton('선택 생성')
     await waitForText('.notice-success', 'workbook 생성 완료', 60_000)
-    for (const fileName of ['KeyTable.xlsx', 'ReferenceTable.xlsx']) {
+    for (const fileName of ['CategoryTable.xlsx', 'KeyTable.xlsx', 'ReferenceTable.xlsx']) {
       if (!existsSync(resolve(workspace, 'excel', fileName))) {
         throw new Error(`${fileName} was not generated.`)
       }
     }
-
     await clickButton('선택 생성')
     await waitForText('[role="dialog"]', '기존 Excel 파일')
     await clickButton('생성 취소')
@@ -65,14 +65,15 @@ describe('M8 native core flow', () => {
 
     await clickButton('선택 생성')
     await clickButton('백업 없이 덮어쓰기')
-    await waitForText('.notice-success', '2개 workbook 생성 완료', 60_000)
+    await waitForText('.notice-success', '3개 workbook 생성 완료', 60_000)
 
     await clickButton('선택 생성')
     await clickButton('백업 후 생성')
-    await waitForText('.notice-success', '2개 workbook 생성 완료, 2개 백업', 60_000)
+    await waitForText('.notice-success', '3개 workbook 생성 완료, 3개 백업', 60_000)
     const backupFiles = readdirSync(resolve(workspace, 'excel', 'backup')).sort()
     if (
-      backupFiles.length !== 2 ||
+      backupFiles.length !== 3 ||
+      !backupFiles.some((name) => /^CategoryTable_\d{14}\.xlsx$/.test(name)) ||
       !backupFiles.some((name) => /^KeyTable_\d{14}\.xlsx$/.test(name)) ||
       !backupFiles.some((name) => /^ReferenceTable_\d{14}\.xlsx$/.test(name))
     ) {
@@ -80,19 +81,20 @@ describe('M8 native core flow', () => {
     }
 
     await populateWorkbooks(workspace)
+    await clickTab('JSON 생성')
     await clickAriaButton('KeyTable.xlsx 읽기 검사')
     await waitForText('.notice-success', 'KeyTable.xlsx: 4개 sheet, 8개 행 확인', 60_000)
     await clickAriaButton('ReferenceTable.xlsx 읽기 검사')
     await waitForText('.notice-success', 'ReferenceTable.xlsx: 4개 sheet, 2개 행 확인', 60_000)
+    await clickAriaButton('CategoryTable.xlsx 읽기 검사')
+    await waitForText('.notice-success', 'CategoryTable.xlsx: 1개 sheet, 3개 행 확인', 60_000)
 
-    for (const checkbox of await $$('[aria-label$=" JSON 선택"]')) {
-      const name = await checkbox.getAttribute('aria-label')
-      if (name !== 'RootTarget JSON 선택' && (await checkbox.isSelected())) await checkbox.click()
-    }
-    await clickButton('선택 JSON')
+    await clickAriaButton('ReferenceTable.xlsx RootTarget JSON 테이블')
+    await clickJsonGenerate()
     await waitForText('.notice-success', 'JSON 파일 내보내기 완료', 60_000)
     const rootJson = resolve(workspace, 'json', 'RootTarget.json')
     assertResolvedRootJson(rootJson)
+    await exerciseSelfReferenceJson(workspace)
     await exerciseExcelCancellationAndDiagnostics(workspace)
 
     await openArea('코드 생성', '코드 생성')
@@ -108,6 +110,14 @@ describe('M8 native core flow', () => {
       ['code', 'rust', 'KeyTable.u.pb.rs'],
       ['code', 'ruby', 'KeyTable_pb.rb'],
       ['code', 'php', 'GPBMetadata', 'KeyTable.php'],
+      ['code', 'cpp', 'CategoryTable.pb.h'],
+      ['code', 'csharp', 'CategoryTable.cs'],
+      ['code', 'java', 'd1000', 'CategoryTable.java'],
+      ['code', 'python', 'CategoryTable_pb2.py'],
+      ['code', 'go', 'd1000', 'CategoryTable.pb.go'],
+      ['code', 'rust', 'CategoryTable.u.pb.rs'],
+      ['code', 'ruby', 'CategoryTable_pb.rb'],
+      ['code', 'php', 'D1000', 'Category.php'],
       ['code', 'unreal', 'DataTables.h'],
       ['code', 'unreal', 'DataTableLoader.cpp']
     ]) {
@@ -115,7 +125,6 @@ describe('M8 native core flow', () => {
         throw new Error(`${relativePath.join('/')} was not generated.`)
       }
     }
-
     const cancellationFixtures = createCancellationFixtures(workspace)
     try {
       await clickButton('전체 생성')
@@ -137,10 +146,11 @@ describe('M8 native core flow', () => {
     }
 
     await openArea('설정', '설정')
-    const persistedLimit = await $('[aria-label="열당 최대 테이블 수"]')
-    await persistedLimit.waitForDisplayed()
-    if ((await persistedLimit.getValue()) !== '7') {
-      throw new Error('Settings were not reloaded from the native settings file.')
+    if (await (await $('[aria-label="열당 최대 테이블 수"]')).isExisting()) {
+      throw new Error('Deprecated maxNodesPerColumn control returned after settings reload.')
+    }
+    if (JSON.parse(readFileSync(settingsPath, 'utf8')).diagram?.maxNodesPerColumn !== 8) {
+      throw new Error('Deprecated maxNodesPerColumn was not preserved in settings v2.')
     }
 
     await clickButton('가져오기 검토')
@@ -174,7 +184,7 @@ async function exerciseDiagramInteractions() {
   const search = await $('[aria-label="관계도 검색"]')
   await search.setValue('RootTarget')
   await browser.waitUntil(async () => (await $$('.diagram-node-dimmed')).length === 8, {
-    timeoutMsg: 'Relationship search did not dim the eight non-matching nodes.'
+    timeoutMsg: 'Relationship search did not dim the eight non-matching Message nodes.'
   })
   await search.clearValue()
   await browser.waitUntil(async () => (await $$('.diagram-node-dimmed')).length === 0, {
@@ -190,8 +200,8 @@ async function exerciseDiagramInteractions() {
         .then((value) => value.includes('diagram-node-emphasized')),
     { timeoutMsg: 'Hover did not emphasize RootTarget.' }
   )
-  await browser.waitUntil(async () => (await $$('.diagram-node-dimmed')).length === 2, {
-    timeoutMsg: 'Hover did not preserve only RootTarget and its six neighbors.'
+  await browser.waitUntil(async () => (await $$('.diagram-node-dimmed')).length === 3, {
+    timeoutMsg: 'Hover did not preserve only RootTarget and its five Message neighbors.'
   })
 
   const edge = (await $$('.react-flow__edge'))[0]
@@ -230,6 +240,26 @@ async function exerciseResponsiveDiagramLayout() {
         ?.getBoundingClientRect()
       const surface = globalThis.document.querySelector('.diagram-surface')?.getBoundingClientRect()
       return {
+        rects: {
+          toolbar: toolbar && {
+            left: toolbar.left,
+            right: toolbar.right,
+            top: toolbar.top,
+            bottom: toolbar.bottom
+          },
+          search: search && {
+            left: search.left,
+            right: search.right,
+            top: search.top,
+            bottom: search.bottom
+          },
+          actions: actions && {
+            left: actions.left,
+            right: actions.right,
+            top: actions.top,
+            bottom: actions.bottom
+          }
+        },
         bodyOverflow: globalThis.document.documentElement.scrollWidth > globalThis.innerWidth,
         headerContainsNavigation: Boolean(
           header && navigation && navigation.top >= header.top && navigation.bottom <= header.bottom
@@ -244,10 +274,14 @@ async function exerciseResponsiveDiagramLayout() {
           toolbar &&
           search &&
           actions &&
-          search.left >= toolbar.left &&
-          actions.left >= search.right &&
-          search.bottom <= toolbar.bottom &&
-          actions.bottom <= toolbar.bottom
+          search.left >= toolbar.left - 1 &&
+          actions.left >= toolbar.left - 1 &&
+          (search.bottom <= actions.top ||
+            actions.bottom <= search.top ||
+            search.right <= actions.left ||
+            actions.right <= search.left) &&
+          search.bottom <= toolbar.bottom + 1 &&
+          actions.bottom <= toolbar.bottom + 1
         )
       }
     })
@@ -312,6 +346,19 @@ async function exerciseSchemaCrud(root) {
   if (readFileSync(temporaryTablePath, 'utf8').includes('message E2eTemp')) {
     throw new Error('The temporary table declaration was not deleted.')
   }
+  const metadataDirectory = resolve(root, 'proto', '.datamanager')
+  const workspaceMetadata = JSON.parse(
+    readFileSync(resolve(metadataDirectory, 'workspace.json'), 'utf8')
+  )
+  if (workspaceMetadata.revision !== 1 || Object.keys(workspaceMetadata.tables).length !== 0) {
+    throw new Error('Proto deletion and workspace metadata did not commit as one generation.')
+  }
+  const transactionLeftovers = readdirSync(metadataDirectory).filter(
+    (name) => name === 'transaction.json' || name.endsWith('.tmp') || name.endsWith('.bak')
+  )
+  if (transactionLeftovers.length > 0) {
+    throw new Error(`Workspace transaction left owned files: ${transactionLeftovers.join(', ')}`)
+  }
   rmSync(temporaryTablePath, { force: true })
 
   await openArea('Enum', 'Enum')
@@ -370,6 +417,13 @@ async function hoverElement(element) {
 }
 
 async function populateWorkbooks(root) {
+  await populateWorkbook(resolve(root, 'excel', 'CategoryTable.xlsx'), {
+    Category: [
+      [1, null, null],
+      [2, 1, null],
+      [3, 2, null]
+    ]
+  })
   await populateWorkbook(resolve(root, 'excel', 'KeyTable.xlsx'), {
     SingleTarget: [
       [1, 'Alpha', 'FixtureState_ACTIVE'],
@@ -403,6 +457,46 @@ async function populateWorkbook(path, rowsBySheet) {
   await workbook.xlsx.writeFile(path)
 }
 
+async function exerciseSelfReferenceJson(root) {
+  await clickAriaButton('ReferenceTable.xlsx RootTarget JSON 테이블')
+  await clickAriaButton('CategoryTable.xlsx Category JSON 테이블')
+  await clickJsonGenerate()
+  await waitForText('.notice-success', 'JSON 파일 내보내기 완료', 60_000)
+  const jsonPath = resolve(root, 'json', 'Category.json')
+  const rows = JSON.parse(readFileSync(jsonPath, 'utf8'))
+  if (
+    rows.length !== 3 ||
+    rows[2]?.parent?.id !== 2 ||
+    rows[2]?.parent?.parent?.id !== 1 ||
+    rows[2]?.parent?.parent?.parent !== null
+  ) {
+    throw new Error(
+      `Category.json did not inline the terminating parent chain: ${JSON.stringify(rows)}`
+    )
+  }
+
+  rmSync(jsonPath, { force: true })
+  const workbookPath = resolve(root, 'excel', 'CategoryTable.xlsx')
+  const validBytes = readFileSync(workbookPath)
+  try {
+    const workbook = new ExcelJS.Workbook()
+    await workbook.xlsx.readFile(workbookPath)
+    const category = workbook.getWorksheet('Category')
+    if (!category) throw new Error('CategoryTable.xlsx is missing Category.')
+    category.getCell('B2').value = 1
+    await workbook.xlsx.writeFile(workbookPath)
+
+    await clickJsonGenerate()
+    await waitForText('.excel-diagnostics', 'JSON_REFERENCE_ROW_CYCLE', 60_000)
+    await waitForText('.excel-diagnostics', 'Category R2 (id=1)', 60_000)
+    if (existsSync(jsonPath)) {
+      throw new Error('A row cycle wrote a partial Category.json file.')
+    }
+  } finally {
+    writeFileSync(workbookPath, validBytes)
+  }
+}
+
 async function exerciseExcelCancellationAndDiagnostics(root) {
   const path = resolve(root, 'excel', 'KeyTable.xlsx')
   const validBytes = readFileSync(path)
@@ -424,7 +518,7 @@ async function exerciseExcelCancellationAndDiagnostics(root) {
     await (await $('.excel-progress')).waitForDisplayed({ timeout: 30_000 })
     const cancellationStarted = Date.now()
     await (await $('.excel-progress button')).click()
-    await waitForText('.notice-error', 'Excel operation was cancelled.', 30_000)
+    await waitForText('.notice-error', '작업이 취소되었습니다', 30_000)
     if (Date.now() - cancellationStarted > 10_000) {
       throw new Error('Cancelling the 10,000-row Excel worker took longer than 10 seconds.')
     }
@@ -495,6 +589,18 @@ async function clickButton(name) {
 
 async function clickAriaButton(name) {
   const button = await $(`[aria-label="${name}"]`)
+  await button.waitForClickable()
+  await button.click()
+}
+
+async function clickTab(name) {
+  const tab = await $(`//button[@role="tab" and normalize-space()="${name}"]`)
+  await tab.waitForClickable()
+  await tab.click()
+}
+
+async function clickJsonGenerate() {
+  const button = await $('#json-generation-panel .excel-section-actions button')
   await button.waitForClickable()
   await button.click()
 }

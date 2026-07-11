@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package d1000;
+
+import "CatalogEnumType.proto";
+
+message Shape {
+  // @PK
+  string id = 1;
+  optional string label = 2;
+  repeated int32 points = 3;
+  CatalogState state = 4;
+  // @Memo(memo-018f6f74) 기획 메모
+}

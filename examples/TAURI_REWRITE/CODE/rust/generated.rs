@@ -1,3 +1,9 @@
+#[path="CategoryTable.u.pb.rs"]
+#[allow(nonstandard_style)]
+pub mod internal_do_not_use_CategoryTable;
+
+#[allow(unused_imports, nonstandard_style)]
+pub use internal_do_not_use_CategoryTable::*;
 #[path="FixtureEnumType.u.pb.rs"]
 #[allow(nonstandard_style)]
 pub mod internal_do_not_use_FixtureEnumType;
@@ -17,6 +23,11 @@ pub mod internal_do_not_use_ReferenceTable;
 #[allow(unused_imports, nonstandard_style)]
 pub use internal_do_not_use_ReferenceTable::*;
 pub mod __unstable {
+pub static CATEGORYTABLE_DESCRIPTOR_INFO: ::protobuf::__internal::runtime::__unstable::DescriptorInfo = ::protobuf::__internal::runtime::__unstable::DescriptorInfo {
+  descriptor: b"\n\x13\x43\x61tegoryTable.proto\x12\x05\x64\x31\x30\x30\x30\"j\n\x08\x43\x61tegory\x12\n\n\x02id\x18\x01 \x01(\x05\x12$\n\x06parent\x18\x02 \x01(\x0b\x32\x0f.d1000.CategoryH\x00\x88\x01\x01\x12!\n\x08\x63hildren\x18\x03 \x03(\x0b\x32\x0f.d1000.CategoryB\t\n\x07_parentB\tZ\x07./d1000b\x06proto3",
+  deps: &[
+  ],
+};
 pub static FIXTUREENUMTYPE_DESCRIPTOR_INFO: ::protobuf::__internal::runtime::__unstable::DescriptorInfo = ::protobuf::__internal::runtime::__unstable::DescriptorInfo {
   descriptor: b"\n\x15\x46ixtureEnumType.proto\x12\x14\x44\x41TA_MANAGER_FIXTURE*T\n\x0c\x46ixtureState\x12\x15\n\x11\x46ixtureState_NONE\x10\x00\x12\x17\n\x13\x46ixtureState_ACTIVE\x10\x01\x12\x14\n\x10\x46ixtureState_MAX\x10\x02\x42\x18Z\x16./DATA_MANAGER_FIXTUREb\x06proto3",
   deps: &[

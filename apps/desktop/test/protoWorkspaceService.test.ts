@@ -1,12 +1,24 @@
 import { describe, expect, it } from 'vitest'
-import { defaultAppSettings, type LegacyImportPreview } from '@datamanager/core'
+import {
+  applyWorkspaceMetadataSectionUpdate,
+  defaultAppSettings,
+  defaultWorkspaceMetadata,
+  type LegacyImportPreview
+} from '@datamanager/core'
 import type { NativePort } from '../src/adapters/native/NativePort'
 import { loadProtoWorkspace, protoPath } from '../src/features/schema/protoWorkspaceService'
 
 function portWithBytes(bytes: Uint8Array): NativePort {
+  let metadata = defaultWorkspaceMetadata()
   return {
     loadSettings: async () => ({ ...defaultAppSettings, protoRoot: 'D:\\PROTO' }),
     saveSettings: async (settings) => settings,
+    loadWorkspaceMetadata: async () => metadata,
+    updateWorkspaceMetadata: async (update) => {
+      metadata = applyWorkspaceMetadataSectionUpdate(metadata, update)
+      return metadata
+    },
+    writeProtoWithMetadata: async () => metadata,
     selectDirectory: async () => null,
     selectFile: async () => null,
     findLegacyConfig: async () => null,
