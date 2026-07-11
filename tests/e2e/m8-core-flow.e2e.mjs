@@ -350,8 +350,11 @@ async function exerciseSchemaCrud(root) {
   const workspaceMetadata = JSON.parse(
     readFileSync(resolve(metadataDirectory, 'workspace.json'), 'utf8')
   )
-  if (workspaceMetadata.revision !== 1 || Object.keys(workspaceMetadata.tables).length !== 0) {
-    throw new Error('Proto deletion and workspace metadata did not commit as one generation.')
+  const tableKeys = Object.keys(workspaceMetadata.tables)
+  if (workspaceMetadata.revision !== 2 || tableKeys.length !== 0) {
+    throw new Error(
+      `Proto deletion and workspace metadata did not commit as one generation: revision=${workspaceMetadata.revision}, tables=${tableKeys.join(',')}`
+    )
   }
   const transactionLeftovers = readdirSync(metadataDirectory).filter(
     (name) => name === 'transaction.json' || name.endsWith('.tmp') || name.endsWith('.bak')
@@ -600,7 +603,8 @@ async function clickTab(name) {
 }
 
 async function clickJsonGenerate() {
-  const button = await $('#json-generation-panel .excel-section-actions button')
+  const panel = await $('#json-generation-panel')
+  const button = await panel.$('button=JSON 생성')
   await button.waitForClickable()
   await button.click()
 }
